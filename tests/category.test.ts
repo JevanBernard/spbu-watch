@@ -15,6 +15,8 @@ describe("stationCategory", () => {
     [{ pertaminaCode: "54.801.01", name: "SPBU Pertamina 54.801.01" }, "spbu"],
     [{ pertaminaCode: "58.803.01", name: "SPBUN Pertamina 58.803.01 (Tanjung Benoa Segara Kulon)" }, "spbun"],
     [{ pertaminaCode: "58.803.01" }, "spbun"],
+    [{ pertaminaCode: "59.803.02", name: "SPDN Pertamina 59.803.02 (Kedonganan)" }, "spdn"],
+    [{ pertaminaCode: "59.803.02" }, "spdn"],
     [{}, "spbu"],
   ])("%j -> %s", (input, expected) => {
     expect(stationCategory(input)).toBe(expected);

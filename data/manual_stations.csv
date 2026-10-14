@@ -10,3 +10,59 @@ SPBU Pertamina 54.801.25 (Citraland),Pertamina,Denpasar,54.801.25,"Jl. Cargo Per
 SPBU Pertamina 54.802.56,Pertamina,Denpasar,54.802.56,"Jl. Prof. Ida Bagus Mantra No. 17X, Kota Denpasar",-8.649288006497242,115.2647090597013,,user-provided
 SPBU Pertamina 54.803.08 (Kapal),Pertamina,Badung,54.803.08,"Desa Kapal, Kecamatan Mengwi, Kabupaten Badung",-8.577216692294186,115.18078040674739,,user-provided
 SPBU Pertamina 54.821.17,Pertamina,Tabanan,54.821.17,"Jl. Bypass Kediri, Kabupaten Tabanan",-8.551039745595464,115.13018852489559,,user-provided
+Pertashop 5P.801.01 (Sanur Kaja),Pertashop,Denpasar,5P.801.01,"Sekitar Desa Sanur Kaja, Kec. Denpasar Selatan, Kota Denpasar",-8.6734491,115.2559410,,approximate-village-centre (Nominatim)
+Pertashop 5P.802.03 (Panjer),Pertashop,Denpasar,5P.802.03,"Sekitar Desa Panjer, Kec. Denpasar, Kota Denpasar",-8.6895542,115.2257750,,approximate-village-centre (Nominatim)
+Pertashop 5P.802.04 (Sanur Kauh),Pertashop,Denpasar,5P.802.04,"Sekitar Desa Sanur Kauh, Kec. Denpasar Selatan, Kota Denpasar",-8.6956574,115.2496763,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.01 (Mengwi),Pertashop,Badung,5P.803.01,"Sekitar Desa Mengwi, Kec. Mengwi, Kabupaten Badung",-8.5465595,115.1672794,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.02 (Blahkiuh),Pertashop,Badung,5P.803.02,"Sekitar Desa Blahkiuh, Kec. Abiansemal, Kabupaten Badung",-8.5076620,115.2096238,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.03 (Taman),Pertashop,Badung,5P.803.03,"Sekitar Desa Taman, Kec. Abiansemal, Kabupaten Badung",-8.4806520,115.2291199,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.04 (Pangsan),Pertashop,Badung,5P.803.04,"Sekitar Desa Pangsan, Kec. Petang, Kabupaten Badung",-8.4105163,115.2194174,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.05 (Munggu),Pertashop,Badung,5P.803.05,"Sekitar Desa Munggu, Kec. Mengwi, Kabupaten Badung",-8.6292074,115.1262016,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.06 (Pecatu),Pertashop,Badung,5P.803.06,"Sekitar Desa Pecatu, Kec. Kuta Selatan, Kabupaten Badung",-8.8208398,115.1136217,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.07 (Gulingan),Pertashop,Badung,5P.803.07,"Sekitar Desa Gulingan, Kec. Mengwi, Kabupaten Badung",-8.5437855,115.1832960,,approximate-village-centre (Nominatim)
+Pertashop 5P.803.08 (Abianbase),Pertashop,Badung,5P.803.08,"Sekitar Desa Abianbase, Kec. Mengwi, Kabupaten Badung",-8.5948483,115.1553919,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.01 (Saba),Pertashop,Gianyar,5P.805.01,"Sekitar Desa Saba, Kec. Blahbatuh, Kabupaten Gianyar",-8.5932710,115.2983223,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.02 (Temesi),Pertashop,Gianyar,5P.805.02,"Sekitar Desa Temesi, Kec. Gianyar, Kabupaten Gianyar",-8.5562305,115.3505823,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.03 (Bakbakan),Pertashop,Gianyar,5P.805.03,"Sekitar Desa Bakbakan, Kec. Gianyar, Kabupaten Gianyar",-8.5076197,115.3231387,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.05 (Sebatu),Pertashop,Gianyar,5P.805.05,"Sekitar Desa Sebatu, Kec. Tegalalang, Kabupaten Gianyar",-8.3787290,115.3000313,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.06 (Kelusa),Pertashop,Gianyar,5P.805.06,"Sekitar Desa Kelusa, Kabupaten Gianyar",-8.4505405,115.2542164,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.07 (Kedisan),Pertashop,Gianyar,5P.805.07,"Sekitar Desa Kedisan, Kec. Tegalalang, Kabupaten Gianyar",-8.4288930,115.2876525,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.08 (Siangan),Pertashop,Gianyar,5P.805.08,"Sekitar Desa Siangan, Kec. Gianyar, Kabupaten Gianyar",-8.5059670,115.3109588,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.10 (Singapadu Tengah),Pertashop,Gianyar,5P.805.10,"Sekitar Desa Singapadu Tengah, Kec. Sukawati, Kabupaten Gianyar",-8.5779175,115.2559118,,approximate-village-centre (Nominatim)
+Pertashop 5P.805.12 (Taro),Pertashop,Gianyar,5P.805.12,"Sekitar Desa Taro, Kec. Tegalalang, Kabupaten Gianyar",-8.3759465,115.2852677,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.01 (Biaung),Pertashop,Tabanan,5P.821.01,"Sekitar Desa Biaung, Kec. Penebel, Kabupaten Tabanan",-8.4154562,115.1664279,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.02 (Kebon Padangan),Pertashop,Tabanan,5P.821.02,"Sekitar Desa Kebon Padangan, Kec. Pupuan, Kabupaten Tabanan",-8.3849195,114.9823076,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.03 (Senganan),Pertashop,Tabanan,5P.821.03,"Sekitar Desa Senganan, Kec. Penebel, Kabupaten Tabanan",-8.3469673,115.1369290,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.04 (Mundeh),Pertashop,Tabanan,5P.821.04,"Sekitar Desa Mundeh, Kec. Selemadeg Barat, Kabupaten Tabanan",-8.4349379,114.9758183,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.05 (Buruan),Pertashop,Tabanan,5P.821.05,"Sekitar Desa Buruan, Kec. Penebel Barat, Kabupaten Tabanan",-8.4593330,115.1366937,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.06 (Tunjuk),Pertashop,Tabanan,5P.821.06,"Sekitar Desa Tunjuk, Kec. Tabanan, Kabupaten Tabanan",-8.4653250,115.1513188,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.07 (Angseri),Pertashop,Tabanan,5P.821.07,"Sekitar Desa Angseri, Kec. Baturiti, Kabupaten Tabanan",-8.3450334,115.1539825,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.08 (Tua),Pertashop,Tabanan,5P.821.08,"Sekitar Desa Tua, Kec. Marga, Kabupaten Tabanan",-8.4130260,115.1822301,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.09 (Antapan),Pertashop,Tabanan,5P.821.09,"Sekitar Desa Antapan, Kec. Baturiti, Kabupaten Tabanan",-8.3216840,115.2019422,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.10 (Bantiran),Pertashop,Tabanan,5P.821.10,"Sekitar Desa Bantiran, Kec. Pupuan, Kabupaten Tabanan",-8.3078419,114.9844399,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.11 (Batunya),Pertashop,Tabanan,5P.821.11,"Sekitar Desa Batunya, Kec. Baturiti, Kabupaten Tabanan",-8.3042100,115.1856346,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.12 (Cepaka),Pertashop,Tabanan,5P.821.12,"Sekitar Desa Cepaka, Kec. Kediri, Kabupaten Tabanan",-8.6052631,115.1466726,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.13 (Antosari),Pertashop,Tabanan,5P.821.13,"Sekitar Desa Antosari, Kec. Selemadeg Barat, Kabupaten Tabanan",-8.4991480,115.0149575,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.14 (Denbantas),Pertashop,Tabanan,5P.821.14,"Sekitar Desa Denbantas, Kec. Tabanan, Kabupaten Tabanan",-8.5125570,115.1379328,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.15 (Kediri),Pertashop,Tabanan,5P.821.15,"Sekitar Desa Kediri, Kec. Kediri, Kabupaten Tabanan",-8.5631975,115.1322426,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.16 (Meliling),Pertashop,Tabanan,5P.821.16,"Sekitar Desa Meliling, Kec. Kerambitan, Kabupaten Tabanan",-8.5136710,115.0793491,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.17 (Lalanglinggah),Pertashop,Tabanan,5P.821.17,"Sekitar Desa Lalanglinggah, Kec. Selemadeg Barat, Kabupaten Tabanan",-8.4715918,114.9482385,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.18 (Banjar Anyar),Pertashop,Tabanan,5P.821.18,"Sekitar Desa Banjar Anyar, Kec. Kediri, Kabupaten Tabanan",-8.5361270,115.1477539,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.19 (Penebel),Pertashop,Tabanan,5P.821.19,"Sekitar Desa Penebel, Kec. Penebel, Kabupaten Tabanan",-8.4188559,115.1491433,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.20 (Batunya),Pertashop,Tabanan,5P.821.20,"Sekitar Desa Batunya, Kec. Baturiti, Kabupaten Tabanan",-8.3042100,115.1860346,,approximate-village-centre (Nominatim)
+Pertashop 5P.821.21 (Timpag),Pertashop,Tabanan,5P.821.21,"Sekitar Desa Timpag, Kec. Kerambitan, Kabupaten Tabanan",-8.4897915,115.0925807,,approximate-village-centre (Nominatim)
+SPBU Pertamina 54.801.14 (Pulau Bungin),Pertamina,Denpasar,54.801.14,"Sekitar Jl. Pulau Bungin, Pedungan, Kota Denpasar",-8.6925534,115.2042885,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.803.17 (Teuku Umar Barat),Pertamina,Badung,54.803.17,"Sekitar Jl. Teuku Umar Barat, Kecamatan Kuta Utara, Kabupaten Badung",-8.6737912,115.1792851,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.803.26 (Plaga Petang),Pertamina,Badung,54.803.26,"Sekitar Banjar Nunung, Desa Plaga, Kec. Petang, Kabupaten Badung",-8.3024143,115.2198893,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.805.03 (Singakerta),Pertamina,Gianyar,54.805.03,"Sekitar Desa Singakerta, Kabupaten Gianyar",-8.5308740,115.2439079,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.805.09 (Peliatan),Pertamina,Gianyar,54.805.09,"Sekitar Desa Peliatan, Kecamatan Ubud, Kabupaten Gianyar",-8.5177360,115.2722159,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.805.11 (Bypass Ketewel),Pertamina,Gianyar,54.805.11,"Sekitar Jl. Bypass Ketewel - Desa Ketewel, Kabupaten Gianyar",-8.6233324,115.2980852,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.805.13 (Ubud),Pertamina,Gianyar,54.805.13,"Sekitar Jl. Raya Lodtunduk - Desa Ubud, Kabupaten Gianyar",-8.5170195,115.2550507,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.805.14 (Kedewatan),Pertamina,Gianyar,54.805.14,"Sekitar Br. Bunutan, Desa Kedewatan, Kec. Ubud, Kabupaten Gianyar",-8.4766577,115.2501069,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.805.15 (Lebih),Pertamina,Gianyar,54.805.15,"Sekitar Jl. Prof Dr Ib Mantra, Desa Lebih, Kabupaten Gianyar",-8.5722453,115.3482011,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.805.23 (Silakarang Singapadu),Pertamina,Gianyar,54.805.23,"Sekitar Desa Silakarang Singapadu, Kabupaten Gianyar",-8.5643638,115.2532594,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.805.25 (Bypass Ketewel Sukawati),Pertamina,Gianyar,54.805.25,"Sekitar Jl. Bypass Ketewel Sukawati, Kabupaten Gianyar",-8.6238463,115.2978385,,"approximate (Nominatim, alamat)"
+SPBU Pertamina 54.805.28 (Sebatu),Pertamina,Gianyar,54.805.28,"Sekitar Br. Pujung Kelod, Desa Sebatu, Kabupaten Gianyar",-8.3787290,115.3000313,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.821.08 (Wanasari),Pertamina,Tabanan,54.821.08,"Sekitar Jl. Raya Penebel - Desa Wanasari, Kabupaten Tabanan",-8.4947697,115.1341218,,"approximate (Nominatim, desa)"
+SPBU Pertamina 55.821.19 (Buruan),Pertamina,Tabanan,55.821.19,"Sekitar Jl. Batukaru No. 115 Kel. Buruan, Kabupaten Tabanan",-8.4593330,115.1366937,,"approximate (Nominatim, desa)"
+SPBU Pertamina 54.803.39 (Sading),Pertamina,Badung,54.803.39,"Jl. Sading-Badung No.171, Sading, Kec. Mengwi, Kabupaten Badung, Bali 80351",-8.587120269162556,115.20346579806638,,user-provided

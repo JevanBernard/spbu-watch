@@ -1,0 +1,46 @@
+code,regency,alamat,desa,kecamatan,tier,lat,lng,matched
+54.801.08,Denpasar,Jl. Bypass Padang Galak,,,,,,
+54.801.14,Denpasar,"Jl. Pulau Bungin, Pedungan",,,alamat,-8.6925534,115.2042885,"Jalan Pulau Bungin, Pedungan, Denpasar Selatan, Denpasar, Bali, 80222, Indonesia"
+54.801.55,Denpasar,Jl. Pemogan Kel. Pemogan Kec. Denpa,Pemogan Kec,Denpa,,,,
+54.802.58,Denpasar,Jl. Raya Bypass I Gusti Ngurah Rai,,,,,,
+54.803.14,Badung,"Desa Denkayu, Kecamatan Mengwi",Denkayu,Mengwi,kecamatan,-8.5488115,115.1853933,"Mengwi, Badung, Bali, Indonesia"
+54.803.15,Badung,Desa Sibang Kaje,Sibang Kaje,,,,,
+54.803.16,Badung,Jl. Uluwatu Desa Jimbaran Kec. Kuta,Jimbaran Kec,Kuta,kecamatan,-8.7264325,115.1778054,"Kuta, Badung, Bali, Indonesia"
+54.803.17,Badung,"Jl. Teuku Umar Barat , Kecamatan Ku",,Ku,alamat,-8.6737912,115.1792851,"Jalan Teuku Umar Barat, Kerobokan Kelod, Denpasar Barat, Kuta Utara, Badung, Bali, 80363, Indonesia"
+54.803.24,Badung,Desa Gerana Kecamatan Abiansemal,Gerana Kecamatan,Abiansemal,kecamatan,-8.5283833,115.2141943,"Abiansemal, Badung, Bali, Indonesia"
+54.803.25,Badung,Kel. Jimbaran Kec. Kuta Selatan,Jimbaran Kec,Kuta Selatan,kecamatan,-8.8004527,115.1766378,"Kuta Selatan, Badung, Bali, Indonesia"
+54.803.26,Badung,Banjar Nunung Ds Plaga Petang,Plaga Petang,,desa,-8.3024143,115.2198893,"Pelaga, Petang, Badung, Bali, 80353, Indonesia"
+54.803.29,Badung,Jl. Bypass Ngurah Rai - Nusa Dua,,,,,,
+54.803.36,Badung,Lokasi Kel. Benoa Kec. Kuta Selatan,Benoa Kec,Kuta Selatan,kecamatan,-8.8004527,115.1766378,"Kuta Selatan, Badung, Bali, Indonesia"
+54.803.37,Badung,Desa Cemagi Kec. Mengwi,Cemagi Kec,Mengwi,kecamatan,-8.5488115,115.1853933,"Mengwi, Badung, Bali, Indonesia"
+54.803.38,Badung,Jl. Gunung Agung Desa Werdhibuana Ke,Werdhibuana Ke,,,,,
+54.805.03,Gianyar,Desa Singakerta,Singakerta,,alamat,-8.5308740,115.2439079,"Singakerta, Ubud, Gianyar, Bali, 80571, Indonesia"
+54.805.04,Gianyar,Jl. Raya Semebaung - Desa Bitra,Bitra,,,,,
+54.805.09,Gianyar,"Desa Peliatan, Kecamatan Ubud",Peliatan,Ubud,alamat,-8.5177360,115.2722159,"Peliatan, Ubud, Gianyar, Bali, 80571, Indonesia"
+54.805.10,Gianyar,Br. Semaon -Desa Puhu Kec. Payangan,Puhu Kec,Payangan,kecamatan,-8.3950927,115.2502897,"Payangan, Gianyar, Bali, 80572, Indonesia"
+54.805.11,Gianyar,Jl. Bypass Ketewel - Desa Ketewel,Ketewel,,alamat,-8.6233324,115.2980852,"Profesor Ida Bagus Mantra Bypass, Rangkan, Ketewel, Sukawati, Gianyar, Bali, 80582, Indonesia"
+54.805.13,Gianyar,Jl. Raya Lodtunduk - Desa Ubud,Ubud,,desa,-8.5170195,115.2550507,"Ubud, Gianyar, Bali, Indonesia"
+54.805.14,Gianyar,"Br. Bunutan, Desa Kedewatan, Kec. Ub",Kedewatan,Ub,desa,-8.4766577,115.2501069,"Kedewatan, Ubud, Gianyar, Bali, 80571, Indonesia"
+54.805.15,Gianyar,"Jl. Prof Dr Ib Mantra, Desa Lebih",Lebih,,desa,-8.5722453,115.3482011,"Lebih, Gianyar, Bali, 80515, Indonesia"
+54.805.16,Gianyar,"Desa Sading, Kec. Tampaksiring",Sading,Tampaksiring,kecamatan,-8.4452620,115.3073734,"Tampaksiring, Gianyar, Bali, 80552, Indonesia"
+54.805.17,Gianyar,Desa Pering Kec. Blahbatu,Pering Kec,Blahbatu,kecamatan,-8.5805007,115.3438899,"Bali Safari & Marine Park, Profesor Ida Bagus Mantra Bypass, Medahan, Blahbatuh, Gianyar, Bali, 80581, Indonesia"
+54.805.18,Gianyar,Desa Blahbatuh Kec. Blahbatuh,Blahbatuh Kec,Blahbatuh,kecamatan,-8.5674445,115.3087598,"Blahbatuh, Gianyar, Bali, Indonesia"
+54.805.21,Gianyar,Jl. Raya Pengosekan Ubud,,,,,,
+54.805.22,Gianyar,Jl. Raya Sakah - Kec. Sukawati,,Sukawati,kecamatan,-8.5836060,115.2695794,"Sukawati, Gianyar, Bali, Indonesia"
+54.805.23,Gianyar,Desa Silakarang Singapadu,Silakarang Singapadu,,desa,-8.5643638,115.2532594,"Jalan Raya Silakarang, Singapadu Kaler, Sukawati, Gianyar, Bali, 80582, Indonesia"
+54.805.24,Gianyar,Lingk. Selat Samplangan,,,,,,
+54.805.25,Gianyar,Jl. Bypass Ketewel Sukawati,,,alamat,-8.6238463,115.2978385,"Profesor Ida Bagus Mantra Bypass, Rangkan, Ketewel, Sukawati, Gianyar, Bali, 80582, Indonesia"
+54.805.26,Gianyar,Jl. Bypass Tohpati Kusamba,,,,,,
+54.805.27,Gianyar,Jl. Dr Ir Soekarno Br Bukit Ds Tampa,Tampa,,,,,
+54.805.28,Gianyar,Lokasi Br.Pujung Kelod Desa Sebatu,Sebatu,,desa,-8.3787290,115.3000313,"Sebatu, Tegallalang, Gianyar, Bali, 80561, Indonesia"
+54.821.03,Tabanan,Jl. Raya Mengwi Bedugul-Desa Parean,Parean,,,,,
+54.821.05,Tabanan,Jl. Pulau Batam - Pesiapan,,,,,,
+54.821.07,Tabanan,Jl. Raya Denpasar - Desa Sam Sam,Sam Sam,,,,,
+54.821.08,Tabanan,Jl. Raya Penebel - Desa Wanasari,Wanasari,,desa,-8.4947697,115.1341218,"Wanasari, Tabanan, Bali, 82111, Indonesia"
+54.821.11,Tabanan,Desa Lalang Lingah - Kec. Selemadeg,Lalang Lingah,Selemadeg,kecamatan,-8.4437921,115.0443187,"Selemadeg, Tabanan, Bali, 82164, Indonesia"
+54.821.12,Tabanan,Desa Luwus Baturiti,Luwus Baturiti,,alamat,-8.3089952,115.1719752,"Bali Tree House, Jalan Raya Denpasar - Singaraja, Poyan, Baturiti, Tabanan, Bali, 82191, Indonesia"
+54.821.13,Tabanan,Desa Antap Kec. Selemadeng,Antap Kec,Selemadeng,,,,
+54.821.14,Tabanan,Desa Marga Kec. Marga,Marga Kec,Marga,kecamatan,-8.4548625,115.1685828,"Marga, Tabanan, Bali, Indonesia"
+54.821.16,Tabanan,"Jl. Gatot Subroto, Kec. Kediri",,Kediri,kecamatan,-8.5756499,115.1257559,"Kediri, Tabanan, Bali, Indonesia"
+54.821.18,Tabanan,Desa Megati Kec. Selemadeg Timur,Megati Kec,Selemadeg Timur,kecamatan,-8.4838025,115.0683295,"Selemadeg Timur, Tabanan, Bali, 82160, Indonesia"
+55.821.19,Tabanan,Jl. Batukaru No. 115 Kel. Buruan Ke,Buruan Ke,,desa,-8.4593330,115.1366937,"Buruan, Penebel, Tabanan, Bali, 82152, Indonesia"

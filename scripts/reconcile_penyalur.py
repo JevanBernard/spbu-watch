@@ -83,8 +83,8 @@ with open(DATA / "code_overrides.csv", newline="", encoding="utf-8") as f:
 addr_rows, review, new_codes = [], [], []
 for i, (j, how, sc) in sorted(pairs.items()):
     s, o = ours[i], off[j]
-    if o["code"] in verified_addr:
-        continue
+    if o["code"] in verified_addr or (s["osm_type"] == "manual" and s["address"].startswith("Sekitar ")):
+        continue  # hand-verified, or an approximate pin whose address is already as detailed as the list
     if how == "jalan":
         if sc < STRONG:
             review.append([s["regency"], f'{s["osm_type"]}/{s["osm_id"]}', s["address"], o["code"], o["address"], f"{sc:.2f}"])

@@ -67,6 +67,7 @@ const CATEGORY_STYLE: Record<StationCategory, string> = {
   spbuk: "bg-teal-700 text-white",
   spbbk: "bg-orange-700 text-white",
   spbun: "bg-cyan-700 text-white",
+  spdn: "bg-sky-700 text-white",
 };
 
 /** Station type, always shown as text so it never relies on colour alone. */

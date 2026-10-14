@@ -361,6 +361,7 @@ export default function HomeClient() {
                       <option value="spbuk">SPBUK</option>
                       <option value="spbbk">SPBBK</option>
                       <option value="spbun">SPBUN</option>
+                      <option value="spdn">SPDN</option>
                       <option value="ges">GES</option>
                     </select>
                   </label>

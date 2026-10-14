@@ -1,7 +1,7 @@
 import fuelComplete from "@/data/fuel_complete.json";
 import gesCodes from "@/data/ges_codes.json";
 
-export type StationCategory = "spbu" | "pertashop" | "spbuk" | "spbbk" | "spbun";
+export type StationCategory = "spbu" | "pertashop" | "spbuk" | "spbbk" | "spbun" | "spdn";
 
 export const CATEGORY_LABEL: Record<StationCategory, string> = {
   spbu: "SPBU",
@@ -9,6 +9,7 @@ export const CATEGORY_LABEL: Record<StationCategory, string> = {
   spbuk: "SPBUK",
   spbbk: "SPBBK",
   spbun: "SPBUN",
+  spdn: "SPDN",
 };
 
 /** SPBU vs Pertashop (small outlet) vs SPBUK, from the official code prefix, falling back to brand/name. */
@@ -22,6 +23,7 @@ export function stationCategory(s: {
   if (code.startsWith("5P") || /pertashop/i.test(`${s.brand ?? ""} ${s.name ?? ""}`)) return "pertashop";
   if (code.startsWith("56.")) return "spbuk";
   if (code.startsWith("58.") || /^SPBUN/i.test(s.name ?? "")) return "spbun";
+  if (code.startsWith("59.") || /^SPDN/i.test(s.name ?? "")) return "spdn";
   return "spbu";
 }
 

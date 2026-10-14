@@ -1,9 +1,16 @@
 osm_type,osm_id,pertamina_code,name,brand,operator,regency,lat,lng,address,opening_hours,is_24h,fuels,has_ev_charging,google_place_id,active
+manual,15,5P.803.01,Pertashop 5P.803.01 (Mengwi),Pertashop,Pertamina,Badung,-8.5465595,115.1672794,"Sekitar Desa Mengwi, Kec. Mengwi, Kabupaten Badung",,false,[],false,,true
+manual,16,5P.803.02,Pertashop 5P.803.02 (Blahkiuh),Pertashop,Pertamina,Badung,-8.507662,115.2096238,"Sekitar Desa Blahkiuh, Kec. Abiansemal, Kabupaten Badung",,false,[],false,,true
+manual,17,5P.803.03,Pertashop 5P.803.03 (Taman),Pertashop,Pertamina,Badung,-8.480652,115.2291199,"Sekitar Desa Taman, Kec. Abiansemal, Kabupaten Badung",,false,[],false,,true
+manual,18,5P.803.04,Pertashop 5P.803.04 (Pangsan),Pertashop,Pertamina,Badung,-8.4105163,115.2194174,"Sekitar Desa Pangsan, Kec. Petang, Kabupaten Badung",,false,[],false,,true
+manual,19,5P.803.05,Pertashop 5P.803.05 (Munggu),Pertashop,Pertamina,Badung,-8.6292074,115.1262016,"Sekitar Desa Munggu, Kec. Mengwi, Kabupaten Badung",,false,[],false,,true
+manual,20,5P.803.06,Pertashop 5P.803.06 (Pecatu),Pertashop,Pertamina,Badung,-8.8208398,115.1136217,"Sekitar Desa Pecatu, Kec. Kuta Selatan, Kabupaten Badung",,false,[],false,,true
+manual,21,5P.803.07,Pertashop 5P.803.07 (Gulingan),Pertashop,Pertamina,Badung,-8.5437855,115.183296,"Sekitar Desa Gulingan, Kec. Mengwi, Kabupaten Badung",,false,[],false,,true
+manual,22,5P.803.08,Pertashop 5P.803.08 (Abianbase),Pertashop,Pertamina,Badung,-8.5948483,115.1553919,"Sekitar Desa Abianbase, Kec. Mengwi, Kabupaten Badung",,false,[],false,,true
 way,603585689,,SPBU (Abiansemal Dauh Yeh Cani),,,Badung,-8.5235731,115.2004194,"Sekitar Abiansemal Dauh Yeh Cani, Kabupaten Badung",,false,[],false,,true
 node,12287923856,,SPBU (Jalan Baris),,,Badung,-8.5219765,115.2137882,"Dekat Jalan Baris, Abiansemal, Kabupaten Badung",,false,[],false,,true
 node,9969087618,,SPBU (Jalan Bumbak),,,Badung,-8.6640732,115.1533538,"Dekat Jalan Bumbak, Kerobokan Kelod, Kabupaten Badung",,false,[],false,,true
 node,12287905177,,SPBU (Jalan I. Gusti Ngurah Rai),,,Badung,-8.5048211,115.210345,"Dekat Jalan I. Gusti Ngurah Rai, Blahkiuh, Kabupaten Badung",,false,[],false,,true
-node,2849702811,,SPBU (Jalan Pantai Kedonganan),,,Badung,-8.757882,115.1687409,"Dekat Jalan Pantai Kedonganan, Kedonganan, Kabupaten Badung",,false,[],false,,true
 node,13122086601,,SPBU (Jalan Toyaning Ii),,,Badung,-8.8257372,115.1510788,Jalan Toyaning II,,false,[],false,,true
 node,4630425094,,SPBU (Jalan Wayan Mahendra),,,Badung,-8.7935202,115.1291518,"Dekat Jalan Wayan Mahendra, Jimbaran, Kabupaten Badung",,false,[],false,,true
 node,6460723863,,SPBU (Jimbaran),,,Badung,-8.7691092,115.1718247,"Sekitar Jimbaran, Kabupaten Badung",,false,[],false,,true
@@ -32,12 +39,14 @@ node,4954534052,54.803.07,SPBU Pertamina 54.803.07,Pertamina,,Badung,-8.783355,1
 manual,10,54.803.08,SPBU Pertamina 54.803.08 (Kapal),Pertamina,Pertamina,Badung,-8.5772167,115.1807804,"Desa Kapal, Kecamatan Mengwi, Kabupaten Badung",24/7,true,[],false,,true
 node,5546845704,54.803.09,SPBU Pertamina 54.803.09 (Jalan Muding Sari),,,Badung,-8.6385964,115.1742066,"Desa Padang Sambian - Dalung, Kabupaten Badung",24/7,true,[],false,,true
 way,753245598,54.803.11,SPBU Pertamina 54.803.11 (Abianbase),Pertamina,,Badung,-8.6028465,115.1716363,"Jl. Raya Dalung - Kuta, Kabupaten Badung",24/7,true,[],false,,true
+manual,54,54.803.17,SPBU Pertamina 54.803.17 (Teuku Umar Barat),Pertamina,Pertamina,Badung,-8.6737912,115.1792851,"Sekitar Jl. Teuku Umar Barat, Kecamatan Kuta Utara, Kabupaten Badung",,false,[],false,,true
 node,3791477572,54.803.18,SPBU Pertamina 54.803.18,Pertamina,,Badung,-8.5490905,115.2385702,"Lokasi Desa Mambal, Kabupaten Badung",Mo-Su 08:00-20:00,false,[],false,,true
 node,2487544914,54.803.19,SPBU Pertamina 54.803.19,Pertamina,,Badung,-8.6890239,115.1717806,"Jl. Kunti Raya Sunset Road, Kabupaten Badung",24/7,true,"[""solar""]",false,,true
 node,1502919830,54.803.20,SPBU Pertamina 54.803.20,Pertamina,,Badung,-8.7026066,115.1757054,"Jalan Dewi Sri, Legian, Kuta, Kabupaten Badung, Bali, Indonesia",,false,"[""solar""]",false,,true
 way,714724147,54.803.21,SPBU Pertamina 54.803.21 (Pererenan),Pertamina,,Badung,-8.6308846,115.1327634,"Lokasi Desa Pererenan Mengwi, Kabupaten Badung",24/7,true,[],false,,true
 node,2276389503,54.803.22,SPBU Pertamina 54.803.22 (Dalung Permai),Pertamina,,Badung,-8.6294555,115.1729756,"Jl. Raya Dalung Permai Desa Dalung, Kabupaten Badung",24/7,true,[],false,,true
 node,2279259061,54.803.23,SPBU Pertamina 54.803.23,Pertamina,,Badung,-8.7151528,115.1863077,"Jl. Sunset Road Kuta, Kabupaten Badung",,false,"[""pertamax"", ""solar""]",false,,true
+manual,55,54.803.26,SPBU Pertamina 54.803.26 (Plaga Petang),Pertamina,Pertamina,Badung,-8.3024143,115.2198893,"Sekitar Banjar Nunung, Desa Plaga, Kec. Petang, Kabupaten Badung",,false,[],false,,true
 way,512629994,54.803.27,SPBU Pertamina 54.803.27,,,Badung,-8.7934456,115.2151935,"Jl. Bypass Ngurah Rai Nusa Dua, Kabupaten Badung",24/7,true,[],false,,true
 node,11002450532,54.803.30,SPBU Pertamina 54.803.30 (Darmasaba),Pertamina,,Badung,-8.589582,115.2157029,"Lokasi Desa Darmasaba Kec. Abiansemal, Kabupaten Badung",,false,"[""pertamax_turbo"", ""pertamax"", ""pertamina_dex"", ""dexlite"", ""pertalite"", ""solar""]",false,,true
 node,941307526,54.803.31,SPBU Pertamina 54.803.31 (Sunset Road),Pertamina,Pertamina,Badung,-8.7129491,115.1859091,"Jl. Sunset Road Kec. Kute, Kabupaten Badung",24/7,true,"[""solar""]",false,,true
@@ -45,9 +54,14 @@ node,5317781709,54.803.32,SPBU Pertamina 54.803.32 (Lukluk),Pertamina,,Badung,-8
 node,1456289125,54.803.33,SPBU Pertamina 54.803.33 (Latu),Pertamina,,Badung,-8.5449924,115.2145568,"Desa Latu Kec. Abiansemal, Kabupaten Badung",24/7,true,[],false,,true
 way,714724146,54.803.34,SPBU Pertamina 54.803.34 (Sunset Road),Pertamina,,Badung,-8.6986899,115.1780504,"Sunset Road, Kuta, Kabupaten Badung, Bali, Indonesia",,false,"[""solar""]",false,,true
 node,3217531312,54.803.35,SPBU Pertamina 54.803.35,Pertamina,,Badung,-8.8201644,115.1498481,"Desa Ungasan Kec. Kuta Selatan, Kabupaten Badung",24/7,true,[],false,,true
+manual,67,54.803.39,SPBU Pertamina 54.803.39 (Sading),Pertamina,Pertamina,Badung,-8.5871203,115.2034658,"Jl. Sading-Badung No.171, Sading, Kec. Mengwi, Kabupaten Badung, Bali 80351",,false,[],false,,true
 node,945648527,58.803.01,SPBUN Pertamina 58.803.01 (Tanjung Benoa Segara Kulon),Pertamina,,Badung,-8.7526054,115.2180897,"Jl. Segara Kulon, Benoa, Kec. Kuta Sel., Kabupaten Badung, Bali 80361",,false,"[""solar""]",false,,true
+node,2849702811,59.803.02,SPDN Pertamina 59.803.02 (Kedonganan),,,Badung,-8.757882,115.1687409,"Jl. Pantai Kedonganan No. 1 Lingk.Pas, Kabupaten Badung",,false,[],false,,true
+manual,12,5P.801.01,Pertashop 5P.801.01 (Sanur Kaja),Pertashop,Pertamina,Denpasar,-8.6734491,115.255941,"Sekitar Desa Sanur Kaja, Kec. Denpasar Selatan, Kota Denpasar",,false,[],false,,true
 manual,4,5P.801.02,Pertashop 5P.801.02,Pertashop,Pertamina,Denpasar,-8.5992752,115.2302357,"Desa Peguyangan Kangin Kec. Denpasa, Kota Denpasar",,false,[],false,,true
 manual,3,5P.801.07,Pertashop 5P.801.07,Pertashop,Pertamina,Denpasar,-8.5989174,115.2199396,"Jl. Dam Peraupan No.6, Peguyangan Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali 80115",,false,[],false,,true
+manual,13,5P.802.03,Pertashop 5P.802.03 (Panjer),Pertashop,Pertamina,Denpasar,-8.6895542,115.225775,"Sekitar Desa Panjer, Kec. Denpasar, Kota Denpasar",,false,[],false,,true
+manual,14,5P.802.04,Pertashop 5P.802.04 (Sanur Kauh),Pertashop,Pertamina,Denpasar,-8.6956574,115.2496763,"Sekitar Desa Sanur Kauh, Kec. Denpasar Selatan, Kota Denpasar",,false,[],false,,true
 way,374650232,54.801.46,SPBBK 54.801.46 (Sesetan),Pertamina,,Denpasar,-8.7091641,115.2210697,"Jl. Raya Sesetan No.613, Sesetan, Denpasar Selatan, Kota Denpasar, Bali 80223",,false,"[""solar""]",false,,true
 node,610371699,,SPBU Pertamina (Jalan Bypass Ngurah Rai),Pertamina,,Denpasar,-8.721233,115.1942868,"Jalan Bypass Ngurah Rai, Denpasar",,false,[],false,,true
 node,1963471634,,SPBU Pertamina (Jalan Bypass Ngurah Rai),Pertamina,,Denpasar,-8.6516352,115.2541822,"Jalan Bypass Ngurah Rai, Denpasar",,false,"[""pertamax"", ""solar""]",false,,true
@@ -67,6 +81,7 @@ way,375347728,54.801.10,SPBU Pertamina 54.801.10 (Jl. H.O.S. Cokroaminoto - Maru
 node,3828371871,54.801.11,SPBU Pertamina 54.801.11 (Teras Ayung),Pertamina,,Denpasar,-8.6359364,115.2377311,"Jl. Gatot Subroto Tim., Kesiman Petilan, Kec. Denpasar Tim., Kota Denpasar, Bali 80237",24/7,true,[],false,,true
 node,11002446836,54.801.12,SPBU Pertamina 54.801.12 (Ahmad Yani Utara),Pertamina,,Denpasar,-8.6245512,115.208976,"Jl. Ahmad Yani Utara No.277-301, Peguyangan, Kec. Denpasar Utara, Kota Denpasar, Bali 80115",,false,[],false,,true
 node,4249837879,54.801.13,SPBU Pertamina 54.801.13 (Jalan Kebo Iwa),Pertamina,,Denpasar,-8.6364156,115.1853451,"Jl. Gatot Subroto Barat, Kota Denpasar",,false,[],false,,true
+manual,53,54.801.14,SPBU Pertamina 54.801.14 (Pulau Bungin),Pertamina,Pertamina,Denpasar,-8.6925534,115.2042885,"Sekitar Jl. Pulau Bungin, Pedungan, Kota Denpasar",,false,[],false,,true
 node,2498046487,54.801.15,SPBU Pertamina 54.801.15 (Raya Puputan STIKOM),Pertamina,Pertamina,Denpasar,-8.6730122,115.2262101,"Jl. Raya Puputan 90 A - Renon, Kota Denpasar",,false,[],false,,true
 node,610371788,54.801.16,SPBU Pertamina 54.801.16 (Jalan Bypass Ngurah Rai),Pertamina,,Denpasar,-8.7137109,115.2231589,"Dekat Jalan Bypass Ngurah Rai, Sesetan, Kota Denpasar",24/7,true,[],false,,true
 node,5441794405,54.801.17,SPBU Pertamina 54.801.17 (Pemogan),Pertamina,,Denpasar,-8.7177928,115.2022082,"Jl. Bypass Ngurah Rai No. 786, Kota Denpasar",,false,[],false,,true
@@ -104,6 +119,15 @@ way,1547522483,54.801.59,SPBU Pertamina 54.801.59 (Jalan Kebo Iwa Utara III),Per
 node,12661989424,54.801.60,SPBU Pertamina 54.801.60 (Setia Budi),Pertamina,,Denpasar,-8.6504538,115.2090517,"Dekat Jalan Sri Rama, Pemecutan Kaja, Kota Denpasar",24/7,true,[],false,,true
 manual,9,54.802.56,SPBU Pertamina 54.802.56,Pertamina,Pertamina,Denpasar,-8.649288,115.2647091,"Jl. Prof. Ida Bagus Mantra No. 17X, Kota Denpasar",,false,[],false,,true
 manual,5,56.801.01,SPBUK Pertamina 56.801.01 (Serangan),Pertamina,Pertamina,Denpasar,-8.7240047,115.2313719,"Jl. Tukad Punggawa No.32, Serangan, Denpasar Selatan, Kota Denpasar, Bali 80229",,false,[],false,,true
+manual,23,5P.805.01,Pertashop 5P.805.01 (Saba),Pertashop,Pertamina,Gianyar,-8.593271,115.2983223,"Sekitar Desa Saba, Kec. Blahbatuh, Kabupaten Gianyar",,false,[],false,,true
+manual,24,5P.805.02,Pertashop 5P.805.02 (Temesi),Pertashop,Pertamina,Gianyar,-8.5562305,115.3505823,"Sekitar Desa Temesi, Kec. Gianyar, Kabupaten Gianyar",,false,[],false,,true
+manual,25,5P.805.03,Pertashop 5P.805.03 (Bakbakan),Pertashop,Pertamina,Gianyar,-8.5076197,115.3231387,"Sekitar Desa Bakbakan, Kec. Gianyar, Kabupaten Gianyar",,false,[],false,,true
+manual,26,5P.805.05,Pertashop 5P.805.05 (Sebatu),Pertashop,Pertamina,Gianyar,-8.378729,115.3000313,"Sekitar Desa Sebatu, Kec. Tegalalang, Kabupaten Gianyar",,false,[],false,,true
+manual,27,5P.805.06,Pertashop 5P.805.06 (Kelusa),Pertashop,Pertamina,Gianyar,-8.4505405,115.2542164,"Sekitar Desa Kelusa, Kabupaten Gianyar",,false,[],false,,true
+manual,28,5P.805.07,Pertashop 5P.805.07 (Kedisan),Pertashop,Pertamina,Gianyar,-8.428893,115.2876525,"Sekitar Desa Kedisan, Kec. Tegalalang, Kabupaten Gianyar",,false,[],false,,true
+manual,29,5P.805.08,Pertashop 5P.805.08 (Siangan),Pertashop,Pertamina,Gianyar,-8.505967,115.3109588,"Sekitar Desa Siangan, Kec. Gianyar, Kabupaten Gianyar",,false,[],false,,true
+manual,30,5P.805.10,Pertashop 5P.805.10 (Singapadu Tengah),Pertashop,Pertamina,Gianyar,-8.5779175,115.2559118,"Sekitar Desa Singapadu Tengah, Kec. Sukawati, Kabupaten Gianyar",,false,[],false,,true
+manual,31,5P.805.12,Pertashop 5P.805.12 (Taro),Pertashop,Pertamina,Gianyar,-8.3759465,115.2852677,"Sekitar Desa Taro, Kec. Tegalalang, Kabupaten Gianyar",,false,[],false,,true
 node,4593501496,,SPBU (Blahbatuh),,,Gianyar,-8.5662499,115.3049769,"Dekat Jalan Desa Pering, Blahbatuh, Kabupaten Gianyar",,false,[],false,,true
 node,6355894185,,SPBU (Jalan I Wayan Lunga),,,Gianyar,-8.447857,115.2805724,"Dekat Jalan I Wayan Lunga, Tegallalang, Kabupaten Gianyar",,false,[],false,,true
 node,6355907290,,SPBU (Jalan I Wayan Lunga),,,Gianyar,-8.4523559,115.279707,"Dekat Jalan I Wayan Lunga, Tegallalang, Kabupaten Gianyar",,false,[],false,,true
@@ -136,12 +160,42 @@ node,4593932705,,SPBU Pertamina (Ketewel),Pertamina,,Gianyar,-8.635779,115.28722
 node,4446960858,,SPBU Pertamina (Profesor Ida Bagus Mantra Bypass),Pertamina,,Gianyar,-8.6018053,115.3247915,"Dekat Profesor Ida Bagus Mantra Bypass, Pering, Kabupaten Gianyar",,false,[],false,,true
 node,4446961398,,SPBU Pertamina (Profesor Ida Bagus Mantra Bypass),Pertamina,,Gianyar,-8.581006,115.3526184,"Dekat Profesor Ida Bagus Mantra Bypass, Lebih, Kabupaten Gianyar",,false,[],false,,true
 node,9498002342,,SPBU Pertamina (Sebatu),Pertamina,,Gianyar,-8.3294926,115.3256533,"Sekitar Sebatu, Kabupaten Gianyar",,false,[],false,,true
+manual,56,54.805.03,SPBU Pertamina 54.805.03 (Singakerta),Pertamina,Pertamina,Gianyar,-8.530874,115.2439079,"Sekitar Desa Singakerta, Kabupaten Gianyar",,false,[],false,,true
 node,1963471597,54.805.06,SPBU Pertamina 54.805.06,,,Gianyar,-8.6023075,115.2608468,"Jl. Raya Desa Celuk, Kecamatan Suka, Kabupaten Gianyar",,false,[],false,,true
 node,2272949196,54.805.08,SPBU Pertamina 54.805.08,,,Gianyar,-8.6241762,115.2571205,"Jl. Raya Batubulan - Desa Batubulan, Kabupaten Gianyar",,false,[],false,,true
+manual,57,54.805.09,SPBU Pertamina 54.805.09 (Peliatan),Pertamina,Pertamina,Gianyar,-8.517736,115.2722159,"Sekitar Desa Peliatan, Kecamatan Ubud, Kabupaten Gianyar",,false,[],false,,true
+manual,58,54.805.11,SPBU Pertamina 54.805.11 (Bypass Ketewel),Pertamina,Pertamina,Gianyar,-8.6233324,115.2980852,"Sekitar Jl. Bypass Ketewel - Desa Ketewel, Kabupaten Gianyar",,false,[],false,,true
 node,3530974108,54.805.12,SPBU Pertamina 54.805.12,Pertamina,,Gianyar,-8.5231597,115.2759405,"Desa Teges, Kecamatan Ubud, Kabupaten Gianyar",Mo-Su 05:00-22:00,false,[],false,,true
+manual,59,54.805.13,SPBU Pertamina 54.805.13 (Ubud),Pertamina,Pertamina,Gianyar,-8.5170195,115.2550507,"Sekitar Jl. Raya Lodtunduk - Desa Ubud, Kabupaten Gianyar",,false,[],false,,true
+manual,60,54.805.14,SPBU Pertamina 54.805.14 (Kedewatan),Pertamina,Pertamina,Gianyar,-8.4766577,115.2501069,"Sekitar Br. Bunutan, Desa Kedewatan, Kec. Ubud, Kabupaten Gianyar",,false,[],false,,true
+manual,61,54.805.15,SPBU Pertamina 54.805.15 (Lebih),Pertamina,Pertamina,Gianyar,-8.5722453,115.3482011,"Sekitar Jl. Prof Dr Ib Mantra, Desa Lebih, Kabupaten Gianyar",,false,[],false,,true
 way,545825031,54.805.20,SPBU Pertamina 54.805.20,Pertamina,,Gianyar,-8.5052246,115.2717004,"Jl. Raya Andong, Kabupaten Gianyar",,false,[],false,,true
+manual,62,54.805.23,SPBU Pertamina 54.805.23 (Silakarang Singapadu),Pertamina,Pertamina,Gianyar,-8.5643638,115.2532594,"Sekitar Desa Silakarang Singapadu, Kabupaten Gianyar",,false,[],false,,true
+manual,63,54.805.25,SPBU Pertamina 54.805.25 (Bypass Ketewel Sukawati),Pertamina,Pertamina,Gianyar,-8.6238463,115.2978385,"Sekitar Jl. Bypass Ketewel Sukawati, Kabupaten Gianyar",,false,[],false,,true
+manual,64,54.805.28,SPBU Pertamina 54.805.28 (Sebatu),Pertamina,Pertamina,Gianyar,-8.378729,115.3000313,"Sekitar Br. Pujung Kelod, Desa Sebatu, Kabupaten Gianyar",,false,[],false,,true
 way,603638557,,Pertashop (Timpag),Pertashop,,Tabanan,-8.4869695,115.0945631,"Sekitar Timpag, Kabupaten Tabanan",,false,[],false,,true
 way,603638612,,Pertashop (Timpag),Pertashop,,Tabanan,-8.486425,115.0952209,"Sekitar Timpag, Kabupaten Tabanan",,false,[],false,,true
+manual,32,5P.821.01,Pertashop 5P.821.01 (Biaung),Pertashop,Pertamina,Tabanan,-8.4154562,115.1664279,"Sekitar Desa Biaung, Kec. Penebel, Kabupaten Tabanan",,false,[],false,,true
+manual,33,5P.821.02,Pertashop 5P.821.02 (Kebon Padangan),Pertashop,Pertamina,Tabanan,-8.3849195,114.9823076,"Sekitar Desa Kebon Padangan, Kec. Pupuan, Kabupaten Tabanan",,false,[],false,,true
+manual,34,5P.821.03,Pertashop 5P.821.03 (Senganan),Pertashop,Pertamina,Tabanan,-8.3469673,115.136929,"Sekitar Desa Senganan, Kec. Penebel, Kabupaten Tabanan",,false,[],false,,true
+manual,35,5P.821.04,Pertashop 5P.821.04 (Mundeh),Pertashop,Pertamina,Tabanan,-8.4349379,114.9758183,"Sekitar Desa Mundeh, Kec. Selemadeg Barat, Kabupaten Tabanan",,false,[],false,,true
+manual,36,5P.821.05,Pertashop 5P.821.05 (Buruan),Pertashop,Pertamina,Tabanan,-8.459333,115.1366937,"Sekitar Desa Buruan, Kec. Penebel Barat, Kabupaten Tabanan",,false,[],false,,true
+manual,37,5P.821.06,Pertashop 5P.821.06 (Tunjuk),Pertashop,Pertamina,Tabanan,-8.465325,115.1513188,"Sekitar Desa Tunjuk, Kec. Tabanan, Kabupaten Tabanan",,false,[],false,,true
+manual,38,5P.821.07,Pertashop 5P.821.07 (Angseri),Pertashop,Pertamina,Tabanan,-8.3450334,115.1539825,"Sekitar Desa Angseri, Kec. Baturiti, Kabupaten Tabanan",,false,[],false,,true
+manual,39,5P.821.08,Pertashop 5P.821.08 (Tua),Pertashop,Pertamina,Tabanan,-8.413026,115.1822301,"Sekitar Desa Tua, Kec. Marga, Kabupaten Tabanan",,false,[],false,,true
+manual,40,5P.821.09,Pertashop 5P.821.09 (Antapan),Pertashop,Pertamina,Tabanan,-8.321684,115.2019422,"Sekitar Desa Antapan, Kec. Baturiti, Kabupaten Tabanan",,false,[],false,,true
+manual,41,5P.821.10,Pertashop 5P.821.10 (Bantiran),Pertashop,Pertamina,Tabanan,-8.3078419,114.9844399,"Sekitar Desa Bantiran, Kec. Pupuan, Kabupaten Tabanan",,false,[],false,,true
+manual,42,5P.821.11,Pertashop 5P.821.11 (Batunya),Pertashop,Pertamina,Tabanan,-8.30421,115.1856346,"Sekitar Desa Batunya, Kec. Baturiti, Kabupaten Tabanan",,false,[],false,,true
+manual,43,5P.821.12,Pertashop 5P.821.12 (Cepaka),Pertashop,Pertamina,Tabanan,-8.6052631,115.1466726,"Sekitar Desa Cepaka, Kec. Kediri, Kabupaten Tabanan",,false,[],false,,true
+manual,44,5P.821.13,Pertashop 5P.821.13 (Antosari),Pertashop,Pertamina,Tabanan,-8.499148,115.0149575,"Sekitar Desa Antosari, Kec. Selemadeg Barat, Kabupaten Tabanan",,false,[],false,,true
+manual,45,5P.821.14,Pertashop 5P.821.14 (Denbantas),Pertashop,Pertamina,Tabanan,-8.512557,115.1379328,"Sekitar Desa Denbantas, Kec. Tabanan, Kabupaten Tabanan",,false,[],false,,true
+manual,46,5P.821.15,Pertashop 5P.821.15 (Kediri),Pertashop,Pertamina,Tabanan,-8.5631975,115.1322426,"Sekitar Desa Kediri, Kec. Kediri, Kabupaten Tabanan",,false,[],false,,true
+manual,47,5P.821.16,Pertashop 5P.821.16 (Meliling),Pertashop,Pertamina,Tabanan,-8.513671,115.0793491,"Sekitar Desa Meliling, Kec. Kerambitan, Kabupaten Tabanan",,false,[],false,,true
+manual,48,5P.821.17,Pertashop 5P.821.17 (Lalanglinggah),Pertashop,Pertamina,Tabanan,-8.4715918,114.9482385,"Sekitar Desa Lalanglinggah, Kec. Selemadeg Barat, Kabupaten Tabanan",,false,[],false,,true
+manual,49,5P.821.18,Pertashop 5P.821.18 (Banjar Anyar),Pertashop,Pertamina,Tabanan,-8.536127,115.1477539,"Sekitar Desa Banjar Anyar, Kec. Kediri, Kabupaten Tabanan",,false,[],false,,true
+manual,50,5P.821.19,Pertashop 5P.821.19 (Penebel),Pertashop,Pertamina,Tabanan,-8.4188559,115.1491433,"Sekitar Desa Penebel, Kec. Penebel, Kabupaten Tabanan",,false,[],false,,true
+manual,51,5P.821.20,Pertashop 5P.821.20 (Batunya),Pertashop,Pertamina,Tabanan,-8.30421,115.1860346,"Sekitar Desa Batunya, Kec. Baturiti, Kabupaten Tabanan",,false,[],false,,true
+manual,52,5P.821.21,Pertashop 5P.821.21 (Timpag),Pertashop,Pertamina,Tabanan,-8.4897915,115.0925807,"Sekitar Desa Timpag, Kec. Kerambitan, Kabupaten Tabanan",,false,[],false,,true
 node,3800945890,,SPBU (Berembeng),,,Tabanan,-8.4989099,115.034218,"Sekitar Berembeng, Kabupaten Tabanan",,false,[],false,,true
 node,3788508644,,SPBU (Jalan Raya Denpasar - Singaraja),,,Tabanan,-8.3621622,115.1910254,"Dekat Jalan Raya Denpasar - Singaraja, Mekarsari, Kabupaten Tabanan",,false,[],false,,true
 node,12287937936,,SPBU (Jalan Raya Denpasar - Singaraja),,,Tabanan,-8.2952994,115.1740283,"Dekat Jalan Raya Denpasar - Singaraja, Batunya, Kabupaten Tabanan",,false,[],false,,true
@@ -165,6 +219,8 @@ way,1119410373,54.821.01,SPBU Pertamina 54.821.01,Pertamina,,Tabanan,-8.4747415,
 node,1963414988,54.821.02,SPBU Pertamina 54.821.02 (Sanjiwani),Pertamina,,Tabanan,-8.560268,115.153967,"Desa Abiantuwung Kecamatan Kediri, Kabupaten Tabanan",24/7,true,[],false,,true
 node,10779121218,54.821.04,SPBU Pertamina 54.821.04,Pertamina,,Tabanan,-8.5495892,115.1231642,"Jl. Bypass Alteri Kediri Pesiapan, Kabupaten Tabanan",24/7,true,[],false,,true
 way,597363262,54.821.06,SPBU Pertamina 54.821.06,,,Tabanan,-8.3621749,115.1899586,"Desa Candi Kuning, Kecamatan Baturi, Kabupaten Tabanan",,false,[],false,,true
+manual,65,54.821.08,SPBU Pertamina 54.821.08 (Wanasari),Pertamina,Pertamina,Tabanan,-8.4947697,115.1341218,"Sekitar Jl. Raya Penebel - Desa Wanasari, Kabupaten Tabanan",,false,[],false,,true
 node,274853846,54.821.09,SPBU Pertamina 54.821.09,,,Tabanan,-8.3398013,115.0320289,"Jl. Raya Batungsel - Desa Pupuan, Kabupaten Tabanan",,false,[],false,,true
 way,597363267,54.821.15,SPBU Pertamina 54.821.15,,,Tabanan,-8.3621724,115.1904765,"Lokasi Desa Pacung Kec. Baturiti, Kabupaten Tabanan",,false,[],false,,true
 manual,11,54.821.17,SPBU Pertamina 54.821.17,Pertamina,Pertamina,Tabanan,-8.5510397,115.1301885,"Jl. Bypass Kediri, Kabupaten Tabanan",24/7,true,[],false,,true
+manual,66,55.821.19,SPBU Pertamina 55.821.19 (Buruan),Pertamina,Pertamina,Tabanan,-8.459333,115.1366937,"Sekitar Jl. Batukaru No. 115 Kel. Buruan, Kabupaten Tabanan",,false,[],false,,true

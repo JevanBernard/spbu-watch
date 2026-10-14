@@ -265,16 +265,18 @@ NAME_NOISE = {"spbu", "spbuk", "pertamina", "pertashop", "gas", "station", "petr
 
 
 def standard_name(old: str, code: str) -> str:
-    """'<type> <code> (<area>)' where type follows the official code: 5P = Pertashop, 56 = SPBUK, else SPBU Pertamina."""
+    """'<type> <code> (<area>)' where type follows the official code: 5P = Pertashop, 56 = SPBUK, 59 = SPDN, else SPBU Pertamina."""
     if code.startswith("5P"):
         prefix = "Pertashop"
     elif code.startswith("56."):
         prefix = "SPBUK Pertamina"
     elif code.startswith("58."):
         prefix = "SPBUN Pertamina"
+    elif code.startswith("59."):
+        prefix = "SPDN Pertamina"
     else:
         prefix = "SPBU Pertamina"
-    if re.fullmatch(rf"(SPBUK? Pertamina|SPBUN Pertamina|Pertashop|SPBBK) {re.escape(code)}( \(.+\))?", old):
+    if re.fullmatch(rf"(SPBUK? Pertamina|SPBUN Pertamina|SPDN Pertamina|Pertashop|SPBBK) {re.escape(code)}( \(.+\))?", old):
         return old  # already standard (including hand-written area labels)
     words = [w for w in re.sub(r"[()]", " ", CODE_RE.sub(" ", old)).split() if w.lower() not in NAME_NOISE]
     area = " ".join(words).strip(" -")
