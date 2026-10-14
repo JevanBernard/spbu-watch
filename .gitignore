@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env*.local
+next-env.d.ts
+*.tsbuildinfo
+data/spbu_raw.json
+__pycache__
+public/maplibre
+playwright-report
+test-results

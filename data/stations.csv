@@ -1,0 +1,159 @@
+osm_type,osm_id,pertamina_code,name,brand,operator,regency,lat,lng,address,opening_hours,is_24h,fuels,has_ev_charging,google_place_id,active
+node,12287905177,,Fuel Station,,,Badung,-8.5048211,115.210345,,,false,[],false,,true
+node,12287923856,,Fuel Station,,,Badung,-8.5219765,115.2137882,,,false,[],false,,true
+node,945648527,,Pertamina,Pertamina,,Badung,-8.7526054,115.2180897,,24/7,true,"[""solar""]",false,,true
+node,963276323,,Pertamina,Pertamina,,Badung,-8.7433555,115.1750055,,,false,[],false,,true
+node,1292872676,,Pertamina,Pertamina,,Badung,-8.7208505,115.1801911,,,false,[],false,,true
+node,1830362205,,Pertamina,Pertamina,,Badung,-8.7819795,115.1748485,"Jalan Uluwatu 2, Jimbaran",,false,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+node,2279259061,,Pertamina,Pertamina,,Badung,-8.7151528,115.1863077,"Sunset Road, Kuta",,false,"[""pertamax"", ""solar""]",false,,true
+node,3217531312,,Pertamina,Pertamina,,Badung,-8.8201644,115.1498481,,24/7,true,[],false,,true
+node,3915627035,,Pertamina,Pertamina,,Badung,-8.7917883,115.2144029,,,false,[],false,,true
+node,4954534046,,Pertamina,Pertamina,,Badung,-8.7845777,115.1968257,,,false,[],false,,true
+node,4954534047,,Pertamina,Pertamina,Pertamina,Badung,-8.7844001,115.1881012,"Jl. Batur Raya, Jimbaran",,false,[],false,,true
+node,4954534052,,Pertamina,Pertamina,,Badung,-8.783355,115.1868238,,,false,[],false,,true
+node,5015970023,,Pertamina,Pertamina,,Badung,-8.6372122,115.1769705,,,false,[],false,,true
+node,5539012614,,Pertamina,Pertamina,Pertamina,Badung,-8.770381,115.1781931,,,false,"[""solar""]",false,,true
+node,6400253085,,Pertamina,Pertamina,,Badung,-8.6456055,115.1604306,,,false,[],false,,true
+node,13948488673,,Pertamina,Pertamina,,Badung,-8.8318606,115.2050547,,,false,[],false,,true
+way,311216627,,Pertamina,Pertamina,,Badung,-8.7978587,115.1612195,"Jalan Uluwatu, Ungasan",,false,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+way,419467852,,Pertamina,Pertamina,,Badung,-8.7389783,115.1798409,,,false,[],false,,true
+way,464475021,,Pertamina,Pertamina,,Badung,-8.8064091,115.2010998,,,false,[],false,,true
+way,753245598,,Pertamina,Pertamina,,Badung,-8.6028465,115.1716363,,,false,[],false,,true
+node,1456289125,,Pertamina,Pertamina,,Badung,-8.5449924,115.2145568,,,false,[],false,,true
+node,2000869724,,Pertamina,Pertamina,,Badung,-8.5439737,115.214653,,,false,[],false,,true
+node,2487421377,,Pertamina,Pertamina,,Badung,-8.5200644,115.1743476,,,false,[],false,,true
+node,7622285885,,Pertamina,Pertamina,,Badung,-8.3270538,115.2226649,,,false,[],false,,true
+node,2872212679,54.803.06,Pertamina 54.803.06 Gas Station,Pertamina,,Badung,-8.6729773,115.1651785,"Jalan Raya Kerobokan, Kerobokan Kelod, Kuta Utara, Kabupaten Badung, Bali, Indonesia",Mo-Su 05:00-00:00,false,"[""solar""]",false,,true
+node,6875260470,,Pertamina Buwit,Pertamina,,Badung,-8.6173884,115.1161502,Buwit,,false,[],false,,true
+node,1502919830,54.803.20,Pertamina Gas Station 54.803.20,Pertamina,,Badung,-8.7026066,115.1757054,"Jalan Dewi Sri, Legian, Kuta, Kabupaten Badung, Bali, Indonesia",24/7,true,"[""solar""]",false,,true
+node,2276389503,,Pom Bensin,Pertamina,,Badung,-8.6294555,115.1729756,,,false,[],false,,true
+node,9768297246,54.803.01,Pom Bensin 54.803.01,Pertamina,,Badung,-8.6121311,115.1924875,,,false,[],false,,true
+node,2849702811,,SPBU,,,Badung,-8.757882,115.1687409,,,false,[],false,,true
+node,4630425094,,SPBU,,,Badung,-8.7935202,115.1291518,,,false,[],false,,true
+node,5546845704,,SPBU,,,Badung,-8.6385964,115.1742066,,,false,[],false,,true
+node,6460723863,,SPBU,,,Badung,-8.7691092,115.1718247,,,false,[],false,,true
+node,9969087618,,SPBU,,,Badung,-8.6640732,115.1533538,,,false,[],false,,true
+way,512629994,,SPBU,,,Badung,-8.7934456,115.2151935,,,false,[],false,,true
+way,603585689,,SPBU,,,Badung,-8.5235731,115.2004194,,,false,[],false,,true
+node,13122086601,,SPBU - Jalan Toyaning II,,,Badung,-8.8257372,115.1510788,Jalan Toyaning II,,false,[],false,,true
+node,3791477572,54.803.18,SPBU 54.803.18,Pertamina,,Badung,-8.5490905,115.2385702,,Mo-Su 08:00-20:00,false,[],false,,true
+node,11002450532,,SPBU Darmasaba,Pertamina,,Badung,-8.589582,115.2157029,Darmasaba,24/7,true,[],false,,true
+node,941307526,54.803.31,SPBU Gas Station Sunset Road 54.803.31,Pertamina,Pertamina,Badung,-8.7129491,115.1859091,"Sunset Road, 27, Kuta, Kabupaten Badung, Bali, Indonesia",24/7,true,"[""solar""]",false,,true
+node,5317781709,,SPBU Pertamina,Pertamina,,Badung,-8.5941571,115.1867456,,,false,[],false,,true
+node,10997051997,,SPBU Pertamina,Pertamina,,Badung,-8.6736455,115.1778051,"Jalan Raya Kerobokan, Kerobokan Kelod, North Kuta, Bali",Mo-Su 05:00-00:00,false,"[""solar""]",false,,true
+node,11002446837,,SPBU Pertamina,Pertamina,,Badung,-8.5624985,115.2204386,,,false,[],false,,true
+node,2487544914,54.803.19,SPBU Pertamina 54.803.19,Pertamina,,Badung,-8.6890239,115.1717806,"Sunset Road, Seminyak, Benoa, Kuta Selatan, Kabupaten Badung, Bali, Indonesia",24/7,true,"[""solar""]",false,,true
+way,714724147,54.803.21,SPBU Pertamina Pererenan 54.803.21,Pertamina,,Badung,-8.6308846,115.1327634,,,false,[],false,,true
+way,714724146,54.803.34,SPBU Pertamina Sunset Road 54.803.34,Pertamina,,Badung,-8.6986899,115.1780504,"Sunset Road, Kuta, Kabupaten Badung, Bali, Indonesia",,false,"[""solar""]",false,,true
+way,577920894,54.801.31,Gas Station Buluh Indah (54.801.31),Pertamina,,Denpasar,-8.643363,115.1962934,,24/7,true,[],false,,true
+node,610371699,,Pertamina,Pertamina,,Denpasar,-8.721233,115.1942868,"Jalan Bypass Ngurah Rai, Denpasar",24/7,true,[],false,,true
+node,610371788,,Pertamina,Pertamina,,Denpasar,-8.7137109,115.2231589,,24/7,true,[],false,,true
+node,2498046486,,Pertamina,Pertamina,,Denpasar,-8.6772839,115.2321022,,,false,[],false,,true
+node,2498046487,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6730122,115.2262101,"Raya Puputan, Denpasar",,false,[],false,,true
+node,3175963462,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6668111,115.2315163,,,false,[],false,,true
+node,3292077086,,Pertamina,Pertamina,,Denpasar,-8.6566631,115.2250801,"Jalan Kamboja, Denpasar",,false,[],false,,true
+node,3646990902,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6663729,115.2415592,"Jalan Hayam Wuruk, Denpasar",24/7,true,[],false,,true
+node,3671677724,,Pertamina,Pertamina,,Denpasar,-8.6862208,115.2263815,"Tukad Pakerisan, Denpasar",Mo-Su 05:00-00:00,false,[],false,,true
+node,3675164637,,Pertamina,Pertamina,,Denpasar,-8.6603673,115.2393983,"Jalan Hayam Wuruk, Denpasar",Mo-Su 06:00-21:00,false,[],false,,true
+node,3718349380,,Pertamina,Pertamina,,Denpasar,-8.678971,115.2149141,"Jalan Raya Sesetan, Denpasar",,false,[],false,,true
+node,3780445716,,Pertamina,Pertamina,,Denpasar,-8.7107789,115.2234888,"Suwung Batan Kendal, Denpasar",24/7,true,"[""solar""]",false,,true
+node,3781991815,,Pertamina,Pertamina,,Denpasar,-8.714504,115.2158046,,,false,[],false,,true
+node,3784338063,,Pertamina,Pertamina,,Denpasar,-8.6597129,115.2031647,"Jalan Gunung Batukaru, Denpasar",24/7,true,[],false,,true
+node,3791203569,,Pertamina,Pertamina,,Denpasar,-8.6359432,115.2187343,"Jalan Bypass Gatot Subroto, Denpasar",,false,[],false,,true
+node,3828371871,,Pertamina,Pertamina,,Denpasar,-8.6359364,115.2377311,,,false,[],false,,true
+node,4157284889,,Pertamina,Pertamina,,Denpasar,-8.675199,115.2023412,"Jalan Imam Bonjol, Denpasar",24/7,true,[],false,,true
+node,4236778069,,Pertamina,Pertamina,,Denpasar,-8.6814158,115.1926231,"Jalan Pura Demak, Denpasar",24/7,true,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+node,4249837879,,Pertamina,Pertamina,,Denpasar,-8.6364156,115.1853451,"Jalan Kebo Iwa, Denpasar",,false,[],false,,true
+node,4438497483,,Pertamina,Pertamina,,Denpasar,-8.6389264,115.2039161,"Jalan Bypass Gatot Subroto, Denpasar",24/7,true,"[""pertamax"", ""solar""]",false,,true
+node,4959546626,,Pertamina,Pertamina,,Denpasar,-8.6767582,115.2070972,"Jalan Pulau Kawe, Denpasar",,false,[],false,,true
+node,5103311413,,Pertamina,Pertamina,,Denpasar,-8.6365252,115.1947454,"Jalan Bypass Gatot Subroto, Denpasar",,false,[],false,,true
+node,5104508763,,Pertamina,Pertamina,,Denpasar,-8.6705534,115.190962,,,false,[],false,,true
+node,5126061305,,Pertamina,Pertamina,,Denpasar,-8.7132748,115.2248385,,,false,[],false,,true
+node,5441794405,,Pertamina,Pertamina,,Denpasar,-8.7177928,115.2022082,,24/7,true,[],false,,true
+node,5575035954,,Pertamina,Pertamina,,Denpasar,-8.6821361,115.1913587,"Jalan Teuku Umar Barat, Denpasar",24/7,true,[],false,,true
+node,11707649769,,Pertamina,Pertamina,,Denpasar,-8.7109197,115.2335044,,,false,[],false,,true
+node,12661989424,,Pertamina,Pertamina,,Denpasar,-8.6504538,115.2090517,,,false,[],false,,true
+way,374650214,,Pertamina,Pertamina,,Denpasar,-8.6996475,115.2194621,"Jalan Raya Sesetan, Denpasar",24/7,true,[],false,,true
+way,374650232,,Pertamina,Pertamina,,Denpasar,-8.7091641,115.2210697,,,false,"[""solar""]",false,,true
+way,375347728,,Pertamina,Pertamina,,Denpasar,-8.6447571,115.209575,"Jalan H.O.S. Cokroaminoto, Denpasar",24/7,true,[],false,,true
+way,522920168,,Pertamina,Pertamina,,Denpasar,-8.6777714,115.2116215,,,false,[],false,,true
+way,1090641137,,Pertamina,Pertamina,,Denpasar,-8.6671225,115.1877229,"Jalan Buana Raya, 101, Padang Sambian, Denpasar, Bali, Indonesia",24/7,true,"[""pertamax_turbo"", ""solar""]",false,,true
+way,1329030189,,Pertamina,Pertamina,,Denpasar,-8.623218,115.2363679,,,false,[],false,,true
+way,1547522483,,Pertamina,Pertamina,,Denpasar,-8.6189193,115.1831218,,,false,[],false,,true
+way,1557359089,,Pertamina,Pertamina,,Denpasar,-8.6914637,115.227932,,,false,[],false,,true
+node,1534960000,,Pertamina,Pertamina,Rugana,Denpasar,-8.6723394,115.2588015,"Jalan Bypass Ngurah Rai, Denpasar",24/7,true,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+node,1963471634,,Pertamina,Pertamina,,Denpasar,-8.6516352,115.2541822,"Jalan Bypass Ngurah Rai, Denpasar",,false,"[""pertamax"", ""solar""]",false,,true
+node,2488170415,,Pertamina,Pertamina,,Denpasar,-8.6742892,115.2542247,,24/7,true,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+node,3834339466,,Pertamina,Pertamina,,Denpasar,-8.6364386,115.2519375,,"PH,Mo-Su 06:00-23:00",false,[],false,,true
+node,4938684923,,Pertamina,Pertamina,,Denpasar,-8.6413927,115.2517962,"Jalan WR Supratman, Denpasar",,false,[],false,,true
+node,5529682390,,Pertamina,Pertamina,,Denpasar,-8.6953833,115.2590717,,,false,[],false,,true
+node,4217406976,,Pertamina Petrol Station,Pertamina,,Denpasar,-8.6958654,115.18713,"Jalan Imam Bonjol, Denpasar",24/7,true,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
+node,11002446836,,Pertamina SPBU,Pertamina,,Denpasar,-8.6245512,115.208976,,24/7,true,[],false,,true
+node,2279234528,,Pompa Bensin,Pertamina,,Denpasar,-8.6490072,115.1863788,,,false,[],false,,true
+node,4426603389,,Pompa bensin,,,Denpasar,-8.6060724,115.2360732,,,false,[],false,,true
+node,2498046488,,SPBU Pertamina,Pertamina,Pertamina,Denpasar,-8.67308,115.2401219,,,false,[],false,,true
+node,1675080290,54.801.32,SPBU Pertamina 54.801.32,Pertamina,,Denpasar,-8.687005,115.1867265,"Jalan Gunung Soputan, 29, Denpasar",24/7,true,"[""solar""]",false,,true
+node,3787237309,54.801.35,SPBU Pertamina 54.801.35,Pertamina,,Denpasar,-8.6382619,115.2089748,"Jalan Bypass Gatot Subroto, Denpasar",24/7,true,[],false,,true
+node,4198773706,,Pertamina,Pertamina,,Gianyar,-8.5748859,115.2762409,,,false,"[""pertamax"", ""solar""]",false,,true
+node,4198773752,,Pertamina,Pertamina,,Gianyar,-8.5668758,115.2747603,,,false,[],false,,true
+node,4446960858,,Pertamina,Pertamina,,Gianyar,-8.6018053,115.3247915,,,false,[],false,,true
+node,4446961398,,Pertamina,Pertamina,,Gianyar,-8.581006,115.3526184,,,false,[],false,,true
+node,4467737446,,Pertamina,Pertamina,,Gianyar,-8.5538112,115.2515009,,,false,[],false,,true
+node,4593501492,,Pertamina,Pertamina,,Gianyar,-8.5655166,115.2880082,,,false,[],false,,true
+node,4593932704,,Pertamina,Pertamina,,Gianyar,-8.6121569,115.3092889,,,false,[],false,,true
+node,4593932705,,Pertamina,Pertamina,,Gianyar,-8.635779,115.2872241,,,false,[],false,,true
+way,514001663,,Pertamina,Pertamina,,Gianyar,-8.5277397,115.2437777,,,false,[],false,,true
+node,3791297306,,Pertamina,Pertamina,,Gianyar,-8.5349986,115.306609,Jalan Raya Semebaung,,false,[],false,,true
+node,4467738292,,Pertamina,Pertamina,,Gianyar,-8.4627372,115.2976035,,,false,[],false,,true
+node,6712210032,,Pertamina,Pertamina,,Gianyar,-8.4396411,115.3081128,,,false,[],false,,true
+node,9274481126,,Pertamina,Pertamina,,Gianyar,-8.4154523,115.2807412,,,false,[],false,,true
+node,9464806554,,Pertamina,Pertamina,,Gianyar,-8.4185343,115.2983646,,Mo-Su 06:00-20:00,false,[],false,,true
+node,9498002342,,Pertamina,Pertamina,,Gianyar,-8.3294926,115.3256533,,,false,[],false,,true
+node,11002518744,,Pertamina,Pertamina,,Gianyar,-8.3676426,115.3074894,,,false,[],false,,true
+way,512355161,,Pertamina,Pertamina,,Gianyar,-8.5241915,115.2637147,,,false,[],false,,true
+way,514011012,,Pertamina,Pertamina,,Gianyar,-8.5262808,115.2950609,,,false,[],false,,true
+way,563856427,,Pertamina,Pertamina,,Gianyar,-8.4160766,115.2806455,,,false,[],false,,true
+way,1087957090,,Pertamina,Pertamina,,Gianyar,-8.5366361,115.3334269,,,false,[],false,,true
+way,1489545694,,Pertamina,Pertamina,,Gianyar,-8.5483293,115.3084164,,,false,[],false,,true
+way,1532743149,,Pertamina,Pertamina,,Gianyar,-8.5413513,115.3210918,,,false,[],false,,true
+node,3530974108,54.805.12,Pertamina 54.805.12,Pertamina,,Gianyar,-8.5231597,115.2759405,,Mo-Su 05:00-22:00,false,[],false,,true
+way,545825031,54.805.20,Pertamina 54.805.20,Pertamina,,Gianyar,-8.5052246,115.2717004,,,false,[],false,,true
+node,4593501496,,Pom bensin blahbatuh,,,Gianyar,-8.5662499,115.3049769,,,false,[],false,,true
+node,1963471597,,SPBU,,,Gianyar,-8.6023075,115.2608468,,,false,[],false,,true
+node,2272949196,,SPBU,,,Gianyar,-8.6241762,115.2571205,,,false,[],false,,true
+node,5017453423,,SPBU,,,Gianyar,-8.563332,115.261646,,,false,[],false,,true
+node,4707866590,,SPBU,,,Gianyar,-8.40877,115.2448962,,,false,[],false,,true
+node,5833788586,,SPBU,,,Gianyar,-8.4483447,115.2394654,,,false,[],false,,true
+node,11033884336,,SPBU,,,Gianyar,-8.4239732,115.2462734,,,false,[],false,,true
+node,6286590885,,SPBU,,,Gianyar,-8.451204,115.3184907,,,false,[],false,,true
+node,6355894185,,SPBU,,,Gianyar,-8.447857,115.2805724,,,false,[],false,,true
+node,6355907290,,SPBU,,,Gianyar,-8.4523559,115.279707,,,false,[],false,,true
+node,6355913587,,SPBU,,,Gianyar,-8.4533096,115.279605,,,false,[],false,,true
+node,4422250828,,SPBU Pertamina,Pertamina,,Gianyar,-8.6415338,115.2782915,,,false,[],false,,true
+node,12313863793,,Fuel Station,,,Tabanan,-8.552535,115.0764661,,,false,[],false,,true
+node,12313877251,,Fuel Station,,,Tabanan,-8.492523,114.9584518,,,false,[],false,,true
+node,12287937936,,Fuel Station,,,Tabanan,-8.2952994,115.1740283,,,false,[],false,,true
+node,12313882736,,Fuel Station,,,Tabanan,-8.5085467,115.0778761,,,false,[],false,,true
+way,603638557,,PERTASHOP TIMPAG (CV Restu Mahitala),Pertashop,,Tabanan,-8.4869695,115.0945631,,,false,[],false,,true
+way,603638612,,PERTASHOP TIMPAG (CV Restu Mahitala),Pertashop,,Tabanan,-8.486425,115.0952209,,,false,[],false,,true
+way,603638421,,Padma Sari (P. Bayu),,,Tabanan,-8.4826317,115.098058,,,false,[],false,,true
+node,641643890,,Pertamina,Pertamina,,Tabanan,-8.502495,115.1350278,,,false,[],false,,true
+node,1963414951,,Pertamina,Pertamina,,Tabanan,-8.384301,115.1954396,,"Mo-Su,PH 06:00-22:00",false,[],false,,true
+way,595268291,,Pertamina,Pertamina,,Tabanan,-8.5439969,115.1408807,,,false,[],false,,true
+node,2487421443,,Pertamina,Pertamina,,Tabanan,-8.3337155,115.1866722,,,false,[],false,,true
+way,225177250,,Pertamina,Pertamina,,Tabanan,-8.4375237,115.1962745,,,false,[],false,,true
+way,475757306,,Pertamina,Pertamina,,Tabanan,-8.2578546,115.1617255,,,false,[],false,,true
+node,5317781710,,SPBU,,,Tabanan,-8.572125,115.1391495,,,false,[],false,,true
+node,274853846,,SPBU,,,Tabanan,-8.3398013,115.0320289,,,false,[],false,,true
+node,3800945890,,SPBU,,,Tabanan,-8.4989099,115.034218,,,false,[],false,,true
+way,600380264,,SPBU,,,Tabanan,-8.528148,115.0012811,,,false,[],false,,true
+node,3788508644,,SPBU,,,Tabanan,-8.3621622,115.1910254,,,false,[],false,,true
+way,597363262,,SPBU,,,Tabanan,-8.3621749,115.1899586,,,false,[],false,,true
+way,597363267,,SPBU,,,Tabanan,-8.3621724,115.1904765,,,false,[],false,,true
+node,1963414988,,SPBU Pertamina,Pertamina,,Tabanan,-8.560268,115.153967,,,false,[],false,,true
+node,10779108513,,SPBU Pertamina,Pertamina,,Tabanan,-8.495693,115.0492298,,,false,[],false,,true
+way,1119410373,,SPBU Pertamina,Pertamina,,Tabanan,-8.4747415,114.9326444,,,false,[],false,,true
+node,10800799512,,SPBU Pertamina,Pertamina,,Tabanan,-8.3292799,115.1719401,,,false,[],false,,true
+node,10801074996,,SPBU Pertamina,Pertamina,,Tabanan,-8.4690241,115.1372242,,,false,[],false,,true
+node,10801074998,,SPBU Pertamina,Pertamina,,Tabanan,-8.4544855,115.1385149,,,false,[],false,,true
+node,10779121218,54.821.04,SPBU Pertamina 54.821.04,Pertamina,,Tabanan,-8.5495892,115.1231642,,,false,[],false,,true

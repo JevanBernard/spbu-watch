@@ -1,0 +1,45 @@
+osm_type,osm_id,name,brand,lat,lng,reason
+node,1963414988,,Pertamina,-8.560268,115.153967,no name tag - generic name generated
+node,2498046488,,Pertamina,-8.67308,115.2401219,no name tag - generic name generated
+node,2849702811,,,-8.757882,115.1687409,no name tag - generic name generated
+node,3219129615,Pertamina,Pertamina,-8.7240617,115.2312805,outside polygons and no usable addr:* tag - assign manually
+node,4630425094,,,-8.7935202,115.1291518,no name tag - generic name generated
+node,5317781709,,Pertamina,-8.5941571,115.1867456,no name tag - generic name generated
+node,5317781710,,,-8.572125,115.1391495,no name tag - generic name generated
+node,5546845704,,,-8.6385964,115.1742066,no name tag - generic name generated
+node,6316044085,Pertamini,Pertamini,-8.8079774,115.1152246,not an official SPBU (Pertamini / non-fuel business) - excluded
+node,6460723863,,,-8.7691092,115.1718247,no name tag - generic name generated
+node,9969087618,,,-8.6640732,115.1533538,no name tag - generic name generated
+node,13122086601,,,-8.8257372,115.1510788,no name tag - generic name generated
+way,512629994,,,-8.7934456,115.2151935,no name tag - generic name generated
+node,1963471597,,,-8.6023075,115.2608468,no name tag - generic name generated
+node,2272949196,,,-8.6241762,115.2571205,no name tag - generic name generated
+node,4422250828,,Pertamina,-8.6415338,115.2782915,no name tag - generic name generated
+node,5017453423,,,-8.563332,115.261646,no name tag - generic name generated
+node,274853846,,,-8.3398013,115.0320289,no name tag - generic name generated
+node,3800945890,,,-8.4989099,115.034218,no name tag - generic name generated
+node,10779108513,,Pertamina,-8.495693,115.0492298,no name tag - generic name generated
+way,600380264,,,-8.528148,115.0012811,no name tag - generic name generated
+way,1119410373,,Pertamina,-8.4747415,114.9326444,no name tag - generic name generated
+node,3788508644,,,-8.3621622,115.1910254,no name tag - generic name generated
+node,4707866590,,,-8.40877,115.2448962,no name tag - generic name generated
+node,5833788586,,,-8.4483447,115.2394654,no name tag - generic name generated
+node,10800799512,,Pertamina,-8.3292799,115.1719401,no name tag - generic name generated
+node,10801074996,,Pertamina,-8.4690241,115.1372242,no name tag - generic name generated
+node,10801074998,,Pertamina,-8.4544855,115.1385149,no name tag - generic name generated
+node,11033884336,,,-8.4239732,115.2462734,no name tag - generic name generated
+way,597363262,,,-8.3621749,115.1899586,no name tag - generic name generated
+way,597363267,,,-8.3621724,115.1904765,no name tag - generic name generated
+way,603585689,,,-8.5235731,115.2004194,no name tag - generic name generated
+way,1072524309,Distributor Minicon Bali (Penghemat BBM),,-8.4883055,115.0932288,not an official SPBU (Pertamini / non-fuel business) - excluded
+node,4593535189,Pelumas Pertamina 54.805.09,Pertamina,-8.5287952,115.2717137,not an official SPBU (Pertamini / non-fuel business) - excluded
+node,6286590885,,,-8.451204,115.3184907,no name tag - generic name generated
+node,6355894185,,,-8.447857,115.2805724,no name tag - generic name generated
+node,6355907290,,,-8.4523559,115.279707,no name tag - generic name generated
+node,6355913587,,,-8.4533096,115.279605,no name tag - generic name generated
+node,7192803785,pertamina,Pertamina,-8.4283591,115.4233169,outside polygons and no usable addr:* tag - assign manually
+node,11048165240,,,-8.4261734,115.4414954,outside polygons and no usable addr:* tag - assign manually
+node,11048165241,,,-8.4036763,115.4209625,outside polygons and no usable addr:* tag - assign manually
+node,12277145587,Fuel Station,,-8.4631202,115.4060252,outside polygons and no usable addr:* tag - assign manually
+node,12277189747,Fuel Station,,-8.3652741,115.4191175,outside polygons and no usable addr:* tag - assign manually
+way,1087950699,Pertashop Telagatawang,Pertashop,-8.479283,115.446903,outside polygons and no usable addr:* tag - assign manually
