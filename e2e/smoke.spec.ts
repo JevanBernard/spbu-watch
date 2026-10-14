@@ -19,7 +19,7 @@ test("home page: disclaimer, map loads under the CSP, station list, no console e
   await page.goto("/");
 
   await expect(page.getByText(/Bukan informasi resmi Pertamina/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: /Informasi resmi/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Info resmi/ })).toBeVisible();
   await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(6000); // let tiles, glyphs and the worker load (CSP violations log here)
   if (seen.style !== null) expect(seen.style, "map style request").toBe(200);

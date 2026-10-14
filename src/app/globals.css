@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+/* Hide the scrollbar on horizontally scrolling rows (chips, carousel) but keep them scrollable. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

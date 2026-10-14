@@ -94,17 +94,20 @@ export function FuelsSold({
   fuels,
   complete,
   fromUsers = [],
+  label = true,
 }: {
   fuels: Fuel[];
   complete: boolean;
   fromUsers?: Fuel[];
+  label?: boolean;
 }) {
   const text = soldFuelsText({ fuels });
-  if (!text) return <span className="text-slate-600">BBM: belum diketahui</span>;
+  if (!text) return <span className="text-slate-600">{label ? "BBM: " : ""}belum diketahui</span>;
   const userText = soldFuelsText({ fuels: fromUsers });
   return (
     <span className="text-slate-800">
-      BBM: <b>{text}</b>
+      {label && "BBM: "}
+      <b>{text}</b>
       {userText && <span className="text-slate-600"> ({userText}: dilaporkan pengguna)</span>}
       {!complete && <span className="text-slate-600"> · daftar mungkin belum lengkap</span>}
     </span>

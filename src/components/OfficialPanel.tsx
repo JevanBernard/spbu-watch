@@ -17,16 +17,16 @@ export default function OfficialPanel({ updates }: { updates: OfficialUpdateDTO[
   const [open, setOpen] = useState(false);
   const latest = updates.slice(0, 3);
   return (
-    <section className="rounded-lg border border-slate-300 bg-white shadow-md">
+    <section>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className="flex min-h-11 w-full items-center justify-between gap-2 px-3 text-left text-sm font-bold"
       >
-        <span>Informasi resmi</span>
+        <span>Info resmi &amp; harga BBM</span>
         <span className="text-xs font-normal text-slate-600">
-          Call Center Pertamina <b>135</b> {open ? "▲" : "▼"}
+          Call Center <b>135</b> {open ? "▲" : "▼"}
         </span>
       </button>
       {open && (

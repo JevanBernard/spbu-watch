@@ -4,16 +4,18 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
+import type { StationCategory } from "@/lib/category";
 import { getDeviceId } from "@/lib/device";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
-import { countText } from "@/lib/visits-format";
 import type { Fuel } from "@/lib/status";
-import type { StationCategory } from "@/lib/category";
+import { countText } from "@/lib/visits-format";
 import OfficialPanel from "./OfficialPanel";
 import ShareDialog from "./ShareDialog";
+import StationCard from "./StationCard";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
 import { Legend } from "./StatusBits";
+import { Chip, IconButton, LocateIcon, SearchIcon, ShareIcon, SlidersIcon } from "./ui";
 
 const MapView = dynamic(() => import("./MapView"), {
   ssr: false,
@@ -23,8 +25,11 @@ const MapView = dynamic(() => import("./MapView"), {
 const REFRESH_MS = 60_000;
 const CONTACT_URL = process.env.NEXT_PUBLIC_CONTACT_URL;
 const REGENCIES = ["Denpasar", "Badung", "Gianyar", "Tabanan"];
+const CAROUSEL_COUNT = 10;
 export const DISCLAIMER =
   "Data berasal dari laporan warga dan bersifat indikatif. Bukan informasi resmi Pertamina. Cek kanal resmi untuk kepastian.";
+
+type Kind = "" | StationCategory | "ges";
 
 function useRefreshing<T>(url: string, pick: (json: never) => T, initial: T) {
   const [data, setData] = useState<T>(initial);
@@ -66,6 +71,8 @@ function useRefreshing<T>(url: string, pick: (json: never) => T, initial: T) {
   return { data, error, updatedAt, reload: load };
 }
 
+const selectCls = "min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm";
+
 export default function HomeClient() {
   const stationsQ = useRefreshing<StationDTO[]>(
     "/api/stations",
@@ -105,17 +112,20 @@ export default function HomeClient() {
   const [selectedId, setSelectedId] = useState<string | null>(() =>
     typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("spbu"),
   );
-  const [sheetOpen, setSheetOpen] = useState(() =>
+  // "peek": map first with the nearest stations as a carousel. "full": list or station detail.
+  const [full, setFull] = useState(() =>
     typeof window === "undefined" ? false : new URLSearchParams(window.location.search).has("spbu"),
   );
   const [search, setSearch] = useState("");
   const [regency, setRegency] = useState("");
   const [only24h, setOnly24h] = useState(false);
   const [fuelFilter, setFuelFilter] = useState<Fuel | "">("");
-  const [kind, setKind] = useState<"" | StationCategory | "ges">("");
+  const [kind, setKind] = useState<Kind>("");
+  const [moreFilters, setMoreFilters] = useState(false);
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null);
   const [geoMsg, setGeoMsg] = useState<string | null>(null);
   const scroller = useRef<HTMLDivElement>(null);
+  const searchBox = useRef<HTMLInputElement>(null);
 
   const locate = () => {
     if (!navigator.geolocation) {
@@ -153,14 +163,62 @@ export default function HomeClient() {
   }, [stations, search, regency, only24h, kind, fuelFilter, me]);
 
   const selected = selectedId ? (stations.find((s) => s.id === selectedId) ?? null) : null;
+  const selectedDistance = selected && me ? distanceM(me, selected) : null;
+  const activeFilters =
+    (kind ? 1 : 0) + (only24h ? 1 : 0) + (fuelFilter ? 1 : 0) + (regency ? 1 : 0);
 
   const select = (id: string | null) => {
     scroller.current?.scrollTo({ top: 0 });
     setSelectedId(id);
-    if (id) setSheetOpen(true);
+    if (id) setFull(true);
     // Keep the address bar in step so the page URL itself is shareable.
     window.history.replaceState(null, "", id ? `/?spbu=${id}` : "/");
   };
+
+  const clearFilters = () => {
+    setKind("");
+    setOnly24h(false);
+    setFuelFilter("");
+    setRegency("");
+  };
+
+  const toggleKind = (k: Kind) => setKind((cur) => (cur === k ? "" : k));
+  const toggleFuel = (f: Fuel) => setFuelFilter((cur) => (cur === f ? "" : f));
+
+  const chips = (
+    <div
+      className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
+      role="group"
+      aria-label="Filter cepat"
+    >
+      <Chip active={!activeFilters} onClick={clearFilters}>
+        Semua
+      </Chip>
+      <Chip active={kind === "spbu"} onClick={() => toggleKind("spbu")}>
+        SPBU
+      </Chip>
+      <Chip active={kind === "pertashop"} onClick={() => toggleKind("pertashop")}>
+        Pertashop
+      </Chip>
+      <Chip active={kind === "ges"} onClick={() => toggleKind("ges")}>
+        GES
+      </Chip>
+      <Chip active={only24h} onClick={() => setOnly24h((v) => !v)}>
+        24 jam
+      </Chip>
+      <Chip active={fuelFilter === "pertalite"} onClick={() => toggleFuel("pertalite")}>
+        Pertalite
+      </Chip>
+      <Chip active={fuelFilter === "pertamax"} onClick={() => toggleFuel("pertamax")}>
+        Pertamax
+      </Chip>
+      <Chip active={fuelFilter === "solar"} onClick={() => toggleFuel("solar")}>
+        Solar
+      </Chip>
+    </div>
+  );
+
+  const nearest = items.slice(0, CAROUSEL_COUNT);
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">
@@ -173,184 +231,254 @@ export default function HomeClient() {
         />
       </div>
 
-      {/* Top: disclaimer + official panel, above the station list */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 space-y-2 p-2 md:left-4 md:right-auto md:w-96 md:p-4">
-        <div className="pointer-events-auto rounded-lg bg-yellow-100 px-3 py-2 text-xs font-semibold text-yellow-950 shadow-md">
-          <span className="font-bold">SPBU Watch SARBAGITA.</span> {DISCLAIMER}
-        </div>
-        <div className="pointer-events-auto">
+      {/* Top: disclaimer and official information (always above the station list) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 p-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:left-4 md:right-auto md:w-96 md:p-4">
+        <div className="pointer-events-auto overflow-hidden rounded-2xl bg-white/95 shadow-lg backdrop-blur">
+          <p className="bg-amber-50 px-3 py-1.5 text-[11px] leading-snug font-semibold text-amber-950">
+            <span className="font-bold">SPBU Watch SARBAGITA.</span> {DISCLAIMER}
+          </p>
           <OfficialPanel updates={officialQ.data} />
         </div>
       </div>
 
       {/* Bottom sheet (mobile) / left panel (desktop) */}
       <div
-        className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-2xl border-t border-slate-300 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.2)] transition-[height] duration-200 md:bottom-4 md:left-4 md:right-auto md:w-96 md:rounded-2xl md:border ${
-          sheetOpen ? "h-[78dvh] md:h-[calc(100dvh-8rem)]" : "h-[34dvh] md:h-[34dvh]"
+        className={`absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-3xl bg-gradient-to-b from-white to-slate-50 shadow-[0_-6px_24px_rgba(15,23,42,0.22)] transition-[height] duration-200 md:bottom-4 md:left-4 md:right-auto md:w-96 md:rounded-3xl ${
+          full ? "h-[84dvh] md:h-[calc(100dvh-9rem)]" : "h-[46dvh] md:h-[46dvh]"
         }`}
       >
+        {!full && !selected && (
+          <div className="absolute -top-14 right-3">
+            <IconButton label="Gunakan lokasi saya" onClick={locate}>
+              <LocateIcon />
+            </IconButton>
+          </div>
+        )}
+
         <button
           type="button"
-          onClick={() => setSheetOpen((o) => !o)}
-          aria-label={sheetOpen ? "Perkecil daftar" : "Perbesar daftar"}
-          className="flex min-h-11 w-full shrink-0 items-center justify-center"
+          onClick={() => setFull((o) => !o)}
+          aria-label={full ? "Perkecil daftar" : "Perbesar daftar"}
+          className="flex min-h-9 w-full shrink-0 items-center justify-center"
         >
-          <span className="h-1.5 w-12 rounded-full bg-slate-400" />
+          <span className="h-1.5 w-12 rounded-full bg-slate-300" />
         </button>
 
-        <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          {selected ? (
-            <StationDetail
-              station={selected}
-              onBack={() => select(null)}
-              onReported={stationsQ.reload}
-            />
-          ) : (
-            <>
-              <div className="space-y-2 px-4 pb-2">
-                <div className="flex items-center justify-between gap-2 text-xs text-slate-700">
-                  <span>
-                    {statsQ.data.online !== null && statsQ.data.today !== null ? (
-                      <>
-                        <span aria-hidden className="mr-1 inline-block size-2 rounded-full bg-green-600" />
-                        <b>{countText(statsQ.data.online)}</b> online · <b>{countText(statsQ.data.today)}</b>{" "}
-                        pengunjung hari ini
-                      </>
-                    ) : null}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShareApp(true)}
-                    className="min-h-11 rounded-md border border-blue-900 px-3 text-sm font-bold text-blue-900"
-                  >
-                    Bagikan (tautan & QR)
-                  </button>
+        {selected ? (
+          <StationDetail
+            key={selected.id}
+            station={selected}
+            distance={selectedDistance}
+            onBack={() => select(null)}
+            onReported={stationsQ.reload}
+          />
+        ) : full ? (
+          <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4">
+            <div className="space-y-3 px-4 pb-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Daftar SPBU</h2>
+                  <p className="text-xs text-slate-600">
+                    {items.length} dari {stations.length} SPBU · diurutkan menurut {me ? "jarak" : "nama"}
+                  </p>
                 </div>
+                <div className="flex gap-2">
+                  <IconButton label="Gunakan lokasi saya" onClick={locate}>
+                    <LocateIcon />
+                  </IconButton>
+                  <IconButton label="Bagikan (tautan & QR)" onClick={() => setShareApp(true)}>
+                    <ShareIcon />
+                  </IconButton>
+                </div>
+              </div>
+
+              {statsQ.data.online !== null && statsQ.data.today !== null && (
+                <p className="text-xs text-slate-700">
+                  <span aria-hidden className="mr-1 inline-block size-2 rounded-full bg-green-600" />
+                  <b>{countText(statsQ.data.online)}</b> online · <b>{countText(statsQ.data.today)}</b>{" "}
+                  pengunjung hari ini
+                </p>
+              )}
+
+              <div className="relative">
+                <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-slate-500">
+                  <SearchIcon />
+                </span>
                 <input
+                  ref={searchBox}
                   type="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  onFocus={() => setSheetOpen(true)}
-                  placeholder="Cari nama SPBU atau daerah"
+                  placeholder="Cari nama, kode, atau daerah"
                   aria-label="Cari SPBU"
-                  className="min-h-11 w-full rounded-md border border-slate-400 px-3 text-base"
+                  className="min-h-12 w-full rounded-2xl border border-slate-300 bg-white pr-3 pl-11 text-base shadow-sm"
                 />
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={regency}
-                    onChange={(e) => setRegency(e.target.value)}
-                    aria-label="Filter kabupaten/kota"
-                    className="min-h-11 rounded-md border border-slate-400 bg-white px-2 text-sm"
-                  >
-                    <option value="">Semua wilayah</option>
-                    {REGENCIES.map((r) => (
-                      <option key={r}>{r}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={kind}
-                    onChange={(e) => setKind(e.target.value as typeof kind)}
-                    aria-label="Filter jenis"
-                    className="min-h-11 rounded-md border border-slate-400 bg-white px-2 text-sm"
-                  >
-                    <option value="">Semua jenis</option>
-                    <option value="spbu">SPBU</option>
-                    <option value="pertashop">Pertashop</option>
-                    <option value="spbuk">SPBUK</option>
-                    <option value="spbbk">SPBBK</option>
-                    <option value="spbun">SPBUN</option>
-                    <option value="ges">GES</option>
-                  </select>
-                  <select
-                    value={fuelFilter}
-                    onChange={(e) => setFuelFilter(e.target.value as Fuel | "")}
-                    aria-label="Filter jenis BBM yang dijual"
-                    className="min-h-11 rounded-md border border-slate-400 bg-white px-2 text-sm"
-                  >
-                    <option value="">Semua BBM</option>
-                    <option value="pertalite">Menjual Pertalite</option>
-                    <option value="pertamax">Menjual Pertamax</option>
-                    <option value="solar">Menjual Solar</option>
-                    <option value="pertamax_turbo">Menjual Pertamax Turbo</option>
-                    <option value="dexlite">Menjual Dexlite</option>
-                    <option value="pertamina_dex">Menjual Pertamina Dex</option>
-                  </select>
-                  <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
-                    <input
-                      type="checkbox"
-                      checked={only24h}
-                      onChange={(e) => setOnly24h(e.target.checked)}
-                      className="size-5"
-                    />
-                    24 jam
-                  </label>
-                  <button
-                    type="button"
-                    onClick={locate}
-                    className="min-h-11 rounded-md border border-blue-900 px-3 text-sm font-bold text-blue-900"
-                  >
-                    {me ? "Perbarui lokasi" : "Urutkan dari lokasi saya"}
-                  </button>
-                </div>
-                {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
-                {fuelFilter && (
-                  <p className="text-xs text-slate-700">
-                    Filter BBM memakai data jenis BBM yang dijual SPBU, bukan stok saat ini. SPBU yang
-                    jenis BBM-nya belum diketahui tetap ditampilkan.
-                  </p>
-                )}
-                <details className="text-xs text-slate-700">
-                  <summary className="min-h-8 cursor-pointer py-1 font-semibold">
-                    Keterangan tanda
-                  </summary>
-                  <div className="space-y-1 pb-1">
-                    <p>
-                      Diurutkan menurut {me ? "jarak" : "nama"}. Lokasi Anda hanya dipakai di
-                      perangkat ini dan tidak disimpan.
-                    </p>
-                    <Legend />
-                  </div>
-                </details>
-                {stationsQ.error && (
-                  <p className="rounded bg-red-100 p-2 text-sm font-semibold text-red-900">
-                    Gagal memuat data terbaru. Mencoba lagi otomatis.
-                  </p>
-                )}
               </div>
-              <StationList items={items} onSelect={select} />
-            </>
-          )}
 
-          <footer className="space-y-1 border-t border-slate-200 px-4 py-4 text-xs text-slate-600">
-            <p>{DISCLAIMER}</p>
-            <p>
-              Peta © MapTiler · © OpenStreetMap contributors. Data SPBU dari OpenStreetMap
-              (ODbL).
-            </p>
-            <p>
-              Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, hash IP, dan hash harian anonim untuk penghitung pengunjung.
-              Tidak menyimpan koordinat lokasi, plat nomor, atau foto.{" "}
-              <Link href="/privasi" className="font-bold underline">
-                Selengkapnya
-              </Link>
-              {CONTACT_URL && (
-                <>
-                  {" · "}
-                  <a href={CONTACT_URL} className="font-bold underline" rel="noopener noreferrer">
-                    Kontak
-                  </a>
-                </>
+              {chips}
+
+              <button
+                type="button"
+                onClick={() => setMoreFilters((v) => !v)}
+                aria-expanded={moreFilters}
+                className="flex min-h-11 items-center gap-2 text-sm font-bold text-blue-900"
+              >
+                <SlidersIcon />
+                Filter lainnya{activeFilters ? ` (${activeFilters} aktif)` : ""}
+              </button>
+              {moreFilters && (
+                <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-3">
+                  <label className="block text-xs font-semibold text-slate-600">
+                    Wilayah
+                    <select value={regency} onChange={(e) => setRegency(e.target.value)} className={`${selectCls} mt-1`}>
+                      <option value="">Semua wilayah</option>
+                      {REGENCIES.map((r) => (
+                        <option key={r}>{r}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block text-xs font-semibold text-slate-600">
+                    Jenis
+                    <select
+                      value={kind}
+                      onChange={(e) => setKind(e.target.value as Kind)}
+                      aria-label="Filter jenis"
+                      className={`${selectCls} mt-1`}
+                    >
+                      <option value="">Semua jenis</option>
+                      <option value="spbu">SPBU</option>
+                      <option value="pertashop">Pertashop</option>
+                      <option value="spbuk">SPBUK</option>
+                      <option value="spbbk">SPBBK</option>
+                      <option value="spbun">SPBUN</option>
+                      <option value="ges">GES</option>
+                    </select>
+                  </label>
+                  <label className="block text-xs font-semibold text-slate-600">
+                    BBM yang dijual
+                    <select
+                      value={fuelFilter}
+                      onChange={(e) => setFuelFilter(e.target.value as Fuel | "")}
+                      aria-label="Filter jenis BBM yang dijual"
+                      className={`${selectCls} mt-1`}
+                    >
+                      <option value="">Semua BBM</option>
+                      <option value="pertalite">Menjual Pertalite</option>
+                      <option value="pertamax">Menjual Pertamax</option>
+                      <option value="solar">Menjual Solar</option>
+                      <option value="pertamax_turbo">Menjual Pertamax Turbo</option>
+                      <option value="dexlite">Menjual Dexlite</option>
+                      <option value="pertamina_dex">Menjual Pertamina Dex</option>
+                    </select>
+                  </label>
+                </div>
               )}
-            </p>
-            {stationsQ.updatedAt && (
+              {fuelFilter && (
+                <p className="text-xs text-slate-700">
+                  Filter BBM memakai data jenis BBM yang dijual SPBU, bukan stok saat ini. SPBU yang jenis
+                  BBM-nya belum diketahui tetap ditampilkan.
+                </p>
+              )}
+              {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
+              {stationsQ.error && (
+                <p className="rounded-xl bg-red-100 p-2 text-sm font-semibold text-red-900">
+                  Gagal memuat data terbaru. Mencoba lagi otomatis.
+                </p>
+              )}
+              <details className="text-xs text-slate-700">
+                <summary className="min-h-9 cursor-pointer py-1 font-semibold">Keterangan tanda</summary>
+                <div className="space-y-1 pb-1">
+                  <p>Lokasi Anda hanya dipakai di perangkat ini dan tidak disimpan.</p>
+                  <Legend />
+                </div>
+              </details>
+            </div>
+
+            <StationList items={items} onSelect={select} />
+
+            <footer className="mt-4 space-y-1 border-t border-slate-200 px-4 pt-4 text-xs text-slate-600">
+              <p>{DISCLAIMER}</p>
               <p>
-                Diperbarui otomatis tiap 60 detik. Terakhir:{" "}
-                {stationsQ.updatedAt.toLocaleTimeString("id-ID", { hour12: false })}
+                Peta © MapTiler · © OpenStreetMap contributors. Data SPBU dari OpenStreetMap (ODbL).
               </p>
+              <p>
+                Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, hash IP, dan hash harian
+                anonim untuk penghitung pengunjung. Tidak menyimpan koordinat lokasi, plat nomor, atau foto.{" "}
+                <Link href="/privasi" className="font-bold underline">
+                  Selengkapnya
+                </Link>
+                {CONTACT_URL && (
+                  <>
+                    {" · "}
+                    <a href={CONTACT_URL} className="font-bold underline" rel="noopener noreferrer">
+                      Kontak
+                    </a>
+                  </>
+                )}
+              </p>
+              {stationsQ.updatedAt && (
+                <p>
+                  Diperbarui otomatis tiap 60 detik. Terakhir:{" "}
+                  {stationsQ.updatedAt.toLocaleTimeString("id-ID", { hour12: false })}
+                </p>
+              )}
+            </footer>
+          </div>
+        ) : (
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3">
+            <div className="flex items-center justify-between gap-2 px-4">
+              <h2 className="text-lg font-bold text-slate-900">{me ? "SPBU terdekat" : "SPBU di Bali"}</h2>
+              <div className="flex items-center gap-2">
+                <IconButton label="Bagikan (tautan & QR)" onClick={() => setShareApp(true)}>
+                  <ShareIcon />
+                </IconButton>
+                <button
+                  type="button"
+                  onClick={() => setFull(true)}
+                  className="min-h-11 rounded-full px-3 text-sm font-bold text-blue-900"
+                >
+                  Lihat daftar
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-1 px-4">{chips}</div>
+
+            {me ? (
+              nearest.length > 0 ? (
+                <ul className="no-scrollbar mt-2 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+                  {nearest.map(({ station, distance }) => (
+                    <li key={station.id} className="w-[86%] max-w-sm shrink-0 snap-center">
+                      <StationCard station={station} distance={distance} onSelect={select} className="h-full" />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mx-4 mt-2 rounded-2xl bg-white p-4 text-sm text-slate-700 shadow-sm">
+                  Tidak ada SPBU yang cocok dengan filter ini.
+                </p>
+              )
+            ) : (
+              <div className="mx-4 mt-2 space-y-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <p className="text-sm font-semibold text-slate-900">Lihat SPBU terdekat dari Anda</p>
+                <p className="text-xs text-slate-600">
+                  Lokasi hanya dipakai di perangkat ini untuk mengurutkan jarak, dan tidak disimpan.
+                </p>
+                <button
+                  type="button"
+                  onClick={locate}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-900 text-base font-bold text-white"
+                >
+                  <LocateIcon />
+                  Gunakan lokasi saya
+                </button>
+                {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
+              </div>
             )}
-          </footer>
-        </div>
+          </div>
+        )}
       </div>
+
       {shareApp && (
         <ShareDialog
           url={window.location.origin}
