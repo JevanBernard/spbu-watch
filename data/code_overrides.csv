@@ -10,8 +10,8 @@ node,3784338063,54.801.49,"user-verified (Google Maps pin, 8 m from OSM node)",S
 node,4157284889,54.801.21,mypertamina-street-match score=1.00,,
 node,4959546626,54.801.40,mypertamina-street-match score=1.00,,
 node,5104508763,54.801.29,mypertamina-street-match score=1.00,,
-node,5126061305,54.801.08,mypertamina-street-match score=1.00,,
-node,5441794405,54.801.16,mypertamina-street-match score=1.00,,
+node,5126061305,54.801.50,user-verified,SPBU Pertamina 54.801.50,"Jl. Bypass Ngurah Rai, Sanur Kauh, Denpasar Selatan, Kota Denpasar, Bali"
+node,5441794405,54.801.17,user-verified (Pemogan),SPBU Pertamina 54.801.17 (Pemogan),
 node,11707649769,54.801.24,mypertamina-street-match score=1.00,,
 node,4217406976,54.801.33,mypertamina-street-match score=1.00,,
 node,11002446836,54.801.12,"user-verified name/address (node is on Jl. Ahmad Yani, Peguyangan)",SPBU Pertamina 54.801.12 (Ahmad Yani Utara),"Jl. Ahmad Yani Utara No.277-301, Peguyangan, Kec. Denpasar Utara, Kota Denpasar, Bali 80115"
@@ -31,3 +31,33 @@ way,374650232,54.801.46,"user-verified (Google Maps pin, 94 m from OSM way)",SPB
 node,945648527,58.803.01,"user-verified (Google Maps pin, 14 m from OSM node)",SPBUN Pertamina 58.803.01 (Tanjung Benoa Segara Kulon),"Jl. Segara Kulon, Benoa, Kec. Kuta Sel., Kabupaten Badung, Bali 80361"
 node,4438497483,54.801.36,"user-verified (coordinates, 5 m from OSM node)",SPBU Pertamina 54.801.36 (Jl. Gatsu Barat Aston),"Jl. Gatot Subroto Barat No.300, Pemecutan Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali 80111"
 way,375347728,54.801.10,"user-verified (coordinates, 12 m from OSM way)",SPBU Pertamina 54.801.10 (Jl. H.O.S. Cokroaminoto - Maruti),"Jl. Cokroaminoto No.21A, Pemecutan Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali 80231"
+node,2279259061,54.803.23,penyalur-street-match score=1.00,,
+node,3675164637,54.801.05,penyalur-street-match score=1.00,,
+node,963276323,53.803.12,user-verified (Tuban),SPBU Pertamina 53.803.12 (Tuban),"Jl. Bandara Ngurah Rai, Tuban, Kabupaten Badung"
+node,2498046488,54.801.09,user-verified (Raya Puputan - Sumerta Kelod),SPBU Pertamina 54.801.09 (Raya Puputan),
+node,1534960000,54.801.45,user-verified (Pelabuhan Matahari Terbit),SPBU Pertamina 54.801.45 (Pelabuhan Matahari Terbit),
+node,5529682390,54.801.06,user-verified (Sanur),SPBU Pertamina 54.801.06 (Sanur),
+node,4249837879,54.801.13,user-verified (Jalan Kebo Iwa),SPBU Pertamina 54.801.13 (Jalan Kebo Iwa),
+node,2498046487,54.801.15,user-verified (Raya Puputan STIKOM),SPBU Pertamina 54.801.15 (Raya Puputan STIKOM),
+node,610371788,54.801.16,user-verified (Jalan Bypass Ngurah Rai - Sesetan),SPBU Pertamina 54.801.16 (Jalan Bypass Ngurah Rai),"Dekat Jalan Bypass Ngurah Rai, Sesetan, Kota Denpasar"
+node,3175963462,54.801.20,user-verified (Jalan Badak),SPBU Pertamina 54.801.20 (Jalan Badak),
+node,12661989424,54.801.60,user-verified (Setia Budi),SPBU Pertamina 54.801.60 (Setia Budi),
+way,1090641137,54.801.26,user-verified (Jalan Buana Raya),SPBU Pertamina 54.801.26 (Jalan Buana Raya),
+node,5103311413,54.801.27,user-verified (Gatsu Barat),SPBU Pertamina 54.801.27 (Gatsu Barat),
+node,3834339466,54.801.37,user-verified (Gatsu Timur),SPBU Pertamina 54.801.37 (Gatsu Timur),
+node,5575035954,54.801.38,user-verified (Jalan Teuku Umar Barat),SPBU Pertamina 54.801.38 (Jalan Teuku Umar Barat),
+node,3292077086,54.801.39,user-verified (Jalan Kamboja),SPBU Pertamina 54.801.39 (Jalan Kamboja),
+node,2498046486,54.801.42,user-verified (Tukad Yeh Aya),SPBU Pertamina 54.801.42 (Tukad Yeh Aya),
+node,2488170415,54.801.43,user-verified (Jalan Hang Tuah),SPBU Pertamina 54.801.43 (Jalan Hang Tuah),
+node,4236778069,54.801.47,user-verified (Jalan Pura Demak),SPBU Pertamina 54.801.47 (Jalan Pura Demak),
+way,1547522483,54.801.59,user-verified (Jalan Kebo Iwa Utara III),SPBU Pertamina 54.801.59 (Jalan Kebo Iwa Utara III),
+node,5015970023,54.801.44,user-verified (Gatsu Barat),SPBU Pertamina 54.801.44 (Gatsu Barat),
+node,5539012614,54.803.02,user-verified (Jimbaran),SPBU Pertamina 54.803.02 (Jimbaran),
+way,419467852,54.803.04,user-verified (Jalan Pelita),SPBU Pertamina 54.803.04 (Jalan Pelita),
+node,5546845704,54.803.09,user-verified (Jalan Muding Sari),SPBU Pertamina 54.803.09 (Jalan Muding Sari),
+node,2276389503,54.803.22,user-verified (Dalung Permai),SPBU Pertamina 54.803.22 (Dalung Permai),
+node,5317781709,54.803.32,user-verified (Lukluk),SPBU Pertamina 54.803.32 (Lukluk),
+node,1456289125,54.803.33,user-verified (Latu),SPBU Pertamina 54.803.33 (Latu),
+node,4938684923,54.801.03,user-verified (Jalan WR Supratman),SPBU Pertamina 54.801.03 (Jalan WR Supratman),
+way,753245598,54.803.11,user-verified (Abianbase),SPBU Pertamina 54.803.11 (Abianbase),
+node,1963414988,54.821.02,user-verified (Sanjiwani),SPBU Pertamina 54.821.02 (Sanjiwani),

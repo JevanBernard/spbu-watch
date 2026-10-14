@@ -341,6 +341,47 @@ FUEL_COMPLETE_JSON = Path(__file__).resolve().parent.parent / "src" / "data" / "
 VALID_FUELS = {"pertalite", "pertamax", "pertamax_turbo", "solar", "dexlite", "pertamina_dex"}
 
 
+OFFICIAL_ADDRESSES = DATA / "official_addresses.csv"  # pertamina_code,address,source (scripts/reconcile_penyalur.py)
+
+
+def apply_official_addresses(kept):
+    """Official dealer-list address per code; replaces approximate or geocoded addresses."""
+    if not OFFICIAL_ADDRESSES.exists():
+        return 0
+    by_code = {r["pertamina_code"]: r["address"] for r in csv.DictReader(open(OFFICIAL_ADDRESSES, encoding="utf-8")) if r["address"]}
+    n = 0
+    for s in kept:
+        addr = by_code.get(s["pertamina_code"])
+        if addr and addr != s["address"]:
+            s["address"] = addr
+            n += 1
+    return n
+
+
+PERTAMINA_24H = DATA / "pertamina_24h.csv"  # pertamina_code,source: the only stations that count as 24 hours
+
+
+def apply_24h_list(kept):
+    """24-hour status comes only from data/pertamina_24h.csv. Stations not on it are not 24 hours.
+
+    Listed stations get opening_hours '24/7'; a '24/7' tag from OSM on an unlisted station is dropped.
+    Other opening hours (e.g. 'Mo-Su 05:00-22:00') are kept.
+    """
+    if not PERTAMINA_24H.exists():
+        return 0
+    listed = {r["pertamina_code"] for r in csv.DictReader(open(PERTAMINA_24H, encoding="utf-8"))}
+    n = 0
+    for s in kept:
+        if s["pertamina_code"] in listed:
+            s["is_24h"], s["opening_hours"] = "true", "24/7"
+            n += 1
+        else:
+            s["is_24h"] = "false"
+            if is_24h(s["opening_hours"]):
+                s["opening_hours"] = ""
+    return n
+
+
 def apply_fuel_overrides(kept):
     """Fuel lists per station code from data/fuel_overrides.csv.
 
@@ -533,6 +574,8 @@ def main():
     fuel_rows, fuel_verified = apply_fuel_overrides(kept)
     print(f"fuel_overrides rows used: {fuel_rows} | verified complete lists: {fuel_verified}")
     renamed, addr_filled = standardize_names(kept)
+    print(f"24-hour stations (pertamina_24h.csv): {apply_24h_list(kept)}")
+    print(f"official addresses applied: {apply_official_addresses(kept)}")
     print(f"names standardised: {renamed} | addresses filled (approximate, 'Dekat ...'): {addr_filled}")
     print(f"codes filled from overrides: {filled} | manual stations added: {added}")
     kept.sort(key=lambda s: (s["regency"], s["name"]))
