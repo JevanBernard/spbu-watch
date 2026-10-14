@@ -260,6 +260,81 @@ def add_manual(kept, boundaries):
     return n
 
 
+
+NAME_NOISE = {"spbu", "spbuk", "pertamina", "pertashop", "gas", "station", "petrol", "pom", "pompa", "bensin", "fuel"}
+
+
+def standard_name(old: str, code: str) -> str:
+    """'<type> <code> (<area>)' where type follows the official code: 5P = Pertashop, 56 = SPBUK, else SPBU Pertamina."""
+    if code.startswith("5P"):
+        prefix = "Pertashop"
+    elif code.startswith("56."):
+        prefix = "SPBUK Pertamina"
+    elif code.startswith("58."):
+        prefix = "SPBUN Pertamina"
+    else:
+        prefix = "SPBU Pertamina"
+    if re.fullmatch(rf"(SPBUK? Pertamina|SPBUN Pertamina|Pertashop|SPBBK) {re.escape(code)}( \(.+\))?", old):
+        return old  # already standard (including hand-written area labels)
+    words = [w for w in re.sub(r"[()]", " ", CODE_RE.sub(" ", old)).split() if w.lower() not in NAME_NOISE]
+    area = " ".join(words).strip(" -")
+    return f"{prefix} {code} ({area})" if area else f"{prefix} {code}"
+
+
+REGENCY_LABEL = {"Denpasar": "Kota Denpasar", "Badung": "Kabupaten Badung", "Gianyar": "Kabupaten Gianyar", "Tabanan": "Kabupaten Tabanan"}
+REVERSE_CACHE = DATA / "reverse_cache.json"  # street names from Nominatim (scripts/reverse_streets.py)
+
+
+def type_label(s) -> str:
+    text = f'{s["brand"]} {s["name"]}'.lower()
+    if "pertashop" in text:
+        return "Pertashop"
+    if "pertamina" in text or (s.get("operator") or "").lower() == "pertamina":
+        return "SPBU Pertamina"
+    return "SPBU"
+
+
+def tidy(words) -> str:
+    return " ".join(w.capitalize() if (w.isupper() and len(w) > 1) or w.islower() else w for w in words)
+
+
+def standardize_names(kept):
+    """Every station gets '<type> <code> (<area>)' or '<type> (<area>)', and an address.
+
+    Uncoded stations take their area from the OSM name or the nearest street (reverse geocoding).
+    Addresses that come from reverse geocoding are written 'Dekat <street>' because they are approximate.
+    """
+    cache = json.loads(REVERSE_CACHE.read_text(encoding="utf-8")) if REVERSE_CACHE.exists() else {}
+    changed = filled = 0
+    for s in kept:
+        geo = cache.get(f'{s["osm_type"]}/{s["osm_id"]}', {})
+        road, suburb = geo.get("road"), geo.get("suburb")
+        if s["pertamina_code"]:
+            new = standard_name(s["name"], s["pertamina_code"])
+        else:
+            kind = type_label(s)
+            # Text in parentheses is usually the operator (e.g. "(CV Restu Mahitala)"): use it only if nothing else is left.
+            base = re.sub(r"\([^)]*\)", " ", s["name"])
+            clean = lambda t: [w for w in re.sub(r"[()-]", " ", t).split() if w.lower() not in NAME_NOISE]
+            words = clean(base) or clean(s["name"])
+            addr_street = s["address"].split(",")[0].strip() if s["address"] else ""
+            area = tidy(words) or addr_street or road or suburb or ""
+            new = f"{kind} ({area})" if area else kind
+        if new != s["name"]:
+            s["name"] = new
+            changed += 1
+        if not s["address"]:
+            label = REGENCY_LABEL[s["regency"]]
+            if road:
+                s["address"] = f"Dekat {road}, {suburb + ', ' if suburb else ''}{label}"
+            elif suburb:
+                s["address"] = f"Sekitar {suburb}, {label}"
+            else:
+                s["address"] = label
+            filled += 1
+    return changed, filled
+
+
 # ---------- main ----------
 
 def merge_duplicates(elements):
@@ -408,6 +483,8 @@ def main():
     # Points outside all four regencies are expected (bounding box overlaps neighbours).
     filled = apply_overrides(kept)
     added = add_manual(kept, boundaries)
+    renamed, addr_filled = standardize_names(kept)
+    print(f"names standardised: {renamed} | addresses filled (approximate, 'Dekat ...'): {addr_filled}")
     print(f"codes filled from overrides: {filled} | manual stations added: {added}")
     kept.sort(key=lambda s: (s["regency"], s["name"]))
     fields = list(kept[0].keys())

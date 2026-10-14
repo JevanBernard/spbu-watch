@@ -1,3 +1,4 @@
+import type { StationCategory } from "./category";
 import type { Fuel, QueueStatus, StockStatus } from "./status";
 
 export interface StationDTO {
@@ -13,6 +14,8 @@ export interface StationDTO {
   fuels: Fuel[];
   hasEvCharging: boolean;
   pertaminaCode: string | null;
+  category: StationCategory;
+  isGes: boolean;
   queue: QueueStatus;
   stock: Partial<Record<Fuel, StockStatus>>;
 }

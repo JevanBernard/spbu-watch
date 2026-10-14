@@ -1,5 +1,6 @@
 import type { Fuel, QueueState, StockState } from "./status";
 import type { StationDTO } from "./api-types";
+import { CATEGORY_LABEL } from "./category";
 
 export const QUEUE_LABEL: Record<QueueState, string> = {
   sepi: "Antrean sepi",
@@ -77,7 +78,7 @@ export function hasConfirmedOut(s: StationDTO): boolean {
 export function matchesSearch(s: StationDTO, q: string): boolean {
   const needle = q.trim().toLowerCase();
   if (!needle) return true;
-  return [s.name, s.address ?? "", s.regency, s.brand ?? "", s.pertaminaCode ?? ""].some((t) =>
+  return [s.name, s.address ?? "", s.regency, s.brand ?? "", s.pertaminaCode ?? "", CATEGORY_LABEL[s.category]].some((t) =>
     t.toLowerCase().includes(needle),
   );
 }

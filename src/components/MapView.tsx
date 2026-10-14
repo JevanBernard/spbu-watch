@@ -22,13 +22,18 @@ const COLORS = {
 } as const;
 
 /** Marker icons: a coloured disc with 1/2/3 bars (queue length) or "?" so colour is never the only cue. */
-function drawIcon(status: keyof typeof COLORS): ImageData {
+function drawIcon(status: keyof typeof COLORS, square: boolean): ImageData {
   const size = 56;
   const c = document.createElement("canvas");
   c.width = c.height = size;
   const g = c.getContext("2d")!;
   g.beginPath();
-  g.arc(size / 2, size / 2, size / 2 - 3, 0, Math.PI * 2);
+  if (square) {
+    // roundRect is missing in older browsers; fall back to a plain square so markers still draw.
+    if (typeof g.roundRect === "function") g.roundRect(4, 4, size - 8, size - 8, 10);
+    else g.rect(4, 4, size - 8, size - 8);
+  }
+  else g.arc(size / 2, size / 2, size / 2 - 3, 0, Math.PI * 2);
   g.fillStyle = COLORS[status];
   g.fill();
   g.lineWidth = 4;
@@ -82,7 +87,7 @@ function toGeoJSON(stations: StationDTO[]): GeoJSON.FeatureCollection {
     features: stations.map((s) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-      properties: { id: s.id, status: s.queue.status, out: hasConfirmedOut(s) },
+      properties: { id: s.id, status: s.queue.status, out: hasConfirmedOut(s), shop: s.category === "pertashop" },
     })),
   };
 }
@@ -98,6 +103,7 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
   const onSelectRef = useRef(onSelect);
   const stationsRef = useRef(stations);
 
@@ -109,13 +115,20 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
   // Create the map once.
   useEffect(() => {
     if (!STYLE_URL || !container.current) return;
-    const map = new maplibregl.Map({
-      container: container.current,
-      style: STYLE_URL,
-      center: DENPASAR,
-      zoom: 11,
-      attributionControl: false,
-    });
+    let map: maplibregl.Map;
+    try {
+      map = new maplibregl.Map({
+        container: container.current,
+        style: STYLE_URL,
+        center: DENPASAR,
+        zoom: 11,
+        attributionControl: false,
+      });
+    } catch {
+      // No WebGL (old device, blocked GPU): the station list keeps working without the map.
+      queueMicrotask(() => setFailed(true));
+      return;
+    }
     mapRef.current = map;
     map.addControl(
       new maplibregl.AttributionControl({
@@ -128,9 +141,10 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     map.on("load", () => {
-      (["sepi", "sedang", "panjang", "unknown"] as const).forEach((s) =>
-        map.addImage(`q-${s}`, drawIcon(s), { pixelRatio: 2 }),
-      );
+      (["sepi", "sedang", "panjang", "unknown"] as const).forEach((s) => {
+        map.addImage(`q-${s}`, drawIcon(s, false), { pixelRatio: 2 });
+        map.addImage(`p-${s}`, drawIcon(s, true), { pixelRatio: 2 });
+      });
       map.addImage("stock-out", drawStockOutIcon(), { pixelRatio: 2 });
 
       map.addSource("stations", {
@@ -188,7 +202,7 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
         source: "stations",
         filter: ["!", ["has", "point_count"]],
         layout: {
-          "icon-image": ["concat", "q-", ["get", "status"]],
+          "icon-image": ["concat", ["case", ["get", "shop"], "p-", "q-"], ["get", "status"]],
           "icon-allow-overlap": true,
           "icon-size": 1,
         },
@@ -275,6 +289,13 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
     });
   }, [userLocation, ready]);
 
+  if (failed) {
+    return (
+      <div className="flex h-full items-center justify-center bg-slate-100 p-6 text-center text-sm text-slate-700">
+        Peta tidak dapat dimuat di perangkat ini. Daftar SPBU tetap dapat dipakai.
+      </div>
+    );
+  }
   if (!STYLE_URL) {
     return (
       <div className="flex h-full items-center justify-center bg-slate-100 p-6 text-center text-sm text-slate-700">

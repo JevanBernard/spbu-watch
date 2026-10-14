@@ -1,6 +1,6 @@
 import type { StationDTO } from "@/lib/api-types";
 import { formatDistance, reportedText } from "@/lib/format";
-import { QueueBadge } from "./StatusBits";
+import { CategoryBadge, GesBadge, QueueBadge } from "./StatusBits";
 
 export interface ListItem {
   station: StationDTO;
@@ -34,12 +34,16 @@ export default function StationList({
                 </span>
               )}
             </span>
-            <span className="text-xs text-slate-600">
-              {[s.address?.split(",").slice(0, 2).join(",").trim(), s.regency]
-                .filter(Boolean)
-                .join(" · ")}
-              {s.is24h && " · 24 jam"}
-              {s.pertaminaCode && ` · ${s.pertaminaCode}`}
+            <span className="text-xs text-slate-700">{s.address ?? s.regency}</span>
+            <span className="flex flex-wrap items-center gap-1.5 text-xs">
+              <CategoryBadge category={s.category} />
+              {s.isGes && <GesBadge />}
+              {s.is24h && (
+                <span className="rounded bg-slate-200 px-2 py-0.5 font-bold text-slate-800">24 jam</span>
+              )}
+              <span className="text-slate-600">
+                {s.pertaminaCode ? `Kode ${s.pertaminaCode}` : "Kode belum diketahui"}
+              </span>
             </span>
             <span className="flex flex-wrap items-center gap-2">
               <QueueBadge status={s.queue.status} />

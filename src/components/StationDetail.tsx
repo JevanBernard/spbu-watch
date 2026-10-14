@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { StationDTO } from "@/lib/api-types";
 import { FUEL_LABEL, reportedText, stationFuels } from "@/lib/format";
 import ReportFlow from "./ReportFlow";
-import { QueueBadge, StockBadge } from "./StatusBits";
+import { CategoryBadge, GesBadge, QueueBadge, StockBadge } from "./StatusBits";
 
 export default function StationDetail({
   station,
@@ -27,26 +27,30 @@ export default function StationDetail({
 
       <header>
         <h2 className="text-lg font-bold leading-tight">{station.name}</h2>
-        <p className="text-sm text-slate-700">
-          {[station.brand, station.regency].filter(Boolean).join(" · ")}
-        </p>
-        {station.address && <p className="mt-1 text-sm text-slate-700">{station.address}</p>}
-        {station.pertaminaCode && (
-          <p className="mt-1 text-sm text-slate-800">
-            Kode SPBU: <b className="font-mono">{station.pertaminaCode}</b>
-            <span className="block text-xs text-slate-600">
-              Dicocokkan dengan daftar Pertamina dan bisa keliru. Periksa papan di SPBU.
-            </span>
-          </p>
-        )}
-        <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+          <CategoryBadge category={station.category} />
+          {station.isGes && <GesBadge />}
           {station.is24h && (
-            <span className="rounded bg-blue-900 px-2 py-1 text-white">24 jam</span>
-          )}
-          {!station.is24h && station.openingHours && (
-            <span className="rounded bg-slate-200 px-2 py-1">Buka: {station.openingHours}</span>
+            <span className="rounded bg-slate-200 px-2 py-0.5 font-bold text-slate-800">24 jam</span>
           )}
         </div>
+        <p className="mt-2 text-sm text-slate-800">
+          Kode resmi:{" "}
+          {station.pertaminaCode ? (
+            <b className="font-mono">{station.pertaminaCode}</b>
+          ) : (
+            <span className="text-slate-600">belum diketahui</span>
+          )}
+          {station.pertaminaCode && (
+            <span className="block text-xs text-slate-600">
+              Kode dari daftar Pertamina atau input pengelola. Jika ragu, periksa papan di lokasi.
+            </span>
+          )}
+        </p>
+        <p className="mt-1 text-sm text-slate-800">{station.address ?? station.regency}</p>
+        {!station.is24h && station.openingHours && (
+          <p className="mt-1 text-xs text-slate-700">Buka: {station.openingHours}</p>
+        )}
       </header>
 
       <section>

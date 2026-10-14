@@ -1,3 +1,4 @@
+import { CATEGORY_LABEL, type StationCategory } from "@/lib/category";
 import type { QueueState, StockState } from "@/lib/status";
 import { QUEUE_LABEL, STOCK_LABEL } from "@/lib/format";
 
@@ -53,7 +54,36 @@ export function Legend() {
   return (
     <p className="text-xs leading-relaxed text-slate-700">
       <b>Antrean:</b> 1 batang = sepi, 2 = sedang, 3 = panjang, ? = belum ada laporan terbaru.{" "}
-      <b>✕</b> merah = stok BBM habis (terkonfirmasi beberapa pelapor).
+      <b>✕</b> merah = stok BBM habis (terkonfirmasi beberapa pelapor). Bulat = SPBU, kotak = Pertashop.
     </p>
+  );
+}
+
+const CATEGORY_STYLE: Record<StationCategory, string> = {
+  spbu: "bg-blue-900 text-white",
+  pertashop: "bg-violet-700 text-white",
+  spbuk: "bg-teal-700 text-white",
+  spbbk: "bg-orange-700 text-white",
+  spbun: "bg-cyan-700 text-white",
+};
+
+/** Station type, always shown as text so it never relies on colour alone. */
+export function CategoryBadge({ category }: { category: StationCategory }) {
+  return (
+    <span className={`rounded px-2 py-0.5 text-xs font-bold ${CATEGORY_STYLE[category]}`}>
+      {CATEGORY_LABEL[category]}
+    </span>
+  );
+}
+
+/** Green Energy Station (per the official GES list). */
+export function GesBadge() {
+  return (
+    <span
+      title="Green Energy Station"
+      className="rounded border border-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-900"
+    >
+      GES
+    </span>
   );
 }

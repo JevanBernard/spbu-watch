@@ -2,9 +2,10 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
 import { distanceM, matchesSearch } from "@/lib/format";
+import type { StationCategory } from "@/lib/category";
 import OfficialPanel from "./OfficialPanel";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
@@ -79,8 +80,10 @@ export default function HomeClient() {
   const [search, setSearch] = useState("");
   const [regency, setRegency] = useState("");
   const [only24h, setOnly24h] = useState(false);
+  const [kind, setKind] = useState<"" | StationCategory | "ges">("");
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null);
   const [geoMsg, setGeoMsg] = useState<string | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
 
   const locate = () => {
     if (!navigator.geolocation) {
@@ -106,6 +109,7 @@ export default function HomeClient() {
       .filter((s) => matchesSearch(s, search))
       .filter((s) => !regency || s.regency === regency)
       .filter((s) => !only24h || s.is24h)
+      .filter((s) => !kind || (kind === "ges" ? s.isGes : s.category === kind))
       .map((s) => ({ station: s, distance: me ? distanceM(me, s) : null }));
     list.sort((a, b) =>
       me
@@ -113,11 +117,12 @@ export default function HomeClient() {
         : a.station.name.localeCompare(b.station.name, "id"),
     );
     return list;
-  }, [stations, search, regency, only24h, me]);
+  }, [stations, search, regency, only24h, kind, me]);
 
   const selected = selectedId ? (stations.find((s) => s.id === selectedId) ?? null) : null;
 
   const select = (id: string) => {
+    scroller.current?.scrollTo({ top: 0 });
     setSelectedId(id);
     setSheetOpen(true);
   };
@@ -158,7 +163,7 @@ export default function HomeClient() {
           <span className="h-1.5 w-12 rounded-full bg-slate-400" />
         </button>
 
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {selected ? (
             <StationDetail
               station={selected}
@@ -188,6 +193,20 @@ export default function HomeClient() {
                     {REGENCIES.map((r) => (
                       <option key={r}>{r}</option>
                     ))}
+                  </select>
+                  <select
+                    value={kind}
+                    onChange={(e) => setKind(e.target.value as typeof kind)}
+                    aria-label="Filter jenis"
+                    className="min-h-11 rounded-md border border-slate-400 bg-white px-2 text-sm"
+                  >
+                    <option value="">Semua jenis</option>
+                    <option value="spbu">SPBU</option>
+                    <option value="pertashop">Pertashop</option>
+                    <option value="spbuk">SPBUK</option>
+                    <option value="spbbk">SPBBK</option>
+                    <option value="spbun">SPBUN</option>
+                    <option value="ges">GES</option>
                   </select>
                   <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                     <input
