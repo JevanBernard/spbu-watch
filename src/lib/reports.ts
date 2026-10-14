@@ -16,29 +16,43 @@ const FUELS = [
   "pertamina_dex",
 ] as const;
 
+/** kind decides which of queueLevel / fuel+stockStatus are required. Shared by user and admin reports. */
+function checkKind(
+  v: { kind: "queue" | "stock"; queueLevel?: number; fuel?: string; stockStatus?: string },
+  ctx: z.RefinementCtx,
+) {
+  const bad = (message: string) => ctx.addIssue({ code: "custom", message });
+  if (v.kind === "queue") {
+    if (v.queueLevel === undefined) bad("queueLevel wajib untuk laporan antrean");
+    if (v.fuel !== undefined || v.stockStatus !== undefined) bad("fuel/stockStatus tidak boleh");
+  } else {
+    if (v.fuel === undefined || v.stockStatus === undefined) bad("fuel dan stockStatus wajib");
+    if (v.queueLevel !== undefined) bad("queueLevel tidak boleh untuk laporan stok");
+  }
+}
+
+const reportFields = {
+  stationId: z.string().uuid(),
+  kind: z.enum(["queue", "stock"]),
+  queueLevel: z.number().int().min(0).max(2).optional(),
+  fuel: z.enum(FUELS).optional(),
+  stockStatus: z.enum(["available", "out"]).optional(),
+};
+
+/** Admin report (from CCTV): no device, location or captcha; the route checks the admin token instead. */
+export const adminReportSchema = z.object(reportFields).strict().superRefine(checkKind);
+export type AdminReportInput = z.infer<typeof adminReportSchema>;
+
 export const reportSchema = z
   .object({
-    stationId: z.string().uuid(),
-    kind: z.enum(["queue", "stock"]),
-    queueLevel: z.number().int().min(0).max(2).optional(),
-    fuel: z.enum(FUELS).optional(),
-    stockStatus: z.enum(["available", "out"]).optional(),
+    ...reportFields,
     deviceId: z.string().regex(/^[A-Za-z0-9_-]{8,64}$/),
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
     turnstileToken: z.string().max(2048).optional(), // checked in the route, never stored
   })
   .strict()
-  .superRefine((v, ctx) => {
-    const bad = (message: string) => ctx.addIssue({ code: "custom", message });
-    if (v.kind === "queue") {
-      if (v.queueLevel === undefined) bad("queueLevel wajib untuk laporan antrean");
-      if (v.fuel !== undefined || v.stockStatus !== undefined) bad("fuel/stockStatus tidak boleh");
-    } else {
-      if (v.fuel === undefined || v.stockStatus === undefined) bad("fuel dan stockStatus wajib");
-      if (v.queueLevel !== undefined) bad("queueLevel tidak boleh untuk laporan stok");
-    }
-  });
+  .superRefine(checkKind);
 
 export type ReportInput = z.infer<typeof reportSchema>;
 

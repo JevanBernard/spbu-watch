@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { FUEL_LABEL, QUEUE_LABEL, timeAgo } from "@/lib/format";
+import { FUEL_LABEL, FUEL_ORDER, QUEUE_LABEL, timeAgo } from "@/lib/format";
+import type { StationDTO } from "@/lib/api-types";
 import type { Fuel } from "@/lib/status";
 
 interface Update {
@@ -25,6 +26,8 @@ interface AdminReport {
   hidden: boolean;
   createdAt: string;
 }
+
+type AdminStation = Pick<StationDTO, "id" | "name" | "regency" | "pertaminaCode" | "fuels">;
 
 const input = "min-h-11 w-full rounded-md border border-slate-400 px-3 text-base";
 const btn = "min-h-11 rounded-md px-3 text-sm font-bold";
@@ -53,6 +56,10 @@ export default function AdminClient() {
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm());
+  const [stations, setStations] = useState<AdminStation[]>([]);
+  const [stationQuery, setStationQuery] = useState("");
+  const [stationId, setStationId] = useState("");
+  const [sendingReport, setSendingReport] = useState(false);
 
   const api = useCallback(
     async (path: string, tok: string, init?: RequestInit) => {
@@ -84,11 +91,17 @@ export default function AdminClient() {
       }
       setUpdates(u.data.updates);
       setReports(r.ok ? r.data.reports : []);
+      if (stations.length === 0) {
+        const s = await fetch("/api/stations")
+          .then((x) => x.json())
+          .catch(() => null);
+        if (s?.stations) setStations(s.stations);
+      }
       setAuthed(true);
       setMsg(null);
       return true;
     },
-    [api],
+    [api, stations.length],
   );
 
   const login = async (e: React.FormEvent) => {
@@ -152,6 +165,25 @@ export default function AdminClient() {
     });
     await load(token);
     if (!res.ok) setMsg(res.data.error ?? "Gagal mengubah.");
+  };
+
+  const sendReport = async (body: Record<string, unknown>, label: string) => {
+    if (!stationId) {
+      setMsg("Pilih SPBU dulu.");
+      return;
+    }
+    setSendingReport(true);
+    const res = await api("/api/admin/reports", token, {
+      method: "POST",
+      body: JSON.stringify({ stationId, ...body }),
+    });
+    setSendingReport(false);
+    if (!res.ok) {
+      setMsg(res.data.error ?? "Gagal mengirim laporan.");
+      return;
+    }
+    await load(token);
+    setMsg(`Laporan terkirim: ${label}.`);
   };
 
   const hide = async (r: AdminReport) => {
@@ -312,6 +344,81 @@ export default function AdminClient() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-lg font-bold">Lapor kondisi SPBU (admin)</h2>
+        <p className="text-sm text-slate-700">
+          Untuk laporan dari pantauan jarak jauh, mis. CCTV. Tidak dibatasi jarak. Laporan &quot;habis&quot; dari admin langsung
+          tampil sebagai habis. Laporkan hanya yang benar-benar Anda lihat.
+        </p>
+        <input
+          placeholder="Cari SPBU (nama atau kode)"
+          value={stationQuery}
+          onChange={(e) => setStationQuery(e.target.value)}
+          className={input}
+        />
+        <select
+          aria-label="Pilih SPBU"
+          value={stationId}
+          onChange={(e) => setStationId(e.target.value)}
+          className={input}
+          size={6}
+        >
+          {stations
+            .filter((s) =>
+              `${s.name} ${s.pertaminaCode ?? ""} ${s.regency}`.toLowerCase().includes(stationQuery.trim().toLowerCase()),
+            )
+            .slice(0, 60)
+            .map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.regency})
+              </option>
+            ))}
+        </select>
+        {stationId && (
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold">Antrean</p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {(["sepi", "sedang", "panjang"] as const).map((k, level) => (
+                  <button
+                    key={k}
+                    disabled={sendingReport}
+                    onClick={() => sendReport({ kind: "queue", queueLevel: level }, QUEUE_LABEL[k])}
+                    className={`${btn} border border-slate-400`}
+                  >
+                    {QUEUE_LABEL[k]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Stok BBM</p>
+              <ul className="space-y-2 pt-1">
+                {FUEL_ORDER.map((f) => (
+                  <li key={f} className="flex items-center gap-2">
+                    <span className="w-32 text-sm">{FUEL_LABEL[f]}</span>
+                    <button
+                      disabled={sendingReport}
+                      onClick={() => sendReport({ kind: "stock", fuel: f, stockStatus: "available" }, `${FUEL_LABEL[f]} ada`)}
+                      className={`${btn} border border-slate-400`}
+                    >
+                      Ada
+                    </button>
+                    <button
+                      disabled={sendingReport}
+                      onClick={() => sendReport({ kind: "stock", fuel: f, stockStatus: "out" }, `${FUEL_LABEL[f]} habis`)}
+                      className={`${btn} border border-red-800 text-red-800`}
+                    >
+                      Habis
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-lg font-bold">Moderasi laporan (24 jam terakhir)</h2>
         <ul className="divide-y divide-slate-200 rounded-md border border-slate-300">
           {reports.length === 0 && <li className="p-3 text-sm text-slate-600">Belum ada laporan.</li>}
@@ -324,7 +431,7 @@ export default function AdminClient() {
                   : `${FUEL_LABEL[r.fuel!]}: ${r.stockStatus === "out" ? "HABIS" : "ada"}`}
               </p>
               <p className="text-xs text-slate-600">
-                {timeAgo(r.createdAt)} · perangkat {r.device}
+                {timeAgo(r.createdAt)} · {r.device.startsWith("admin") ? "admin (CCTV)" : `perangkat ${r.device}`}
               </p>
               {r.hidden ? (
                 <p className="text-xs font-bold">Disembunyikan</p>

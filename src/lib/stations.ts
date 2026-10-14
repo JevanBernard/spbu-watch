@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { FUEL_SOLD_WINDOW_DAYS, STOCK_TTL_MIN } from "./config";
+import { ADMIN_DEVICE_ID, ADMIN_KEEP_DAYS, FUEL_SOLD_WINDOW_DAYS, STOCK_TTL_MIN } from "./config";
 import { fuelListComplete, gesInfo, stationCategory } from "./category";
 import { fuelsReportedSold, type AvailableReport } from "./fuels-sold";
 import {
@@ -121,6 +121,41 @@ export function publicStation(s: StationRow, fromUsers: Fuel[] = []) {
   };
 }
 
+/**
+ * The admin's latest report per station/kind/fuel from the last ADMIN_KEEP_DAYS, whatever its age.
+ * These stay on the map (marked as old) until the admin or a newer report replaces them.
+ */
+export async function loadAdminReports(
+  service: SupabaseClient,
+  now: Date,
+  stationId?: string,
+): Promise<ReportRow[]> {
+  const since = new Date(now.getTime() - ADMIN_KEEP_DAYS * 86_400_000).toISOString();
+  const rows = await fetchAllPages<ReportRow>((from, to) => {
+    let q = service
+      .from("reports")
+      .select(REPORT_COLUMNS)
+      .eq("device_id", ADMIN_DEVICE_ID)
+      .eq("hidden", false)
+      .gte("created_at", since);
+    if (stationId) q = q.eq("station_id", stationId);
+    return q.order("created_at", { ascending: false }).order("id").range(from, to);
+  });
+  const seen = new Set<string>();
+  return rows.filter((r) => {
+    const key = `${r.station_id}|${r.kind}|${r.fuel ?? ""}`; // newest first, so the first one wins
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+/** Window reports plus the admin's kept reports, without duplicates. */
+export function mergeReports(windowRows: ReportRow[], adminRows: ReportRow[]): ReportRow[] {
+  const ids = new Set(windowRows.map((r) => r.id));
+  return [...windowRows, ...adminRows.filter((r) => !ids.has(r.id))];
+}
+
 export async function loadStationsWithStatus(
   service: SupabaseClient,
   anon: SupabaseClient,
@@ -142,7 +177,7 @@ export async function loadStationsWithStatus(
   );
   const sold = await loadSoldReports(service, now);
   const byStation = new Map<string, Report[]>();
-  for (const r of reports) {
+  for (const r of mergeReports(reports, await loadAdminReports(service, now))) {
     const list = byStation.get(r.station_id) ?? [];
     list.push(toReport(r));
     byStation.set(r.station_id, list);

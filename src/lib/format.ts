@@ -40,15 +40,21 @@ export function timeAgo(iso: string | null, now: Date = new Date()): string {
   const min = Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 60_000));
   if (min < 1) return "baru saja";
   if (min < 60) return `${min} menit lalu`;
-  return `${Math.floor(min / 60)} jam lalu`;
+  if (min < 48 * 60) return `${Math.floor(min / 60)} jam lalu`;
+  return `${Math.floor(min / 1440)} hari lalu`;
 }
 
-/** "dilaporkan 12 menit lalu oleh 3 orang" */
+/** "dilaporkan 12 menit lalu oleh 3 orang", or "dipantau admin (CCTV) 5 menit lalu" when the newest report is the admin's. */
 export function reportedText(
-  s: { reportCount: number; lastReportAt: string | null },
+  s: { reportCount: number; lastReportAt: string | null; fromAdmin?: boolean; stale?: boolean },
   now?: Date,
 ): string {
   if (!s.lastReportAt || s.reportCount === 0) return "Belum ada laporan terbaru";
+  if (s.fromAdmin && s.stale) return `terakhir dipantau admin ${timeAgo(s.lastReportAt, now)}`;
+  if (s.fromAdmin) {
+    const others = s.reportCount - 1;
+    return `dipantau admin (CCTV) ${timeAgo(s.lastReportAt, now)}${others > 0 ? `, ditambah ${others} pengguna` : ""}`;
+  }
   return `dilaporkan ${timeAgo(s.lastReportAt, now)} oleh ${s.reportCount} orang`;
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  adminReportSchema,
   clientIp,
   hashIp,
   processReport,
@@ -206,5 +207,20 @@ describe("ip helpers", () => {
     expect(clientIp(new Headers({ "x-forwarded-for": "9.9.9.9, 10.0.0.1" }))).toBe("9.9.9.9");
     expect(clientIp(new Headers({ "x-real-ip": "8.8.8.8" }))).toBe("8.8.8.8");
     expect(clientIp(new Headers())).toBe("unknown");
+  });
+});
+
+describe("adminReportSchema", () => {
+  it("accepts queue and stock reports without device or location", () => {
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "queue", queueLevel: 2 }).success).toBe(true);
+    expect(
+      adminReportSchema.safeParse({ stationId: STATION, kind: "stock", fuel: "solar", stockStatus: "out" }).success,
+    ).toBe(true);
+  });
+
+  it("rejects the wrong field mix and unknown fields", () => {
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "queue" }).success).toBe(false);
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "stock", fuel: "solar" }).success).toBe(false);
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "queue", queueLevel: 1, deviceId: "x" }).success).toBe(false);
   });
 });

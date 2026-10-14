@@ -24,3 +24,28 @@ describe("format", () => {
     expect(formatDistance(1530)).toBe("1.5 km");
   });
 });
+
+describe("reportedText (admin)", () => {
+  const now = new Date("2026-10-14T12:00:00Z");
+  const iso = new Date(now.getTime() - 5 * 60_000).toISOString();
+  it("names the admin when the newest report is theirs", () => {
+    expect(reportedText({ reportCount: 1, lastReportAt: iso, fromAdmin: true }, now)).toBe("dipantau admin (CCTV) 5 menit lalu");
+    expect(reportedText({ reportCount: 3, lastReportAt: iso, fromAdmin: true }, now)).toBe(
+      "dipantau admin (CCTV) 5 menit lalu, ditambah 2 pengguna",
+    );
+  });
+  it("keeps the visitor wording otherwise", () => {
+    expect(reportedText({ reportCount: 2, lastReportAt: iso, fromAdmin: false }, now)).toBe("dilaporkan 5 menit lalu oleh 2 orang");
+  });
+});
+
+describe("reportedText (stale admin)", () => {
+  const now = new Date("2026-10-14T12:00:00Z");
+  it("says when the admin last watched", () => {
+    const iso = new Date(now.getTime() - 3 * 3_600_000).toISOString();
+    expect(reportedText({ reportCount: 1, lastReportAt: iso, fromAdmin: true, stale: true }, now)).toBe("terakhir dipantau admin 3 jam lalu");
+  });
+  it("counts days after two days", () => {
+    expect(timeAgo(new Date(now.getTime() - 3 * 86_400_000).toISOString(), now)).toBe("3 hari lalu");
+  });
+});

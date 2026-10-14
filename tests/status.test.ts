@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ADMIN_DEVICE_ID } from "@/lib/config";
 import { computeQueueStatus, computeStockStatus, weight, type Report } from "@/lib/status";
 
 const NOW = new Date("2026-10-14T12:00:00Z");
@@ -31,6 +32,8 @@ describe("computeQueueStatus", () => {
       status: "unknown",
       reportCount: 0,
       lastReportAt: null,
+      fromAdmin: false,
+      stale: false,
       confidence: "none",
     });
   });
@@ -174,5 +177,48 @@ describe("computeStockStatus", () => {
   it("ignores hidden reports", () => {
     const hidden: Report = { ...s("a", "available", 1), hidden: true };
     expect(computeStockStatus([hidden], "pertalite", NOW).status).toBe("unknown");
+  });
+});
+
+describe("admin reports (CCTV)", () => {
+  it("one visitor 'out' report stays unconfirmed", () => {
+    expect(computeStockStatus([s("a", "out", 1)], "pertalite", NOW).status).toBe("unconfirmed");
+  });
+
+  it("one admin 'out' report counts as confirmed on its own", () => {
+    expect(computeStockStatus([s(ADMIN_DEVICE_ID, "out", 1)], "pertalite", NOW).status).toBe("out");
+  });
+
+  it("marks fromAdmin only when the newest report is the admin's", () => {
+    expect(computeStockStatus([s(ADMIN_DEVICE_ID, "available", 1)], "pertalite", NOW).fromAdmin).toBe(true);
+    expect(computeStockStatus([s(ADMIN_DEVICE_ID, "available", 10), s("a", "available", 1)], "pertalite", NOW).fromAdmin).toBe(false);
+  });
+
+  it("keeps an old admin report beyond the normal TTL, marked stale and low confidence", () => {
+    const st = computeStockStatus([s(ADMIN_DEVICE_ID, "available", 3 * 24 * 60)], "pertalite", NOW);
+    expect(st.status).toBe("available");
+    expect(st.stale).toBe(true);
+    expect(st.fromAdmin).toBe(true);
+    expect(st.confidence).toBe("low");
+    expect(computeQueueStatus([{ ...q(ADMIN_DEVICE_ID, 2, 5 * 60) }], NOW).status).toBe("panjang");
+  });
+
+  it("still drops old visitor reports", () => {
+    expect(computeStockStatus([s("a", "available", 3 * 24 * 60)], "pertalite", NOW).status).toBe("unknown");
+  });
+
+  it("a fresh visitor report outweighs an old admin report", () => {
+    const st = computeStockStatus([s(ADMIN_DEVICE_ID, "available", 5 * 60), s("a", "out", 1), s("b", "out", 2), s("c", "out", 1)], "pertalite", NOW);
+    expect(st.status).toBe("out");
+    expect(st.stale).toBe(false);
+  });
+
+  it("an admin 'out' report is confirmed for 6 hours, then only unconfirmed (time still shown)", () => {
+    const fresh = computeStockStatus([s(ADMIN_DEVICE_ID, "out", 5 * 60)], "pertalite", NOW);
+    expect(fresh.status).toBe("out");
+    const old = computeStockStatus([s(ADMIN_DEVICE_ID, "out", 7 * 60)], "pertalite", NOW);
+    expect(old.status).toBe("unconfirmed");
+    expect(old.lastReportAt).toBe(ago(7 * 60).toISOString());
+    expect(old.stale).toBe(true);
   });
 });

@@ -5,7 +5,9 @@ import { anonymizeReports } from "@/lib/anonymize";
 import { fuelsReportedSold } from "@/lib/fuels-sold";
 import {
   computeStationStatus,
+  loadAdminReports,
   loadSoldReports,
+  mergeReports,
   publicStation,
   REPORT_COLUMNS,
   STATION_COLUMNS,
@@ -53,7 +55,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       {
         station: {
           ...pub,
-          ...computeStationStatus({ fuels: pub.fuels }, reports.map(toReport), now),
+          ...computeStationStatus(
+            { fuels: pub.fuels },
+            mergeReports(reports, await loadAdminReports(serviceClient(), now, id)).map(toReport),
+            now,
+          ),
         },
         // Anonymized: no device_id, ip_hash or report id.
         recentReports: anonymizeReports(reports),

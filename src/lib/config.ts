@@ -3,6 +3,12 @@ export const QUEUE_TTL_MIN = 45;
 export const STOCK_TTL_MIN = 60;
 export const HALF_LIFE_MIN = 20;
 export const MIN_DEVICES_FOR_OUT = 3; // distinct devices needed before showing "habis"
+/** Reports entered by the admin (e.g. from CCTV) are stored under this device id; "habis" from it needs no extra devices. */
+export const ADMIN_DEVICE_ID = "admin-cctv";
+/** The admin's latest report per station/kind/fuel stays visible (marked as old) until replaced, for at most this long. Matches the 30-day report retention. */
+export const ADMIN_KEEP_DAYS = 30;
+/** An admin "habis" report counts as confirmed for this long; after that it shows as "belum terkonfirmasi" (the report time stays visible). */
+export const ADMIN_OUT_CONFIRMED_MIN = 6 * 60;
 export const DOMINANCE = 0.6; // share of weighted votes needed to call a status
 export const GEOFENCE_M = 300;
 

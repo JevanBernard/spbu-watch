@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
+import { ADMIN_DEVICE_ID } from "@/lib/config";
+import { adminReportSchema } from "@/lib/reports";
 import { serviceClient } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -48,5 +50,39 @@ export async function GET(req: Request) {
   } catch (err) {
     console.error("GET /api/admin/reports", err);
     return NextResponse.json({ error: "Gagal memuat laporan." }, { status: 500 });
+  }
+}
+
+/**
+ * Admin report, e.g. from watching CCTV. Skips the geofence and rate limits (the admin token is the check),
+ * and is stored under ADMIN_DEVICE_ID so it can be told apart from visitor reports.
+ */
+export async function POST(req: Request) {
+  const denied = requireAdmin(req);
+  if (denied) return denied;
+  const parsed = adminReportSchema.safeParse(await req.json().catch(() => undefined));
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Data laporan tidak valid." }, { status: 400 });
+  }
+  const r = parsed.data;
+  try {
+    const { error } = await serviceClient().from("reports").insert({
+      station_id: r.stationId,
+      kind: r.kind,
+      queue_level: r.kind === "queue" ? (r.queueLevel ?? null) : null,
+      fuel: r.kind === "stock" ? (r.fuel ?? null) : null,
+      stock_status: r.kind === "stock" ? (r.stockStatus ?? null) : null,
+      device_id: ADMIN_DEVICE_ID,
+      ip_hash: "admin",
+    });
+    if (error) {
+      // 23503 = foreign key violation: the station does not exist.
+      if (error.code === "23503") return NextResponse.json({ error: "SPBU tidak ditemukan." }, { status: 404 });
+      throw new Error(error.message);
+    }
+    return NextResponse.json({ ok: true }, { status: 201 });
+  } catch (err) {
+    console.error("POST /api/admin/reports", err);
+    return NextResponse.json({ error: "Gagal menyimpan laporan." }, { status: 500 });
   }
 }
