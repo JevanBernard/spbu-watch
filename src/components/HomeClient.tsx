@@ -4,10 +4,13 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
+import { getDeviceId } from "@/lib/device";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
+import { countText } from "@/lib/visits-format";
 import type { Fuel } from "@/lib/status";
 import type { StationCategory } from "@/lib/category";
 import OfficialPanel from "./OfficialPanel";
+import ShareDialog from "./ShareDialog";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
 import { Legend } from "./StatusBits";
@@ -75,6 +78,28 @@ export default function HomeClient() {
     [],
   );
   const stations = stationsQ.data;
+  const statsQ = useRefreshing<{ today: number | null; online: number | null }>(
+    "/api/stats",
+    (j: { today: number | null; online: number | null }) => j,
+    { today: null, online: null },
+  );
+  const [shareApp, setShareApp] = useState(false);
+
+  // Anonymous visitor heartbeat: once on load, then every 2 minutes while the tab is visible.
+  useEffect(() => {
+    const beat = () => {
+      if (document.visibilityState !== "visible") return;
+      fetch("/api/visit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ deviceId: getDeviceId() }),
+        keepalive: true,
+      }).catch(() => {});
+    };
+    beat();
+    const t = setInterval(beat, 120_000);
+    return () => clearInterval(t);
+  }, []);
 
   // A shared link (?spbu=<id>) opens that station. Read lazily so there is no extra render.
   const [selectedId, setSelectedId] = useState<string | null>(() =>
@@ -183,6 +208,24 @@ export default function HomeClient() {
           ) : (
             <>
               <div className="space-y-2 px-4 pb-2">
+                <div className="flex items-center justify-between gap-2 text-xs text-slate-700">
+                  <span>
+                    {statsQ.data.online !== null && statsQ.data.today !== null ? (
+                      <>
+                        <span aria-hidden className="mr-1 inline-block size-2 rounded-full bg-green-600" />
+                        <b>{countText(statsQ.data.online)}</b> online · <b>{countText(statsQ.data.today)}</b>{" "}
+                        pengunjung hari ini
+                      </>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShareApp(true)}
+                    className="min-h-11 rounded-md border border-blue-900 px-3 text-sm font-bold text-blue-900"
+                  >
+                    Bagikan (tautan & QR)
+                  </button>
+                </div>
                 <input
                   type="search"
                   value={search}
@@ -285,7 +328,7 @@ export default function HomeClient() {
               (ODbL).
             </p>
             <p>
-              Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, dan hash IP.
+              Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, hash IP, dan hash harian anonim untuk penghitung pengunjung.
               Tidak menyimpan koordinat lokasi, plat nomor, atau foto.{" "}
               <Link href="/privasi" className="font-bold underline">
                 Selengkapnya
@@ -308,6 +351,14 @@ export default function HomeClient() {
           </footer>
         </div>
       </div>
+      {shareApp && (
+        <ShareDialog
+          url={window.location.origin}
+          title="Bagikan SPBU Watch"
+          text="Pantau antrean dan stok BBM di SPBU Denpasar, Badung, Gianyar, dan Tabanan dari laporan warga."
+          onClose={() => setShareApp(false)}
+        />
+      )}
     </div>
   );
 }

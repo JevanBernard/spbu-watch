@@ -37,6 +37,12 @@ export default function PrivacyPage() {
             <b>Hash IP:</b> alamat IP Anda diubah menjadi kode hash bergaram sebelum disimpan,
             hanya untuk membatasi penyalahgunaan. Alamat IP aslinya tidak disimpan.
           </li>
+          <li>
+            <b>Penghitung pengunjung:</b> untuk menampilkan jumlah pengunjung, kami menyimpan kode hash
+            acak yang berubah tiap hari (dibuat dari alamat IP, ID perangkat, dan garam rahasia) beserta
+            waktu terakhir terlihat. Kode ini tidak bisa dikembalikan menjadi IP atau ID perangkat dan
+            tidak bisa dihubungkan antarhari. Data ini dihapus otomatis setelah 7 hari.
+          </li>
         </ul>
       </section>
 

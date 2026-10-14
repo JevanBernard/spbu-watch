@@ -3,6 +3,7 @@ import { asOfText, FUEL_PRICES, priceOf, rupiah } from "@/lib/prices";
 import type { StationDTO } from "@/lib/api-types";
 import { FUEL_LABEL, reportedText, stationFuels } from "@/lib/format";
 import ReportFlow from "./ReportFlow";
+import ShareDialog from "./ShareDialog";
 import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBadge, StockBadge } from "./StatusBits";
 
 export default function StationDetail({
@@ -16,22 +17,7 @@ export default function StationDetail({
 }) {
   const fuels = stationFuels(station);
   const [reporting, setReporting] = useState<"queue" | "stock" | null>(null);
-  const [shareMsg, setShareMsg] = useState<string | null>(null);
-
-  const share = async () => {
-    const url = `${window.location.origin}/?spbu=${station.id}`;
-    const text = `${station.name}: lihat antrean dan stok BBM di SPBU Watch SARBAGITA`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: station.name, text, url });
-        return;
-      }
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      setShareMsg("Tautan disalin");
-    } catch {
-      setShareMsg("Tautan tidak bisa dibagikan dari perangkat ini");
-    }
-  };
+  const [sharing, setSharing] = useState(false);
   return (
     <div className="space-y-4 p-4">
       <button
@@ -155,12 +141,19 @@ export default function StationDetail({
 
       <button
         type="button"
-        onClick={share}
+        onClick={() => setSharing(true)}
         className="min-h-12 w-full rounded-md border-2 border-blue-900 px-4 text-base font-bold text-blue-900"
       >
-        Bagikan SPBU ini
+        Bagikan SPBU ini (tautan dan QR)
       </button>
-      {shareMsg && <p className="text-center text-sm text-slate-700">{shareMsg}</p>}
+      {sharing && (
+        <ShareDialog
+          url={`${window.location.origin}/?spbu=${station.id}`}
+          title={station.name}
+          text="Lihat antrean dan stok BBM SPBU ini di SPBU Watch SARBAGITA."
+          onClose={() => setSharing(false)}
+        />
+      )}
 
       <a
         href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`}
