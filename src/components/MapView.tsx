@@ -95,12 +95,14 @@ function toGeoJSON(stations: StationDTO[]): GeoJSON.FeatureCollection {
 
 interface Props {
   stations: StationDTO[];
+  /** Changes whenever the filters change; null when no filter is active. Used to re-frame the map. */
+  fitKey: string | null;
   selectedId: string | null;
   userLocation: { lat: number; lng: number } | null;
   onSelect: (id: string) => void;
 }
 
-export default function MapView({ stations, selectedId, userLocation, onSelect }: Props) {
+export default function MapView({ stations, fitKey, selectedId, userLocation, onSelect }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
@@ -263,6 +265,26 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
     if (!map || !ready) return;
     (map.getSource("stations") as GeoJSONSource).setData(toGeoJSON(stations));
   }, [stations, ready]);
+
+  // When a filter changes, frame the stations that are left (or go back to the overview when cleared).
+  const framed = useRef(false);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const list = stationsRef.current;
+    if (fitKey === null) {
+      if (framed.current) map.easeTo({ center: DENPASAR, zoom: 11, duration: 600 });
+      framed.current = false;
+      return;
+    }
+    if (list.length === 0) return;
+    const bounds = new maplibregl.LngLatBounds();
+    for (const s of list) bounds.extend([s.lng, s.lat]);
+    // The bottom sheet covers about half of the screen and the info card the top.
+    const bottom = Math.round(window.innerHeight * 0.5);
+    map.fitBounds(bounds, { padding: { top: 130, bottom, left: 40, right: 40 }, maxZoom: 15, duration: 600 });
+    framed.current = true;
+  }, [fitKey, ready]);
 
   // Highlight and fly to the selected station.
   useEffect(() => {

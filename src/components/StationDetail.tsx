@@ -3,7 +3,9 @@ import type { StationDTO } from "@/lib/api-types";
 import { CATEGORY_LABEL } from "@/lib/category";
 import { FUEL_LABEL, FUEL_ORDER, formatDistance, reportedText, stationFuels } from "@/lib/format";
 import { asOfText, FUEL_PRICES, priceOf, rupiah } from "@/lib/prices";
+import { GES_SOURCE } from "@/lib/text";
 import ReportFlow from "./ReportFlow";
+import SiteFooter from "./SiteFooter";
 import ShareDialog from "./ShareDialog";
 import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBadge, StockBadge } from "./StatusBits";
 import { BackIcon, NavIcon, routeUrl } from "./ui";
@@ -223,6 +225,7 @@ export default function StationDetail({
                   {CATEGORY_LABEL[station.category]}
                   {station.isGes && " · Green Energy Station (GES)"}
                 </dd>
+                {station.isGes && <dd className="text-xs text-slate-600">Menurut {GES_SOURCE}.</dd>}
               </div>
               <div>
                 <dt className="text-xs font-semibold text-slate-500">Alamat</dt>
@@ -240,10 +243,7 @@ export default function StationDetail({
                 <dd className="text-slate-600">Belum ada data fasilitas.</dd>
               </div>
             </dl>
-            <p className="text-xs text-slate-600">
-              Data berasal dari laporan warga dan bersifat indikatif. Bukan informasi resmi Pertamina. Lokasi
-              SPBU dari OpenStreetMap (ODbL).
-            </p>
+            <SiteFooter withDisclaimer className="px-0" />
           </>
         )}
       </div>

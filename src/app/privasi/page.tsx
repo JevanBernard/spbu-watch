@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Data apa yang disimpan dan tidak disimpan oleh SPBU Watch SARBAGITA.",
 };
 
+import { contactLabel } from "@/components/SiteFooter";
+
 const CONTACT_URL = process.env.NEXT_PUBLIC_CONTACT_URL;
 
 export default function PrivacyPage() {
@@ -100,7 +102,7 @@ export default function PrivacyPage() {
           Untuk pertanyaan privasi atau permintaan penghapusan laporan:{" "}
           {CONTACT_URL ? (
             <a href={CONTACT_URL} className="font-bold text-blue-900 underline" rel="noopener noreferrer">
-              hubungi kami
+              {contactLabel(CONTACT_URL)}
             </a>
           ) : (
             <b>(kontak belum diatur oleh pengelola)</b>

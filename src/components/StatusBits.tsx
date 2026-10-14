@@ -2,6 +2,7 @@ import { CATEGORY_LABEL, type StationCategory } from "@/lib/category";
 import type { Fuel, QueueState, StockState } from "@/lib/status";
 import { QUEUE_LABEL, STOCK_LABEL, soldFuelsText } from "@/lib/format";
 import { openNow } from "@/lib/hours";
+import { GES_SOURCE } from "@/lib/text";
 
 const QUEUE_STYLE: Record<QueueState, { cls: string; bars: number }> = {
   sepi: { cls: "bg-green-700 text-white", bars: 1 },
@@ -81,7 +82,7 @@ export function CategoryBadge({ category }: { category: StationCategory }) {
 export function GesBadge() {
   return (
     <span
-      title="Green Energy Station"
+      title={`Green Energy Station, menurut ${GES_SOURCE}`}
       className="rounded border border-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-900"
     >
       GES

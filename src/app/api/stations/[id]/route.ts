@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { anonClient, serviceClient } from "@/lib/supabase";
+import { anonymizeReports } from "@/lib/anonymize";
 import { fuelsReportedSold } from "@/lib/fuels-sold";
 import {
   computeStationStatus,
@@ -55,13 +56,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
           ...computeStationStatus({ fuels: pub.fuels }, reports.map(toReport), now),
         },
         // Anonymized: no device_id, ip_hash or report id.
-        recentReports: reports.map((r) => ({
-          kind: r.kind,
-          queueLevel: r.queue_level,
-          fuel: r.fuel,
-          stockStatus: r.stock_status,
-          createdAt: r.created_at,
-        })),
+        recentReports: anonymizeReports(reports),
         generatedAt: now.toISOString(),
       },
       { headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=60" } },

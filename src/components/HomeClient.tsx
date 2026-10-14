@@ -1,16 +1,17 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
 import type { StationCategory } from "@/lib/category";
 import { getDeviceId } from "@/lib/device";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
 import type { Fuel } from "@/lib/status";
+import { DISCLAIMER } from "@/lib/text";
 import { countText } from "@/lib/visits-format";
 import OfficialPanel from "./OfficialPanel";
 import ShareDialog from "./ShareDialog";
+import SiteFooter from "./SiteFooter";
 import StationCard from "./StationCard";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
@@ -23,11 +24,8 @@ const MapView = dynamic(() => import("./MapView"), {
 });
 
 const REFRESH_MS = 60_000;
-const CONTACT_URL = process.env.NEXT_PUBLIC_CONTACT_URL;
 const REGENCIES = ["Denpasar", "Badung", "Gianyar", "Tabanan"];
 const CAROUSEL_COUNT = 10;
-export const DISCLAIMER =
-  "Data berasal dari laporan warga dan bersifat indikatif. Bukan informasi resmi Pertamina. Cek kanal resmi untuk kepastian.";
 
 type Kind = "" | StationCategory | "ges";
 
@@ -163,6 +161,14 @@ export default function HomeClient() {
   }, [stations, search, regency, only24h, kind, fuelFilter, me]);
 
   const selected = selectedId ? (stations.find((s) => s.id === selectedId) ?? null) : null;
+  // The map shows exactly the stations the filters and search leave in the list (plus the open station).
+  const mapStations = useMemo(() => {
+    const shown = items.map((i) => i.station);
+    const open = selectedId ? stations.find((s) => s.id === selectedId) : null;
+    return open && !shown.includes(open) ? [...shown, open] : shown;
+  }, [items, stations, selectedId]);
+  const filtersOn = Boolean(kind || only24h || fuelFilter || regency);
+  const fitKey = filtersOn ? [kind, only24h, fuelFilter, regency].join("|") : null;
   const selectedDistance = selected && me ? distanceM(me, selected) : null;
   const activeFilters =
     (kind ? 1 : 0) + (only24h ? 1 : 0) + (fuelFilter ? 1 : 0) + (regency ? 1 : 0);
@@ -219,12 +225,16 @@ export default function HomeClient() {
   );
 
   const nearest = items.slice(0, CAROUSEL_COUNT);
+  const knownSellers = fuelFilter ? items.filter((i) => i.station.fuels.includes(fuelFilter)).length : 0;
+  const hoursKnown = stations.filter((s) => s.is24h || s.openingHours).length;
+  const stations24h = stations.filter((s) => s.is24h).length;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden">
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" data-testid="map" data-station-count={mapStations.length}>
         <MapView
-          stations={stations}
+          stations={mapStations}
+          fitKey={fitKey}
           selectedId={selectedId}
           userLocation={me}
           onSelect={select}
@@ -375,8 +385,15 @@ export default function HomeClient() {
               )}
               {fuelFilter && (
                 <p className="text-xs text-slate-700">
-                  Filter BBM memakai data jenis BBM yang dijual SPBU, bukan stok saat ini. SPBU yang jenis
-                  BBM-nya belum diketahui tetap ditampilkan.
+                  Filter BBM memakai data jenis BBM yang dijual SPBU, bukan stok saat ini. {knownSellers} SPBU
+                  diketahui menjual jenis ini; {items.length - knownSellers} lainnya belum diketahui jenis BBM-nya dan
+                  tetap ditampilkan.
+                </p>
+              )}
+              {only24h && (
+                <p className="text-xs text-slate-700">
+                  Data 24 jam belum lengkap: baru {stations24h} SPBU tercatat 24 jam, dari {hoursKnown} SPBU yang jam
+                  bukanya diketahui (total {stations.length}). SPBU lain bisa saja 24 jam. Cek pengumuman resmi.
                 </p>
               )}
               {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
@@ -396,33 +413,7 @@ export default function HomeClient() {
 
             <StationList items={items} onSelect={select} />
 
-            <footer className="mt-4 space-y-1 border-t border-slate-200 px-4 pt-4 text-xs text-slate-600">
-              <p>{DISCLAIMER}</p>
-              <p>
-                Peta: OpenFreeMap © OpenMapTiles, data © OpenStreetMap contributors. Data SPBU dari OpenStreetMap (ODbL).
-              </p>
-              <p>
-                Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, hash IP, dan hash harian
-                anonim untuk penghitung pengunjung. Tidak menyimpan koordinat lokasi, plat nomor, atau foto.{" "}
-                <Link href="/privasi" className="font-bold underline">
-                  Selengkapnya
-                </Link>
-                {CONTACT_URL && (
-                  <>
-                    {" · "}
-                    <a href={CONTACT_URL} className="font-bold underline" rel="noopener noreferrer">
-                      Kontak
-                    </a>
-                  </>
-                )}
-              </p>
-              {stationsQ.updatedAt && (
-                <p>
-                  Diperbarui otomatis tiap 60 detik. Terakhir:{" "}
-                  {stationsQ.updatedAt.toLocaleTimeString("id-ID", { hour12: false })}
-                </p>
-              )}
-            </footer>
+            <SiteFooter withDisclaimer updatedAt={stationsQ.updatedAt} className="mt-4 border-t border-slate-200 pt-4" />
           </div>
         ) : (
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3">
@@ -475,6 +466,7 @@ export default function HomeClient() {
                 {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
               </div>
             )}
+            <SiteFooter className="mt-3" />
           </div>
         )}
       </div>

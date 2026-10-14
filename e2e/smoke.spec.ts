@@ -85,3 +85,48 @@ test("web app manifest is served", async ({ request }) => {
   expect(res.status()).toBe(200);
   expect((await res.json()).short_name).toBe("SPBU Watch");
 });
+
+test("home page always shows attribution, privacy link and contact (audit)", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/OpenStreetMap contributors/).first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("link", { name: "Kebijakan privasi" }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /@/ }).first()).toBeVisible(); // visible contact address
+});
+
+test("robots.txt, sitemap and the separate maskable icon exist", async ({ request }) => {
+  const robots = await request.get("/robots.txt");
+  expect(robots.status()).toBe(200);
+  expect(await robots.text()).toMatch(/Disallow: \/admin/);
+  expect((await request.get("/sitemap.xml")).status()).toBe(200);
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  const maskable = manifest.icons.find((i: { purpose?: string }) => i.purpose === "maskable");
+  expect(maskable.src).toBe("/icon-maskable-512.png");
+  expect((await request.get("/icon-maskable-512.png")).status()).toBe(200);
+});
+
+test("stations API reports its own count", async ({ request }) => {
+  const body = await (await request.get("/api/stations")).json();
+  expect(body.count).toBe(body.stations.length);
+});
+
+test("filter chips narrow the map as well as the list", async ({ page }) => {
+  await page.goto("/");
+  const map = page.getByTestId("map");
+  await expect(page.getByRole("button", { name: "Perbesar daftar" })).toBeVisible();
+  await expect.poll(async () => Number(await map.getAttribute("data-station-count")), { timeout: 15_000 }).toBeGreaterThan(100);
+  const total = Number(await map.getAttribute("data-station-count"));
+
+  await page.getByRole("button", { name: "Pertashop", exact: true }).click();
+  const filtered = Number(await map.getAttribute("data-station-count"));
+  expect(filtered).toBeGreaterThan(0);
+  expect(filtered).toBeLessThan(total);
+
+  // the list says the same number
+  await page.getByRole("button", { name: "Perbesar daftar" }).click();
+  await expect(page.getByText(new RegExp(`^${filtered} dari ${total} SPBU`))).toBeVisible();
+  expect(await page.locator("ul li button").count()).toBe(filtered);
+
+  // clearing the filter brings every station back on the map
+  await page.getByRole("button", { name: "Semua", exact: true }).click();
+  expect(Number(await map.getAttribute("data-station-count"))).toBe(total);
+});

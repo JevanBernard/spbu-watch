@@ -8,7 +8,7 @@ export async function GET() {
   try {
     const stations = await loadStationsWithStatus(serviceClient(), anonClient());
     return NextResponse.json(
-      { stations, generatedAt: new Date().toISOString() },
+      { stations, count: stations.length, generatedAt: new Date().toISOString() },
       { headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=60" } },
     );
   } catch (err) {
