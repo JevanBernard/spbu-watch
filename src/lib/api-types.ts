@@ -12,6 +12,7 @@ export interface StationDTO {
   is24h: boolean;
   fuels: Fuel[];
   hasEvCharging: boolean;
+  pertaminaCode: string | null;
   queue: QueueStatus;
   stock: Partial<Record<Fuel, StockStatus>>;
 }

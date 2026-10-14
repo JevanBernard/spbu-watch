@@ -31,6 +31,14 @@ export default function StationDetail({
           {[station.brand, station.regency].filter(Boolean).join(" · ")}
         </p>
         {station.address && <p className="mt-1 text-sm text-slate-700">{station.address}</p>}
+        {station.pertaminaCode && (
+          <p className="mt-1 text-sm text-slate-800">
+            Kode SPBU: <b className="font-mono">{station.pertaminaCode}</b>
+            <span className="block text-xs text-slate-600">
+              Dicocokkan dengan daftar Pertamina dan bisa keliru. Periksa papan di SPBU.
+            </span>
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold">
           {station.is24h && (
             <span className="rounded bg-blue-900 px-2 py-1 text-white">24 jam</span>

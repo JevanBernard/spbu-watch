@@ -11,3 +11,10 @@ __pycache__
 public/maplibre
 playwright-report
 test-results
+
+# MyPertamina comparison data (terms of use not checked): keep local, do not publish
+data/mypertamina_*.json
+data/official_comparison.csv
+data/reverse_cache.json
+data/official_to_locate.csv
+data/mypertamina_ges_bali.json

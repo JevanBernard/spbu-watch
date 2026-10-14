@@ -39,6 +39,7 @@ export default function StationList({
                 .filter(Boolean)
                 .join(" · ")}
               {s.is24h && " · 24 jam"}
+              {s.pertaminaCode && ` · ${s.pertaminaCode}`}
             </span>
             <span className="flex flex-wrap items-center gap-2">
               <QueueBadge status={s.queue.status} />

@@ -77,7 +77,7 @@ export function hasConfirmedOut(s: StationDTO): boolean {
 export function matchesSearch(s: StationDTO, q: string): boolean {
   const needle = q.trim().toLowerCase();
   if (!needle) return true;
-  return [s.name, s.address ?? "", s.regency, s.brand ?? ""].some((t) =>
+  return [s.name, s.address ?? "", s.regency, s.brand ?? "", s.pertaminaCode ?? ""].some((t) =>
     t.toLowerCase().includes(needle),
   );
 }

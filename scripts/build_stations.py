@@ -190,6 +190,65 @@ def address(tags):
     return ", ".join(p for p in parts if p) or None
 
 
+
+# ---------- manual additions and code overrides ----------
+
+OVERRIDES = DATA / "code_overrides.csv"  # osm_type,osm_id,pertamina_code,source
+MANUAL = DATA / "manual_stations.csv"  # stations missing from OSM, added by hand
+
+
+def apply_overrides(kept):
+    """Fill pertamina_code for stations that have none. Never overwrites an existing code."""
+    if not OVERRIDES.exists():
+        return 0
+    by_key = {(s["osm_type"], str(s["osm_id"])): s for s in kept}
+    n = 0
+    for row in csv.DictReader(open(OVERRIDES, encoding="utf-8")):
+        s = by_key.get((row["osm_type"], row["osm_id"]))
+        if s and not s["pertamina_code"]:
+            s["pertamina_code"] = row["pertamina_code"]
+            n += 1
+    return n
+
+
+def add_manual(kept, boundaries):
+    """Append hand-entered stations (osm_type 'manual', ids 1..n in file order)."""
+    if not MANUAL.exists():
+        return 0
+    n = 0
+    for i, row in enumerate(csv.DictReader(open(MANUAL, encoding="utf-8")), 1):
+        lat, lng = float(row["lat"]), float(row["lng"])
+        regency = next((r for r in REGENCIES if geom_contains(boundaries[r], lng, lat)), None)
+        if regency is None:
+            sys.exit(f"manual station {row['name']!r} is outside the four regencies")
+        near = [s for s in kept if haversine_m((lat, lng), (s["lat"], s["lng"])) <= 60]
+        if near:
+            print(f"WARNING: manual station {row['name']!r} is within 60 m of {near[0]['name']!r} ({near[0]['osm_id']})")
+        oh = row.get("opening_hours", "")
+        kept.append(
+            {
+                "osm_type": "manual",
+                "osm_id": i,
+                "pertamina_code": row["pertamina_code"],
+                "name": row["name"],
+                "brand": row["brand"],
+                "operator": "Pertamina",
+                "regency": regency,
+                "lat": round(lat, 7),
+                "lng": round(lng, 7),
+                "address": row["address"],
+                "opening_hours": oh,
+                "is_24h": str(is_24h(oh)).lower(),
+                "fuels": "[]",
+                "has_ev_charging": "false",
+                "google_place_id": "",
+                "active": "true",
+            }
+        )
+        n += 1
+    return n
+
+
 # ---------- main ----------
 
 def merge_duplicates(elements):
@@ -336,6 +395,9 @@ def main():
             review.append({**base, "reason": "; ".join(reasons)})
 
     # Points outside all four regencies are expected (bounding box overlaps neighbours).
+    filled = apply_overrides(kept)
+    added = add_manual(kept, boundaries)
+    print(f"codes filled from overrides: {filled} | manual stations added: {added}")
     kept.sort(key=lambda s: (s["regency"], s["name"]))
     fields = list(kept[0].keys())
     with open(DATA / "stations.csv", "w", newline="", encoding="utf-8") as f:

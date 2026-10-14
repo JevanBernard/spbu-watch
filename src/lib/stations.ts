@@ -101,6 +101,7 @@ export function publicStation(s: StationRow) {
     is24h: s.is_24h,
     fuels: s.fuels,
     hasEvCharging: s.has_ev_charging,
+    pertaminaCode: s.pertamina_code,
   };
 }
 
