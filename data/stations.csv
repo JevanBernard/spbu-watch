@@ -52,15 +52,12 @@ node,2498046486,,Pertamina,Pertamina,,Denpasar,-8.6772839,115.2321022,,,false,[]
 node,2498046487,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6730122,115.2262101,"Raya Puputan, Denpasar",,false,[],false,,true
 node,3175963462,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6668111,115.2315163,,,false,[],false,,true
 node,3292077086,,Pertamina,Pertamina,,Denpasar,-8.6566631,115.2250801,"Jalan Kamboja, Denpasar",,false,[],false,,true
-node,3646990902,,Pertamina,Pertamina,Pertamina,Denpasar,-8.6663729,115.2415592,"Jalan Hayam Wuruk, Denpasar",24/7,true,[],false,,true
 node,3671677724,54.801.18,Pertamina,Pertamina,,Denpasar,-8.6862208,115.2263815,"Tukad Pakerisan, Denpasar",Mo-Su 05:00-00:00,false,[],false,,true
-node,3675164637,51.801.30,Pertamina,Pertamina,,Denpasar,-8.6603673,115.2393983,"Jalan Hayam Wuruk, Denpasar",Mo-Su 06:00-21:00,false,[],false,,true
+node,3675164637,,Pertamina,Pertamina,,Denpasar,-8.6603673,115.2393983,"Jalan Hayam Wuruk, Denpasar",Mo-Su 06:00-21:00,false,[],false,,true
 node,3718349380,54.801.22,Pertamina,Pertamina,,Denpasar,-8.678971,115.2149141,"Jalan Raya Sesetan, Denpasar",,false,[],false,,true
 node,3780445716,,Pertamina,Pertamina,,Denpasar,-8.7107789,115.2234888,"Suwung Batan Kendal, Denpasar",24/7,true,"[""solar""]",false,,true
 node,3781991815,,Pertamina,Pertamina,,Denpasar,-8.714504,115.2158046,,,false,[],false,,true
 node,3784338063,54.801.49,Pertamina,Pertamina,,Denpasar,-8.6597129,115.2031647,"Jalan Gunung Batukaru, Denpasar",24/7,true,[],false,,true
-node,3791203569,,Pertamina,Pertamina,,Denpasar,-8.6359432,115.2187343,"Jalan Bypass Gatot Subroto, Denpasar",,false,[],false,,true
-node,3828371871,,Pertamina,Pertamina,,Denpasar,-8.6359364,115.2377311,,,false,[],false,,true
 node,4157284889,54.801.21,Pertamina,Pertamina,,Denpasar,-8.675199,115.2023412,"Jalan Imam Bonjol, Denpasar",24/7,true,[],false,,true
 node,4236778069,,Pertamina,Pertamina,,Denpasar,-8.6814158,115.1926231,"Jalan Pura Demak, Denpasar",24/7,true,"[""pertalite"", ""pertamax"", ""solar""]",false,,true
 node,4249837879,,Pertamina,Pertamina,,Denpasar,-8.6364156,115.1853451,"Jalan Kebo Iwa, Denpasar",,false,[],false,,true
@@ -94,10 +91,16 @@ manual,3,5P.801.07,Pertashop 5P.801.07,Pertashop,Pertamina,Denpasar,-8.5989174,1
 node,2279234528,54.801.02,Pompa Bensin,Pertamina,,Denpasar,-8.6490072,115.1863788,,,false,[],false,,true
 node,4426603389,54.801.23,Pompa bensin,,,Denpasar,-8.6060724,115.2360732,,,false,[],false,,true
 node,2498046488,,SPBU Pertamina,Pertamina,Pertamina,Denpasar,-8.67308,115.2401219,,,false,[],false,,true
+node,3646990902,51.801.30,SPBU Pertamina 51.801.30,Pertamina,Pertamina,Denpasar,-8.6663729,115.2415592,"Jl. Hayam Wuruk No.142, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239",24/7,true,[],false,,true
+node,3791203569,54.801.01,SPBU Pertamina 54.801.01 (Gatsu Tengah),Pertamina,,Denpasar,-8.6359432,115.2187343,"Jl. Gatot Subroto Tim., Barat, Dangin Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali 80233",,false,[],false,,true
+node,3828371871,54.801.11,SPBU Pertamina 54.801.11 (Teras Ayung),Pertamina,,Denpasar,-8.6359364,115.2377311,"Jl. Gatot Subroto Tim., Kesiman Petilan, Kec. Denpasar Tim., Kota Denpasar, Bali 80237",,false,[],false,,true
 node,1675080290,54.801.32,SPBU Pertamina 54.801.32,Pertamina,,Denpasar,-8.687005,115.1867265,"Jalan Gunung Soputan, 29, Denpasar",24/7,true,"[""solar""]",false,,true
 node,3787237309,54.801.35,SPBU Pertamina 54.801.35,Pertamina,,Denpasar,-8.6382619,115.2089748,"Jalan Bypass Gatot Subroto, Denpasar",24/7,true,[],false,,true
 manual,1,54.801.41,SPBU Pertamina 54.801.41,Pertamina,Pertamina,Denpasar,-8.6174262,115.2229676,"Jl. Antasura No.46, Peguyangan Kangin, Kec. Denpasar Utara, Kota Denpasar, Bali 80237",,false,[],false,,true
+manual,6,54.801.51,SPBU Pertamina 54.801.51 (Gerbang Tol Benoa),Pertamina,Pertamina,Denpasar,-8.7226494,115.2142506,"Jl. Raya Pelabuhan Benoa No.87, Pedungan, Denpasar Selatan, Kota Denpasar, Bali",,false,[],false,,true
+manual,7,54.801.54,SPBU Pertamina 54.801.54 (Simpang Benoa),Pertamina,Pertamina,Denpasar,-8.7164725,115.213603,"Pedungan, Denpasar Selatan, Kota Denpasar, Bali",,false,[],false,,true
 manual,2,54.801.57,SPBU Pertamina 54.801.57,Pertamina,Pertamina,Denpasar,-8.6288128,115.2242403,"Jl. Nangka Utara No.260, Tonja, Kec. Denpasar Utara, Kota Denpasar, Bali 80239",,false,[],false,,true
+manual,5,56.801.01,SPBUK Pertamina 56.801.01 (Serangan),Pertamina,Pertamina,Denpasar,-8.7240047,115.2313719,"Jl. Tukad Punggawa No.32, Serangan, Denpasar Selatan, Kota Denpasar, Bali 80229",,false,[],false,,true
 node,4198773706,,Pertamina,Pertamina,,Gianyar,-8.5748859,115.2762409,,,false,"[""pertamax"", ""solar""]",false,,true
 node,4198773752,,Pertamina,Pertamina,,Gianyar,-8.5668758,115.2747603,,,false,[],false,,true
 node,4446960858,,Pertamina,Pertamina,,Gianyar,-8.6018053,115.3247915,,,false,[],false,,true

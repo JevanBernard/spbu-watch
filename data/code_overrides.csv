@@ -1,27 +1,29 @@
-osm_type,osm_id,pertamina_code,source
-node,1292872676,54.803.03,mypertamina-street-match score=1.00
-node,3217531312,54.803.35,mypertamina-street-match score=1.00
-node,4954534052,54.803.07,mypertamina-street-match score=1.00
-way,512629994,54.803.27,mypertamina-street-match score=1.00
-node,11002450532,54.803.30,mypertamina-street-match score=1.00
-node,3671677724,54.801.18,mypertamina-street-match score=1.00
-node,3675164637,51.801.30,mypertamina-street-match score=1.00
-node,3718349380,54.801.22,mypertamina-street-match score=1.00
-node,3784338063,54.801.49,mypertamina-street-match score=1.00
-node,4157284889,54.801.21,mypertamina-street-match score=1.00
-node,4959546626,54.801.40,mypertamina-street-match score=1.00
-node,5104508763,54.801.29,mypertamina-street-match score=1.00
-node,5126061305,54.801.08,mypertamina-street-match score=1.00
-node,5441794405,54.801.16,mypertamina-street-match score=1.00
-node,11707649769,54.801.24,mypertamina-street-match score=1.00
-way,374650214,54.801.46,mypertamina-street-match score=1.00
-node,4217406976,54.801.33,mypertamina-street-match score=1.00
-node,11002446836,54.801.12,mypertamina-street-match score=1.00
-node,2279234528,54.801.02,mypertamina-street-match score=1.00
-node,4426603389,54.801.23,mypertamina-street-match score=1.00
-node,1963471597,54.805.06,mypertamina-street-match score=1.00
-node,2272949196,54.805.08,mypertamina-street-match score=1.00
-node,274853846,54.821.09,mypertamina-street-match score=1.00
-way,597363262,54.821.06,mypertamina-street-match score=1.00
-way,597363267,54.821.15,mypertamina-street-match score=1.00
-way,1119410373,54.821.01,mypertamina-street-match score=1.00
+osm_type,osm_id,pertamina_code,source,name,address
+node,1292872676,54.803.03,mypertamina-street-match score=1.00,,
+node,3217531312,54.803.35,mypertamina-street-match score=1.00,,
+node,4954534052,54.803.07,mypertamina-street-match score=1.00,,
+way,512629994,54.803.27,mypertamina-street-match score=1.00,,
+node,11002450532,54.803.30,mypertamina-street-match score=1.00,,
+node,3671677724,54.801.18,mypertamina-street-match score=1.00,,
+node,3718349380,54.801.22,mypertamina-street-match score=1.00,,
+node,3784338063,54.801.49,mypertamina-street-match score=1.00,,
+node,4157284889,54.801.21,mypertamina-street-match score=1.00,,
+node,4959546626,54.801.40,mypertamina-street-match score=1.00,,
+node,5104508763,54.801.29,mypertamina-street-match score=1.00,,
+node,5126061305,54.801.08,mypertamina-street-match score=1.00,,
+node,5441794405,54.801.16,mypertamina-street-match score=1.00,,
+node,11707649769,54.801.24,mypertamina-street-match score=1.00,,
+way,374650214,54.801.46,mypertamina-street-match score=1.00,,
+node,4217406976,54.801.33,mypertamina-street-match score=1.00,,
+node,11002446836,54.801.12,mypertamina-street-match score=1.00,,
+node,2279234528,54.801.02,mypertamina-street-match score=1.00,,
+node,4426603389,54.801.23,mypertamina-street-match score=1.00,,
+node,1963471597,54.805.06,mypertamina-street-match score=1.00,,
+node,2272949196,54.805.08,mypertamina-street-match score=1.00,,
+node,274853846,54.821.09,mypertamina-street-match score=1.00,,
+way,597363262,54.821.06,mypertamina-street-match score=1.00,,
+way,597363267,54.821.15,mypertamina-street-match score=1.00,,
+way,1119410373,54.821.01,mypertamina-street-match score=1.00,,
+node,3646990902,51.801.30,"user-verified (Google Maps pin, 20 m from OSM node)",SPBU Pertamina 51.801.30,"Jl. Hayam Wuruk No.142, Sumerta Kelod, Kec. Denpasar Tim., Kota Denpasar, Bali 80239"
+node,3828371871,54.801.11,"user-verified (Google Maps pin, 1 m from OSM node)",SPBU Pertamina 54.801.11 (Teras Ayung),"Jl. Gatot Subroto Tim., Kesiman Petilan, Kec. Denpasar Tim., Kota Denpasar, Bali 80237"
+node,3791203569,54.801.01,"user-verified (Google Maps pin, 4 m from OSM node)",SPBU Pertamina 54.801.01 (Gatsu Tengah),"Jl. Gatot Subroto Tim., Barat, Dangin Puri Kaja, Kec. Denpasar Utara, Kota Denpasar, Bali 80233"

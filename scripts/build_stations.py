@@ -193,7 +193,7 @@ def address(tags):
 
 # ---------- manual additions and code overrides ----------
 
-OVERRIDES = DATA / "code_overrides.csv"  # osm_type,osm_id,pertamina_code,source
+OVERRIDES = DATA / "code_overrides.csv"  # osm_type,osm_id,pertamina_code,source[,name,address]
 MANUAL = DATA / "manual_stations.csv"  # stations missing from OSM, added by hand
 
 
@@ -207,6 +207,11 @@ def apply_overrides(kept):
         s = by_key.get((row["osm_type"], row["osm_id"]))
         if s and not s["pertamina_code"]:
             s["pertamina_code"] = row["pertamina_code"]
+            # Optional hand-verified name/address for the same station.
+            if row.get("name"):
+                s["name"] = row["name"]
+            if row.get("address"):
+                s["address"] = row["address"]
             n += 1
     return n
 
@@ -218,9 +223,15 @@ def add_manual(kept, boundaries):
     n = 0
     for i, row in enumerate(csv.DictReader(open(MANUAL, encoding="utf-8")), 1):
         lat, lng = float(row["lat"]), float(row["lng"])
-        regency = next((r for r in REGENCIES if geom_contains(boundaries[r], lng, lat)), None)
-        if regency is None:
-            sys.exit(f"manual station {row['name']!r} is outside the four regencies")
+        by_polygon = next((r for r in REGENCIES if geom_contains(boundaries[r], lng, lat)), None)
+        # An explicit regency wins: Nominatim polygons can miss islands (e.g. Serangan, Denpasar).
+        regency = row.get("regency") or by_polygon
+        if regency not in REGENCIES:
+            sys.exit(f"manual station {row['name']!r}: regency {regency!r} is not one of the four regencies")
+        if by_polygon and by_polygon != regency:
+            sys.exit(f"manual station {row['name']!r}: regency {regency} disagrees with polygon {by_polygon}")
+        if by_polygon is None:
+            print(f"NOTE: {row['name']!r} is outside all polygons; using regency {regency} from the file")
         near = [s for s in kept if haversine_m((lat, lng), (s["lat"], s["lng"])) <= 60]
         if near:
             print(f"WARNING: manual station {row['name']!r} is within 60 m of {near[0]['name']!r} ({near[0]['osm_id']})")
