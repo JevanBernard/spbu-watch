@@ -335,6 +335,35 @@ def standardize_names(kept):
     return changed, filled
 
 
+
+FUEL_OVERRIDES = DATA / "fuel_overrides.csv"  # pertamina_code,fuels (pipe-separated),source
+FUEL_COMPLETE_JSON = Path(__file__).resolve().parent.parent / "src" / "data" / "fuel_complete.json"
+VALID_FUELS = {"pertalite", "pertamax", "pertamax_turbo", "solar", "dexlite", "pertamina_dex"}
+
+
+def apply_fuel_overrides(kept):
+    """Verified, COMPLETE fuel lists per station code. These replace the OSM-derived list (which is only
+    ever a partial positive list) and are also written to src/data/fuel_complete.json so the app knows
+    that a fuel missing from the list is really not sold there."""
+    complete = {}
+    if FUEL_OVERRIDES.exists():
+        for row in csv.DictReader(open(FUEL_OVERRIDES, encoding="utf-8")):
+            fuels = [f for f in row["fuels"].split("|") if f]
+            bad = [f for f in fuels if f not in VALID_FUELS]
+            if bad:
+                sys.exit(f"fuel_overrides.csv: unknown fuel {bad} for {row['pertamina_code']}")
+            complete[row["pertamina_code"]] = fuels
+    by_code = {s["pertamina_code"]: s for s in kept if s["pertamina_code"]}
+    for code, fuels in complete.items():
+        if code not in by_code:
+            print(f"WARNING: fuel_overrides.csv has code {code} but no station has it")
+            continue
+        by_code[code]["fuels"] = json.dumps(fuels)
+    FUEL_COMPLETE_JSON.parent.mkdir(parents=True, exist_ok=True)
+    FUEL_COMPLETE_JSON.write_text(json.dumps(dict(sorted(complete.items())), indent=1), encoding="utf-8")
+    return len(complete)
+
+
 # ---------- main ----------
 
 def merge_duplicates(elements):
@@ -483,6 +512,8 @@ def main():
     # Points outside all four regencies are expected (bounding box overlaps neighbours).
     filled = apply_overrides(kept)
     added = add_manual(kept, boundaries)
+    fuel_verified = apply_fuel_overrides(kept)
+    print(f"stations with a verified complete fuel list: {fuel_verified}")
     renamed, addr_filled = standardize_names(kept)
     print(f"names standardised: {renamed} | addresses filled (approximate, 'Dekat ...'): {addr_filled}")
     print(f"codes filled from overrides: {filled} | manual stations added: {added}")

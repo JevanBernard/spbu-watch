@@ -82,3 +82,19 @@ export function matchesSearch(s: StationDTO, q: string): boolean {
     t.toLowerCase().includes(needle),
   );
 }
+
+/**
+ * Static filter "sells <fuel>". Never uses live stock. A station stays in the list unless its fuel list
+ * is verified complete and lacks the fuel, so unknown stations are not hidden by missing data.
+ */
+export function matchesFuelFilter(s: StationDTO, fuel: Fuel | ""): boolean {
+  if (!fuel) return true;
+  if (s.fuels.includes(fuel)) return true;
+  return !s.fuelsComplete;
+}
+
+/** "Pertalite, Pertamax, Solar" for the fuels known to be sold, or null when nothing is known. */
+export function soldFuelsText(s: Pick<StationDTO, "fuels">): string | null {
+  const known = FUEL_ORDER.filter((f) => s.fuels.includes(f));
+  return known.length ? known.map((f) => FUEL_LABEL[f]).join(", ") : null;
+}

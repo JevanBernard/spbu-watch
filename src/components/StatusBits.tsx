@@ -1,6 +1,6 @@
 import { CATEGORY_LABEL, type StationCategory } from "@/lib/category";
-import type { QueueState, StockState } from "@/lib/status";
-import { QUEUE_LABEL, STOCK_LABEL } from "@/lib/format";
+import type { Fuel, QueueState, StockState } from "@/lib/status";
+import { QUEUE_LABEL, STOCK_LABEL, soldFuelsText } from "@/lib/format";
 
 const QUEUE_STYLE: Record<QueueState, { cls: string; bars: number }> = {
   sepi: { cls: "bg-green-700 text-white", bars: 1 },
@@ -84,6 +84,18 @@ export function GesBadge() {
       className="rounded border border-emerald-700 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-900"
     >
       GES
+    </span>
+  );
+}
+
+/** Fuels sold (a static fact). Says plainly when the list is unknown or only partly known. */
+export function FuelsSold({ fuels, complete }: { fuels: Fuel[]; complete: boolean }) {
+  const text = soldFuelsText({ fuels });
+  if (!text) return <span className="text-slate-600">BBM: belum diketahui</span>;
+  return (
+    <span className="text-slate-800">
+      BBM: <b>{text}</b>
+      {!complete && <span className="text-slate-600"> (daftar mungkin belum lengkap)</span>}
     </span>
   );
 }

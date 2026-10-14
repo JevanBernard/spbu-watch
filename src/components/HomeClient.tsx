@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
-import { distanceM, matchesSearch } from "@/lib/format";
+import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
+import type { Fuel } from "@/lib/status";
 import type { StationCategory } from "@/lib/category";
 import OfficialPanel from "./OfficialPanel";
 import StationDetail from "./StationDetail";
@@ -80,6 +81,7 @@ export default function HomeClient() {
   const [search, setSearch] = useState("");
   const [regency, setRegency] = useState("");
   const [only24h, setOnly24h] = useState(false);
+  const [fuelFilter, setFuelFilter] = useState<Fuel | "">("");
   const [kind, setKind] = useState<"" | StationCategory | "ges">("");
   const [me, setMe] = useState<{ lat: number; lng: number } | null>(null);
   const [geoMsg, setGeoMsg] = useState<string | null>(null);
@@ -109,6 +111,7 @@ export default function HomeClient() {
       .filter((s) => matchesSearch(s, search))
       .filter((s) => !regency || s.regency === regency)
       .filter((s) => !only24h || s.is24h)
+      .filter((s) => matchesFuelFilter(s, fuelFilter))
       .filter((s) => !kind || (kind === "ges" ? s.isGes : s.category === kind))
       .map((s) => ({ station: s, distance: me ? distanceM(me, s) : null }));
     list.sort((a, b) =>
@@ -117,7 +120,7 @@ export default function HomeClient() {
         : a.station.name.localeCompare(b.station.name, "id"),
     );
     return list;
-  }, [stations, search, regency, only24h, kind, me]);
+  }, [stations, search, regency, only24h, kind, fuelFilter, me]);
 
   const selected = selectedId ? (stations.find((s) => s.id === selectedId) ?? null) : null;
 
@@ -208,6 +211,17 @@ export default function HomeClient() {
                     <option value="spbun">SPBUN</option>
                     <option value="ges">GES</option>
                   </select>
+                  <select
+                    value={fuelFilter}
+                    onChange={(e) => setFuelFilter(e.target.value as Fuel | "")}
+                    aria-label="Filter jenis BBM yang dijual"
+                    className="min-h-11 rounded-md border border-slate-400 bg-white px-2 text-sm"
+                  >
+                    <option value="">Semua BBM</option>
+                    <option value="pertalite">Menjual Pertalite</option>
+                    <option value="pertamax">Menjual Pertamax</option>
+                    <option value="solar">Menjual Solar</option>
+                  </select>
                   <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                     <input
                       type="checkbox"
@@ -226,6 +240,12 @@ export default function HomeClient() {
                   </button>
                 </div>
                 {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
+                {fuelFilter && (
+                  <p className="text-xs text-slate-700">
+                    Filter BBM memakai data jenis BBM yang dijual SPBU, bukan stok saat ini. SPBU yang
+                    jenis BBM-nya belum diketahui tetap ditampilkan.
+                  </p>
+                )}
                 <details className="text-xs text-slate-700">
                   <summary className="min-h-8 cursor-pointer py-1 font-semibold">
                     Keterangan tanda

@@ -1,3 +1,4 @@
+import fuelComplete from "@/data/fuel_complete.json";
 import gesCodes from "@/data/ges_codes.json";
 
 export type StationCategory = "spbu" | "pertashop" | "spbuk" | "spbbk" | "spbun";
@@ -33,4 +34,9 @@ export interface GesInfo {
 export function gesInfo(code: string | null | undefined): GesInfo | null {
   if (!code) return null;
   return (gesCodes as Record<string, GesInfo>)[code] ?? null;
+}
+
+/** True when the fuel list of this station was verified as complete (a fuel not on it is not sold). */
+export function fuelListComplete(code: string | null | undefined): boolean {
+  return Boolean(code) && Object.prototype.hasOwnProperty.call(fuelComplete, code as string);
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { StationDTO } from "@/lib/api-types";
 import { FUEL_LABEL, reportedText, stationFuels } from "@/lib/format";
 import ReportFlow from "./ReportFlow";
-import { CategoryBadge, GesBadge, QueueBadge, StockBadge } from "./StatusBits";
+import { CategoryBadge, FuelsSold, GesBadge, QueueBadge, StockBadge } from "./StatusBits";
 
 export default function StationDetail({
   station,
@@ -48,6 +48,9 @@ export default function StationDetail({
           )}
         </p>
         <p className="mt-1 text-sm text-slate-800">{station.address ?? station.regency}</p>
+        <p className="mt-1 text-sm">
+          <FuelsSold fuels={station.fuels} complete={station.fuelsComplete} />
+        </p>
         {!station.is24h && station.openingHours && (
           <p className="mt-1 text-xs text-slate-700">Buka: {station.openingHours}</p>
         )}

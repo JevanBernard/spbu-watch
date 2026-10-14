@@ -16,6 +16,7 @@ export interface StationDTO {
   pertaminaCode: string | null;
   category: StationCategory;
   isGes: boolean;
+  fuelsComplete: boolean; // true: `fuels` is the verified full list of fuels sold
   queue: QueueStatus;
   stock: Partial<Record<Fuel, StockStatus>>;
 }

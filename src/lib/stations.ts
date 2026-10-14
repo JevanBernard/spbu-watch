@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { STOCK_TTL_MIN } from "./config";
-import { gesInfo, stationCategory } from "./category";
+import { fuelListComplete, gesInfo, stationCategory } from "./category";
 import {
   computeQueueStatus,
   computeStockStatus,
@@ -105,6 +105,7 @@ export function publicStation(s: StationRow) {
     pertaminaCode: s.pertamina_code,
     category: stationCategory({ brand: s.brand, name: s.name, pertaminaCode: s.pertamina_code }),
     isGes: gesInfo(s.pertamina_code) !== null,
+    fuelsComplete: fuelListComplete(s.pertamina_code),
   };
 }
 

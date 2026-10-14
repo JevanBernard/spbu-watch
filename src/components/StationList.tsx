@@ -1,6 +1,6 @@
 import type { StationDTO } from "@/lib/api-types";
 import { formatDistance, reportedText } from "@/lib/format";
-import { CategoryBadge, GesBadge, QueueBadge } from "./StatusBits";
+import { CategoryBadge, FuelsSold, GesBadge, QueueBadge } from "./StatusBits";
 
 export interface ListItem {
   station: StationDTO;
@@ -44,6 +44,9 @@ export default function StationList({
               <span className="text-slate-600">
                 {s.pertaminaCode ? `Kode ${s.pertaminaCode}` : "Kode belum diketahui"}
               </span>
+            </span>
+            <span className="text-xs">
+              <FuelsSold fuels={s.fuels} complete={s.fuelsComplete} />
             </span>
             <span className="flex flex-wrap items-center gap-2">
               <QueueBadge status={s.queue.status} />

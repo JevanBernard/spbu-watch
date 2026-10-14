@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gesInfo, stationCategory } from "@/lib/category";
+import { fuelListComplete, gesInfo, stationCategory } from "@/lib/category";
 
 describe("stationCategory", () => {
   it.each([
@@ -31,5 +31,13 @@ describe("gesInfo", () => {
     expect(gesInfo("")).toBeNull();
     expect(gesInfo(null)).toBeNull();
     expect(gesInfo(undefined)).toBeNull();
+  });
+});
+
+describe("fuelListComplete", () => {
+  it("is false for missing codes and codes without a verified list", () => {
+    expect(fuelListComplete(null)).toBe(false);
+    expect(fuelListComplete("")).toBe(false);
+    expect(fuelListComplete("00.000.00")).toBe(false);
   });
 });
