@@ -6,10 +6,11 @@ import type { GeoJSONSource, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { StationDTO } from "@/lib/api-types";
 import { hasConfirmedOut } from "@/lib/format";
+import { MAP_STYLE_URL } from "@/lib/map";
 
 const DENPASAR: [number, number] = [115.2166, -8.65];
 const CLUSTER_MAX_ZOOM = 11; // clusters below zoom 12
-const STYLE_URL = process.env.NEXT_PUBLIC_MAP_STYLE_URL;
+const STYLE_URL = MAP_STYLE_URL;
 
 // The bundler breaks MapLibre's own worker URL; serve a copy from /public (scripts/copy_maplibre_worker.mjs).
 maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
@@ -134,7 +135,7 @@ export default function MapView({ stations, selectedId, userLocation, onSelect }
       new maplibregl.AttributionControl({
         compact: true,
         customAttribution:
-          '<a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>',
+          '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>',
       }),
       "bottom-right",
     );

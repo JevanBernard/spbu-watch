@@ -9,7 +9,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:3100",
     channel: "chrome",
-    launchOptions: { args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] },
+    launchOptions: { args: ["--use-angle=swiftshader-webgl", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] },
     viewport: { width: 375, height: 760 },
     permissions: ["geolocation"],
     geolocation: { latitude: -8.65, longitude: 115.2166 },

@@ -10,8 +10,9 @@ function origin(url: string | undefined): string | null {
   }
 }
 
-// Map tiles/style/glyphs come from the origin of the configured style URL (MapTiler by default).
-const mapOrigin = origin(process.env.NEXT_PUBLIC_MAP_STYLE_URL);
+// Map tiles/style/glyphs come from the origin of the configured style URL (OpenFreeMap by default).
+const DEFAULT_MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty"; // keep in sync with src/lib/map.ts
+const mapOrigin = origin(process.env.NEXT_PUBLIC_MAP_STYLE_URL || DEFAULT_MAP_STYLE);
 const turnstile = "https://challenges.cloudflare.com";
 
 const csp = [

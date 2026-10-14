@@ -11,7 +11,7 @@ test("home page: disclaimer, map loads under the CSP, station list, no console e
 
   // Headless Chrome with software WebGL sometimes never starts the map, so a missing style request is
   // not a failure. If the style IS requested it must succeed: a 403 usually means this origin is not
-  // allowed on the MapTiler key (add http://localhost:3100), and CSP problems show up as console errors.
+  // reachable (OpenFreeMap needs no key), and CSP problems show up as console errors.
   const seen: { style: number | null } = { style: null };
   page.on("response", (r) => {
     if (/\/style\.json/.test(r.url())) seen.style = r.status();

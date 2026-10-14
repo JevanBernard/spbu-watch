@@ -399,7 +399,7 @@ export default function HomeClient() {
             <footer className="mt-4 space-y-1 border-t border-slate-200 px-4 pt-4 text-xs text-slate-600">
               <p>{DISCLAIMER}</p>
               <p>
-                Peta © MapTiler · © OpenStreetMap contributors. Data SPBU dari OpenStreetMap (ODbL).
+                Peta: OpenFreeMap © OpenMapTiles, data © OpenStreetMap contributors. Data SPBU dari OpenStreetMap (ODbL).
               </p>
               <p>
                 Privasi: aplikasi menyimpan laporan antrean/stok, ID acak perangkat, hash IP, dan hash harian

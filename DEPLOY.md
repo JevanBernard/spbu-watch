@@ -1,10 +1,10 @@
 # Deploy checklist (free tiers)
 
-Target: Vercel (Hobby) + Supabase (Free) + MapTiler (Free). Verify current free-tier limits on each
+Target: Vercel (Hobby) + Supabase (Free) + OpenFreeMap (free, no key). Verify current free-tier limits on each
 provider's pricing page before launch; they change.
 
-> Vercel's Hobby plan is for **non-commercial** use. MapTiler's free plan is too. If the app ever earns
-> money or takes sponsorship, re-check both.
+> Vercel's Hobby plan is for **non-commercial** use. If the app ever earns money or takes sponsorship,
+> re-check it (OpenFreeMap allows commercial use).
 
 ## 1. Supabase
 
@@ -16,12 +16,14 @@ provider's pricing page before launch; they change.
 - [ ] RLS is on for all three tables. `reports` has no policy (check **Authentication → Policies**).
 - [ ] `SUPABASE_SERVICE_ROLE_KEY` is only set as a server env var on the host, never in the repo or client.
 
-## 2. MapTiler
+## 2. Map tiles (OpenFreeMap)
 
-- [ ] API key created, **Allowed HTTP origins** set to the production domain (and `http://localhost:3000`,
-  `http://localhost:3100` for local runs). Do not leave the key unrestricted.
-- [ ] Attribution text (© MapTiler, © OpenStreetMap contributors) is visible. MapTiler asks for its logo
-  on the map; confirm the current wording of their terms before public launch.
+- [ ] Nothing to sign up for. The default style is `https://tiles.openfreemap.org/styles/liberty`; leave
+  `NEXT_PUBLIC_MAP_STYLE_URL` **empty/unset** on Vercel to use it.
+- [ ] If an old MapTiler URL is still set on Vercel, delete it (or replace it) and redeploy: `NEXT_PUBLIC_*`
+  values are baked in at build time.
+- [ ] The attribution shows on the map ("OpenFreeMap © OpenMapTiles Data from OpenStreetMap") and in the footer.
+- [ ] OpenFreeMap is donation funded. If the app grows, consider sponsoring it (github.com/sponsors/hyperknot).
 
 ## 3. Vercel
 
@@ -34,14 +36,14 @@ provider's pricing page before launch; they change.
   | `NEXT_PUBLIC_SUPABASE_URL` | public |
   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | public (anon key only) |
   | `SUPABASE_SERVICE_ROLE_KEY` | secret, server only |
-  | `NEXT_PUBLIC_MAP_STYLE_URL` | MapTiler style URL with the restricted key |
+  | `NEXT_PUBLIC_MAP_STYLE_URL` | leave empty to use OpenFreeMap (or any MapLibre style URL) |
   | `ADMIN_TOKEN` | long random string, different from any other password |
   | `IP_HASH_SALT` | long random string. Changing it later resets per-IP limits |
   | `NEXT_PUBLIC_CONTACT_URL` | `mailto:` or `https://` link (needed for the privacy page) |
   | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | optional, set both or neither |
 
   `NEXT_PUBLIC_*` values are baked in at build time: redeploy after changing them.
-- [ ] First deploy succeeded. Production URL added to the MapTiler key's allowed origins.
+- [ ] First deploy succeeded.
 
 ## 4. Verify the live site
 

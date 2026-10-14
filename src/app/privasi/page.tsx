@@ -73,8 +73,8 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-bold">Pihak ketiga</h2>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>MapTiler</b> menyajikan gambar peta, sehingga peramban Anda terhubung ke server
-            mereka saat peta dimuat.
+            <b>OpenFreeMap</b> menyajikan gambar peta (data OpenStreetMap), sehingga peramban Anda terhubung ke
+            server mereka saat peta dimuat. Mereka menyatakan tidak memakai cookie dan tidak meminta pendaftaran.
           </li>
           <li>
             <b>Supabase</b> dan <b>Vercel</b> menjadi tempat database dan hosting aplikasi ini.
