@@ -1,6 +1,7 @@
 import { CATEGORY_LABEL, type StationCategory } from "@/lib/category";
 import type { Fuel, QueueState, StockState } from "@/lib/status";
 import { QUEUE_LABEL, STOCK_LABEL, soldFuelsText } from "@/lib/format";
+import { openNow } from "@/lib/hours";
 
 const QUEUE_STYLE: Record<QueueState, { cls: string; bars: number }> = {
   sepi: { cls: "bg-green-700 text-white", bars: 1 },
@@ -88,14 +89,32 @@ export function GesBadge() {
   );
 }
 
-/** Fuels sold (a static fact). Says plainly when the list is unknown or only partly known. */
-export function FuelsSold({ fuels, complete }: { fuels: Fuel[]; complete: boolean }) {
+/** Fuels sold (a static fact). Says plainly when the list is unknown, partial or comes from users. */
+export function FuelsSold({
+  fuels,
+  complete,
+  fromUsers = [],
+}: {
+  fuels: Fuel[];
+  complete: boolean;
+  fromUsers?: Fuel[];
+}) {
   const text = soldFuelsText({ fuels });
   if (!text) return <span className="text-slate-600">BBM: belum diketahui</span>;
+  const userText = soldFuelsText({ fuels: fromUsers });
   return (
     <span className="text-slate-800">
       BBM: <b>{text}</b>
-      {!complete && <span className="text-slate-600"> (daftar mungkin belum lengkap)</span>}
+      {userText && <span className="text-slate-600"> ({userText}: dilaporkan pengguna)</span>}
+      {!complete && <span className="text-slate-600"> · daftar mungkin belum lengkap</span>}
     </span>
   );
+}
+
+/** Open / closed now (WITA), from the opening hours when they are known and understood. */
+export function OpenBadge({ hours, is24h }: { hours: string | null; is24h: boolean }) {
+  const o = openNow(hours, is24h);
+  if (o.state === "unknown") return null;
+  const cls = o.state === "open" ? "bg-green-100 text-green-900" : "bg-slate-200 text-slate-800";
+  return <span className={`rounded px-2 py-0.5 font-bold ${cls}`}>{o.state === "open" ? "✓ " : "✕ "}{o.label}</span>;
 }

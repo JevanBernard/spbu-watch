@@ -40,7 +40,7 @@ node,2487544914,54.803.19,SPBU Pertamina 54.803.19,Pertamina,,Badung,-8.6890239,
 node,1502919830,54.803.20,SPBU Pertamina 54.803.20,Pertamina,,Badung,-8.7026066,115.1757054,"Jalan Dewi Sri, Legian, Kuta, Kabupaten Badung, Bali, Indonesia",24/7,true,"[""solar""]",false,,true
 way,714724147,54.803.21,SPBU Pertamina 54.803.21 (Pererenan),Pertamina,,Badung,-8.6308846,115.1327634,"Dekat Jalan Raya Canggu, Pererenan, Kabupaten Badung",,false,[],false,,true
 way,512629994,54.803.27,SPBU Pertamina 54.803.27,,,Badung,-8.7934456,115.2151935,"Dekat Jalan Bypass Ngurah Rai, Benoa, Kabupaten Badung",,false,[],false,,true
-node,11002450532,54.803.30,SPBU Pertamina 54.803.30 (Darmasaba),Pertamina,,Badung,-8.589582,115.2157029,Darmasaba,24/7,true,[],false,,true
+node,11002450532,54.803.30,SPBU Pertamina 54.803.30 (Darmasaba),Pertamina,,Badung,-8.589582,115.2157029,Darmasaba,24/7,true,"[""pertamax_turbo"", ""pertamax"", ""pertamina_dex"", ""dexlite"", ""pertalite"", ""solar""]",false,,true
 node,941307526,54.803.31,SPBU Pertamina 54.803.31 (Sunset Road),Pertamina,Pertamina,Badung,-8.7129491,115.1859091,"Sunset Road, 27, Kuta, Kabupaten Badung, Bali, Indonesia",24/7,true,"[""solar""]",false,,true
 way,714724146,54.803.34,SPBU Pertamina 54.803.34 (Sunset Road),Pertamina,,Badung,-8.6986899,115.1780504,"Sunset Road, Kuta, Kabupaten Badung, Bali, Indonesia",,false,"[""solar""]",false,,true
 node,3217531312,54.803.35,SPBU Pertamina 54.803.35,Pertamina,,Badung,-8.8201644,115.1498481,"Dekat Jalan Raya Uluwatu, Ungasan, Kabupaten Badung",24/7,true,[],false,,true

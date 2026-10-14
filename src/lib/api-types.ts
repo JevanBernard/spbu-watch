@@ -12,6 +12,7 @@ export interface StationDTO {
   openingHours: string | null;
   is24h: boolean;
   fuels: Fuel[];
+  fuelsFromUsers: Fuel[]; // part of `fuels` that comes from user reports, not from the static data
   hasEvCharging: boolean;
   pertaminaCode: string | null;
   category: StationCategory;

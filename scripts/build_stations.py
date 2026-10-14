@@ -336,32 +336,50 @@ def standardize_names(kept):
 
 
 
-FUEL_OVERRIDES = DATA / "fuel_overrides.csv"  # pertamina_code,fuels (pipe-separated),source
+FUEL_OVERRIDES = DATA / "fuel_overrides.csv"  # pertamina_code,fuels,complete,source
 FUEL_COMPLETE_JSON = Path(__file__).resolve().parent.parent / "src" / "data" / "fuel_complete.json"
 VALID_FUELS = {"pertalite", "pertamax", "pertamax_turbo", "solar", "dexlite", "pertamina_dex"}
 
 
 def apply_fuel_overrides(kept):
-    """Verified, COMPLETE fuel lists per station code. These replace the OSM-derived list (which is only
-    ever a partial positive list) and are also written to src/data/fuel_complete.json so the app knows
-    that a fuel missing from the list is really not sold there."""
+    """Fuel lists per station code from data/fuel_overrides.csv.
+
+    - complete=yes: a verified FULL list. A fuel missing from it is really not sold, so the app may hide
+      the station when that fuel is filtered. Written to src/data/fuel_complete.json.
+    - anything else (including no `complete` column): the fuels are only known to be sold, the list may
+      be incomplete. They are added to the station's fuels but never used to hide a station.
+    Fuels are separated with | or ;. Rows with no fuels are skipped (nothing is known).
+    """
     complete = {}
+    added = 0
     if FUEL_OVERRIDES.exists():
+        by_code = {s["pertamina_code"]: s for s in kept if s["pertamina_code"]}
         for row in csv.DictReader(open(FUEL_OVERRIDES, encoding="utf-8")):
-            fuels = [f for f in row["fuels"].split("|") if f]
+            code = (row.get("pertamina_code") or "").strip()
+            raw_fuels = (row.get("fuels") or "").strip()
+            if raw_fuels.startswith("["):  # JSON array form, e.g. ["solar"] or []
+                fuels = [str(f).strip() for f in json.loads(raw_fuels)]
+            else:
+                fuels = [f.strip() for f in re.split(r"[|;]", raw_fuels) if f.strip()]
+            if not code or not fuels:
+                continue
             bad = [f for f in fuels if f not in VALID_FUELS]
             if bad:
-                sys.exit(f"fuel_overrides.csv: unknown fuel {bad} for {row['pertamina_code']}")
-            complete[row["pertamina_code"]] = fuels
-    by_code = {s["pertamina_code"]: s for s in kept if s["pertamina_code"]}
-    for code, fuels in complete.items():
-        if code not in by_code:
-            print(f"WARNING: fuel_overrides.csv has code {code} but no station has it")
-            continue
-        by_code[code]["fuels"] = json.dumps(fuels)
+                sys.exit(f"fuel_overrides.csv: unknown fuel {bad} for {code} (use {sorted(VALID_FUELS)})")
+            station = by_code.get(code)
+            if station is None:
+                print(f"WARNING: fuel_overrides.csv has code {code} but no station has it")
+                continue
+            if (row.get("complete") or "").strip().lower() == "yes":
+                complete[code] = fuels
+                station["fuels"] = json.dumps(fuels)
+            else:
+                known = json.loads(station["fuels"])
+                station["fuels"] = json.dumps([f for f in sorted(VALID_FUELS) if f in known or f in fuels])
+            added += 1
     FUEL_COMPLETE_JSON.parent.mkdir(parents=True, exist_ok=True)
     FUEL_COMPLETE_JSON.write_text(json.dumps(dict(sorted(complete.items())), indent=1), encoding="utf-8")
-    return len(complete)
+    return added, len(complete)
 
 
 # ---------- main ----------
@@ -512,8 +530,8 @@ def main():
     # Points outside all four regencies are expected (bounding box overlaps neighbours).
     filled = apply_overrides(kept)
     added = add_manual(kept, boundaries)
-    fuel_verified = apply_fuel_overrides(kept)
-    print(f"stations with a verified complete fuel list: {fuel_verified}")
+    fuel_rows, fuel_verified = apply_fuel_overrides(kept)
+    print(f"fuel_overrides rows used: {fuel_rows} | verified complete lists: {fuel_verified}")
     renamed, addr_filled = standardize_names(kept)
     print(f"names standardised: {renamed} | addresses filled (approximate, 'Dekat ...'): {addr_filled}")
     print(f"codes filled from overrides: {filled} | manual stations added: {added}")

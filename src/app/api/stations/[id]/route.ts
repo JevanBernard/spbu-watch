@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { anonClient, serviceClient } from "@/lib/supabase";
+import { fuelsReportedSold } from "@/lib/fuels-sold";
 import {
   computeStationStatus,
+  loadSoldReports,
   publicStation,
   REPORT_COLUMNS,
   STATION_COLUMNS,
@@ -43,12 +45,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       .returns<ReportRow[]>();
     if (repErr) throw new Error(repErr.message);
     const reports = rows ?? [];
+    const sold = await loadSoldReports(serviceClient(), now, id);
+    const pub = publicStation(station, fuelsReportedSold(sold.get(id) ?? [], now));
 
     return NextResponse.json(
       {
         station: {
-          ...publicStation(station),
-          ...computeStationStatus(station, reports.map(toReport), now),
+          ...pub,
+          ...computeStationStatus({ fuels: pub.fuels }, reports.map(toReport), now),
         },
         // Anonymized: no device_id, ip_hash or report id.
         recentReports: reports.map((r) => ({

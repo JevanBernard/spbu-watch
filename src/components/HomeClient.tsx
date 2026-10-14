@@ -76,8 +76,13 @@ export default function HomeClient() {
   );
   const stations = stationsQ.data;
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // A shared link (?spbu=<id>) opens that station. Read lazily so there is no extra render.
+  const [selectedId, setSelectedId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("spbu"),
+  );
+  const [sheetOpen, setSheetOpen] = useState(() =>
+    typeof window === "undefined" ? false : new URLSearchParams(window.location.search).has("spbu"),
+  );
   const [search, setSearch] = useState("");
   const [regency, setRegency] = useState("");
   const [only24h, setOnly24h] = useState(false);
@@ -124,10 +129,12 @@ export default function HomeClient() {
 
   const selected = selectedId ? (stations.find((s) => s.id === selectedId) ?? null) : null;
 
-  const select = (id: string) => {
+  const select = (id: string | null) => {
     scroller.current?.scrollTo({ top: 0 });
     setSelectedId(id);
-    setSheetOpen(true);
+    if (id) setSheetOpen(true);
+    // Keep the address bar in step so the page URL itself is shareable.
+    window.history.replaceState(null, "", id ? `/?spbu=${id}` : "/");
   };
 
   return (
@@ -170,7 +177,7 @@ export default function HomeClient() {
           {selected ? (
             <StationDetail
               station={selected}
-              onBack={() => setSelectedId(null)}
+              onBack={() => select(null)}
               onReported={stationsQ.reload}
             />
           ) : (
@@ -221,6 +228,9 @@ export default function HomeClient() {
                     <option value="pertalite">Menjual Pertalite</option>
                     <option value="pertamax">Menjual Pertamax</option>
                     <option value="solar">Menjual Solar</option>
+                    <option value="pertamax_turbo">Menjual Pertamax Turbo</option>
+                    <option value="dexlite">Menjual Dexlite</option>
+                    <option value="pertamina_dex">Menjual Pertamina Dex</option>
                   </select>
                   <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
                     <input

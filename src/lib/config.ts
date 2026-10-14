@@ -10,3 +10,8 @@ export const GEOFENCE_M = 300;
 export const REPORT_COOLDOWN_MIN = 10; // per device, per (station, kind, fuel)
 export const DEVICE_MAX_PER_HOUR = 20;
 export const IP_MAX_PER_HOUR = 60;
+
+// A fuel counts as "sold here" when this many distinct devices reported it available within the window.
+// Only "available" reports count: a report of "out" must never remove a fuel from the list.
+export const FUEL_SOLD_MIN_DEVICES = 2;
+export const FUEL_SOLD_WINDOW_DAYS = 30;

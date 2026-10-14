@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { asOfText, FUEL_PRICES, priceOf, rupiah } from "@/lib/prices";
 import type { StationDTO } from "@/lib/api-types";
 import { FUEL_LABEL, reportedText, stationFuels } from "@/lib/format";
 import ReportFlow from "./ReportFlow";
-import { CategoryBadge, FuelsSold, GesBadge, QueueBadge, StockBadge } from "./StatusBits";
+import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBadge, StockBadge } from "./StatusBits";
 
 export default function StationDetail({
   station,
@@ -15,6 +16,22 @@ export default function StationDetail({
 }) {
   const fuels = stationFuels(station);
   const [reporting, setReporting] = useState<"queue" | "stock" | null>(null);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+
+  const share = async () => {
+    const url = `${window.location.origin}/?spbu=${station.id}`;
+    const text = `${station.name}: lihat antrean dan stok BBM di SPBU Watch SARBAGITA`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: station.name, text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      setShareMsg("Tautan disalin");
+    } catch {
+      setShareMsg("Tautan tidak bisa dibagikan dari perangkat ini");
+    }
+  };
   return (
     <div className="space-y-4 p-4">
       <button
@@ -33,6 +50,7 @@ export default function StationDetail({
           {station.is24h && (
             <span className="rounded bg-slate-200 px-2 py-0.5 font-bold text-slate-800">24 jam</span>
           )}
+          <OpenBadge hours={station.openingHours} is24h={station.is24h} />
         </div>
         <p className="mt-2 text-sm text-slate-800">
           Kode resmi:{" "}
@@ -49,7 +67,11 @@ export default function StationDetail({
         </p>
         <p className="mt-1 text-sm text-slate-800">{station.address ?? station.regency}</p>
         <p className="mt-1 text-sm">
-          <FuelsSold fuels={station.fuels} complete={station.fuelsComplete} />
+          <FuelsSold
+            fuels={station.fuels}
+            complete={station.fuelsComplete}
+            fromUsers={station.fuelsFromUsers}
+          />
         </p>
         {!station.is24h && station.openingHours && (
           <p className="mt-1 text-xs text-slate-700">Buka: {station.openingHours}</p>
@@ -75,7 +97,12 @@ export default function StationDetail({
               const st = station.stock[fuel];
               return (
                 <li key={fuel} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                  <span className="font-semibold">{FUEL_LABEL[fuel]}</span>
+                  <span>
+                    <span className="font-semibold">{FUEL_LABEL[fuel]}</span>
+                    {priceOf(fuel) !== null && (
+                      <span className="block text-xs text-slate-600">{rupiah(priceOf(fuel) as number)}/liter</span>
+                    )}
+                  </span>
                   <span className="text-right">
                     <StockBadge status={st?.status ?? "unknown"} />
                     {st && st.reportCount > 0 && (
@@ -92,6 +119,10 @@ export default function StationDetail({
         <p className="mt-2 text-xs text-slate-600">
           Status &quot;Belum terkonfirmasi&quot; berarti baru sedikit pelapor. Itu bukan berarti
           BBM habis.
+        </p>
+        <p className="mt-1 text-xs text-slate-600">
+          Harga resmi {FUEL_PRICES.region} per {asOfText(FUEL_PRICES.asOf)}. Bisa berubah dan berbeda di
+          Pertashop.
         </p>
       </section>
 
@@ -121,6 +152,15 @@ export default function StationDetail({
           </button>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={share}
+        className="min-h-12 w-full rounded-md border-2 border-blue-900 px-4 text-base font-bold text-blue-900"
+      >
+        Bagikan SPBU ini
+      </button>
+      {shareMsg && <p className="text-center text-sm text-slate-700">{shareMsg}</p>}
 
       <a
         href={`https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`}
