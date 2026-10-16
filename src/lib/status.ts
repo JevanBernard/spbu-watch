@@ -1,6 +1,7 @@
 import {
   ADMIN_DEVICE_ID,
   ADMIN_OUT_CONFIRMED_MIN,
+  ADMIN_QUEUE_SHOW_MIN,
   DOMINANCE,
   HALF_LIFE_MIN,
   MIN_DEVICES_FOR_OUT,
@@ -108,6 +109,18 @@ export function computeQueueStatus(reports: Report[], now: Date = new Date()): Q
   );
   const summary = summarize(used, QUEUE_TTL_MIN);
   if (used.length === 0) return { status: "unknown", ...summary };
+
+  const newestAge = Math.min(...used.map((u) => u.age));
+  // Only an admin report can be this old (visitor reports expire at QUEUE_TTL_MIN). Keep the time, drop the status.
+  if (newestAge >= ADMIN_QUEUE_SHOW_MIN) return { status: "unknown", ...summary };
+
+  // A fresh admin observation that no visitor has contradicted since decides the status alone.
+  const admin = used.find((u) => u.report.deviceId === ADMIN_DEVICE_ID);
+  if (admin && admin.age < QUEUE_TTL_MIN && used.every((u) => u === admin || u.age >= admin.age)) {
+    const level = admin.report.queueLevel as number;
+    return { status: level < 0.5 ? "sepi" : level < 1.5 ? "sedang" : "panjang", ...summary };
+  }
+
   const totalW = used.reduce((s, u) => s + u.w, 0);
   const rawMean = used.reduce((s, u) => s + u.w * (u.report.queueLevel as number), 0) / totalW;
   const mean = Math.round(rawMean * 1e9) / 1e9; // avoid float noise at the 0.5 / 1.5 cut-offs

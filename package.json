@@ -17,6 +17,7 @@
     "prebuild": "node scripts/copy_maplibre_worker.mjs",
     "seed:official": "tsx scripts/seed_official.ts",
     "purge:reports": "tsx scripts/purge_reports.ts",
+    "verify:db": "tsx scripts/verify_db.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {

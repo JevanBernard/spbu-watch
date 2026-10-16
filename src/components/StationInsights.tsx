@@ -78,7 +78,13 @@ export function SummaryTiles({ station, timeline }: { station: StationDTO; timel
         label="Antrean"
         icon={<TimerIcon />}
         value={QUEUE_SHORT[q.status]}
-        sub={q.reportCount > 0 ? `${q.reportCount} pelapor · ${timeAgo(q.lastReportAt)}` : "Belum ada laporan"}
+        sub={
+          q.stale && q.lastReportAt
+            ? `terakhir dipantau admin ${timeAgo(q.lastReportAt)}`
+            : q.reportCount > 0
+              ? `${q.reportCount} pelapor · ${timeAgo(q.lastReportAt)}`
+              : "Belum ada laporan"
+        }
         box={`border ${qt.block}`}
         valueCls={qt.text}
       />

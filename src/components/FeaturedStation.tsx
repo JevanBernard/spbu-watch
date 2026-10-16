@@ -58,7 +58,7 @@ export default function FeaturedStation({
       <QueueBlock
         status={q.status}
         text={reportedText(q)}
-        pill={q.reportCount > 0 ? (q.confidence === "low" ? "Kurang pasti" : `${q.reportCount} pelapor`) : undefined}
+        pill={q.reportCount > 0 && !q.stale ? (q.confidence === "low" ? "Kurang pasti" : `${q.reportCount} pelapor`) : undefined}
       />
       {inRange && (
         <p className="-mt-2 text-xs font-semibold text-status-smooth">

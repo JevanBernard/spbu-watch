@@ -9,6 +9,13 @@ export const ADMIN_DEVICE_ID = "admin-cctv";
 export const ADMIN_KEEP_DAYS = 30;
 /** An admin "habis" report counts as confirmed for this long; after that it shows as "belum terkonfirmasi" (the report time stays visible). */
 export const ADMIN_OUT_CONFIRMED_MIN = 6 * 60;
+/**
+ * Queue level from the admin (watching CCTV) is a direct observation: while it is fresh (within QUEUE_TTL_MIN) and
+ * newer than every visitor report, it decides the queue status alone. A newer visitor report goes back to the blend.
+ */
+/** After this long an admin queue report is no longer shown as a status (queues change in minutes). Only the
+ * "last watched by admin X ago" text stays. Stock keeps its own rule (ADMIN_OUT_CONFIRMED_MIN, ADMIN_KEEP_DAYS). */
+export const ADMIN_QUEUE_SHOW_MIN = 120;
 export const DOMINANCE = 0.6; // share of weighted votes needed to call a status
 export const GEOFENCE_M = 500;
 

@@ -14,7 +14,7 @@ export default function BottomNav({ tab, onChange }: { tab: AppTab; onChange: (t
   return (
     <nav
       aria-label="Menu utama"
-      className="absolute inset-x-0 bottom-0 z-50 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(15,23,42,0.08)]"
+      className="absolute inset-x-0 bottom-0 z-50 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(15,23,42,0.08)] md:right-auto md:w-[440px] md:border-r"
     >
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-around">
         {ITEMS.map((it) => {

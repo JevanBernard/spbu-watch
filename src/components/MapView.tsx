@@ -315,9 +315,11 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, re
     if (list.length === 0) return;
     const bounds = new maplibregl.LngLatBounds();
     for (const s of list) bounds.extend([s.lng, s.lat]);
-    // The bottom sheet covers about half of the screen and the info card the top.
-    const bottom = Math.round(window.innerHeight * 0.5);
-    map.fitBounds(bounds, { padding: { top: 130, bottom, left: 40, right: 40 }, maxZoom: 15, duration: 600 });
+    // On a phone the bottom sheet covers about half of the screen; on a wide screen the list is a side pane
+    // next to the map, so only the info card at the top needs room.
+    const wide = window.matchMedia("(min-width: 768px)").matches;
+    const bottom = wide ? 40 : Math.round(window.innerHeight * 0.5);
+    map.fitBounds(bounds, { padding: { top: wide ? 150 : 130, bottom, left: 40, right: 40 }, maxZoom: 15, duration: 600 });
     framed.current = true;
   }, [fitKey, ready]);
 

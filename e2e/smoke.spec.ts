@@ -328,3 +328,72 @@ test("chat API: reading needs no login, bad ids and bodies are refused, nothing 
   expect((await request.get("/api/admin/chat")).status()).toBe(401); // moderation needs the admin token
   expect((await request.post(`/api/admin/chat/${id}/hide`)).status()).toBe(401);
 });
+
+test.describe("desktop layout (1280 x 800): list pane on the left, map on the right", () => {
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test("two panes that do not overlap, list open by default, nav inside the left pane", async ({ page }) => {
+    await page.goto("/");
+    const canvas = page.locator("canvas.maplibregl-canvas");
+    await expect(canvas).toBeVisible({ timeout: 20_000 });
+    const mapBox = await page.getByTestId("map").boundingBox();
+    expect(mapBox!.x).toBeGreaterThanOrEqual(439);
+    expect(mapBox!.x + mapBox!.width).toBeGreaterThanOrEqual(1279);
+
+    // the list is the default content of the left pane, no sheet to pull up
+    await expect(page.getByRole("heading", { name: "Daftar SPBU" })).toBeVisible();
+    await expect.poll(() => page.locator("li button").count(), { timeout: 15_000 }).toBeGreaterThan(50);
+    await expect(page.getByRole("button", { name: /Perbesar daftar|Perkecil daftar/ })).toBeHidden();
+
+    const nav = await page.getByRole("navigation", { name: "Menu utama" }).boundingBox();
+    expect(nav!.x).toBe(0);
+    expect(nav!.width).toBeLessThanOrEqual(441);
+    const noSideScroll = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    expect(noSideScroll).toBe(true);
+
+    // quick filters sit on the map (only one set is visible), and still narrow the list
+    await expect(page.getByRole("button", { name: "Pertashop", exact: true })).toHaveCount(1);
+    const before = await page.locator("li button").count();
+    await page.getByRole("button", { name: "Pertashop", exact: true }).click();
+    await expect.poll(() => page.locator("li button").count()).toBeLessThan(before);
+
+    // opening a station keeps the map visible next to it
+    await page.getByRole("button", { name: "Semua", exact: true }).click();
+    await page.locator("li button").first().click();
+    await expect(page.getByRole("tab", { name: "Obrolan" })).toBeVisible();
+    await expect(canvas).toBeVisible();
+
+    // Lapor and Info open inside the left pane, not over the whole screen
+    await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+    const info = await page.getByRole("heading", { name: "Cara membaca status" }).boundingBox();
+    expect(info!.x + info!.width).toBeLessThanOrEqual(441);
+    await expect(canvas).toBeVisible();
+  });
+});
+
+for (const size of [
+  { name: "phone", viewport: { width: 375, height: 760 } },
+  { name: "desktop", viewport: { width: 1280, height: 800 } },
+]) {
+  test(`shared link (?spbu=) opens the station without hydration errors, ${size.name}`, async ({ page, request }) => {
+    await page.setViewportSize(size.viewport);
+    const errors: string[] = [];
+    page.on("console", (m) => {
+      if (m.type() === "error") errors.push(m.text());
+    });
+    page.on("pageerror", (e) => errors.push(e.message));
+
+    const { stations } = (await (await request.get("/api/stations")).json()) as { stations: { id: string; name: string }[] };
+    const station = stations[0];
+    await page.goto(`/?spbu=${station.id}`);
+    await expect(page.getByRole("heading", { name: station.name })).toBeVisible({ timeout: 15_000 });
+    await page.waitForTimeout(1500); // let hydration finish and any error show up
+
+    // the content must not touch the top edge of the pane
+    const back = await page.getByRole("button", { name: "Kembali ke daftar SPBU" }).boundingBox();
+    if (size.name === "desktop") expect(back!.y).toBeGreaterThanOrEqual(12);
+
+    const hydration = errors.filter((e) => /hydrat|did not match|#418|#423|#425/i.test(e));
+    expect(hydration, hydration.join("\n")).toEqual([]);
+  });
+}

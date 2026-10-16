@@ -169,7 +169,7 @@ export default function StationDetail({
                 status={station.queue.status}
                 text={reportedText(station.queue)}
                 pill={
-                  station.queue.reportCount > 0
+                  station.queue.reportCount > 0 && !station.queue.stale
                     ? station.queue.confidence === "low"
                       ? "Kurang pasti"
                       : `${station.queue.reportCount} pelapor`

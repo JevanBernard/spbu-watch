@@ -66,9 +66,18 @@ describe("an admin queue report shows up in the status at once", () => {
     expect((await queueOf([first, second])).status).toBe("sepi");
   });
 
-  it("visitor reports can outvote a single admin report (the pin stays put)", async () => {
+  it("a fresh admin report overrules several visitors: the pin follows the first tap", async () => {
     const visitors = [report("v1", 10, 2), report("v2", 8, 2), report("v3", 5, 2)];
+    expect((await queueOf(visitors)).status).toBe("panjang");
     const q = await queueOf([...visitors, report(ADMIN_DEVICE_ID, 0, 0)]);
-    console.log("3 visitors say panjang, admin says sepi ->", q.status, `(${q.reportCount} devices)`);
+    expect(q.status).toBe("sepi");
+    expect(q.fromAdmin).toBe(true);
+  });
+
+  it("an admin report from two days ago only leaves its time behind, not a coloured status", async () => {
+    const q = await queueOf([report(ADMIN_DEVICE_ID, 2 * 24 * 60, 2)]);
+    expect(q.status).toBe("unknown");
+    expect(q.stale).toBe(true);
+    expect(q.lastReportAt).not.toBeNull();
   });
 });

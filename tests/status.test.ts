@@ -200,7 +200,39 @@ describe("admin reports (CCTV)", () => {
     expect(st.stale).toBe(true);
     expect(st.fromAdmin).toBe(true);
     expect(st.confidence).toBe("low");
-    expect(computeQueueStatus([{ ...q(ADMIN_DEVICE_ID, 2, 5 * 60) }], NOW).status).toBe("panjang");
+  });
+
+  describe("admin queue reports", () => {
+    it("a fresh admin report decides the queue on its own, even against several visitors", () => {
+      const visitors = [q("a", 2, 10), q("b", 2, 8), q("c", 2, 6)];
+      expect(computeQueueStatus(visitors, NOW).status).toBe("panjang");
+      expect(computeQueueStatus([...visitors, q(ADMIN_DEVICE_ID, 0, 2)], NOW).status).toBe("sepi");
+      expect(computeQueueStatus([...visitors, q(ADMIN_DEVICE_ID, 1, 3)], NOW).status).toBe("sedang");
+    });
+
+    it("a visitor report made after the admin's goes back to the blend", () => {
+      const reports = [q(ADMIN_DEVICE_ID, 0, 20), q("a", 2, 2), q("b", 2, 3), q("c", 2, 1)];
+      expect(computeQueueStatus(reports, NOW).status).toBe("panjang"); // not the admin's "sepi"
+    });
+
+    it("an admin report older than the visitor TTL no longer overrules anything", () => {
+      const visitors = [q("a", 2, 10), q("b", 2, 8), q("c", 2, 6)];
+      expect(computeQueueStatus([...visitors, q(ADMIN_DEVICE_ID, 0, 60)], NOW).status).toBe("panjang");
+    });
+
+    it("is still shown, marked stale, up to ADMIN_QUEUE_SHOW_MIN", () => {
+      const st = computeQueueStatus([q(ADMIN_DEVICE_ID, 2, 60)], NOW);
+      expect(st.status).toBe("panjang");
+      expect(st.stale).toBe(true);
+    });
+
+    it("after ADMIN_QUEUE_SHOW_MIN only the time is kept: the status goes neutral", () => {
+      const st = computeQueueStatus([q(ADMIN_DEVICE_ID, 2, 5 * 60)], NOW);
+      expect(st.status).toBe("unknown");
+      expect(st.fromAdmin).toBe(true);
+      expect(st.stale).toBe(true);
+      expect(st.lastReportAt).toBe(ago(5 * 60).toISOString());
+    });
   });
 
   it("still drops old visitor reports", () => {
