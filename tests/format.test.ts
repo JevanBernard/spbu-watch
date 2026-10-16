@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { distanceM, formatDistance, reportedText, timeAgo } from "@/lib/format";
+import { distanceM, formatDistance, reportedText, timeAgo, travelMinutes, updatedText } from "@/lib/format";
 
 const NOW = new Date("2026-10-14T12:00:00Z");
 const ago = (m: number) => new Date(NOW.getTime() - m * 60_000).toISOString();
@@ -47,5 +47,19 @@ describe("reportedText (stale admin)", () => {
   });
   it("counts days after two days", () => {
     expect(timeAgo(new Date(now.getTime() - 3 * 86_400_000).toISOString(), now)).toBe("3 hari lalu");
+  });
+});
+
+describe("travel time estimate", () => {
+  it("is a rough motorbike estimate: straight line x 1.3 at 25 km/h, at least 1 minute", () => {
+    expect(travelMinutes(0)).toBe(1);
+    expect(travelMinutes(100)).toBe(1);
+    expect(travelMinutes(650)).toBe(2);
+    expect(travelMinutes(5000)).toBe(16);
+  });
+  it("updatedText", () => {
+    const now = new Date("2026-10-14T12:00:00Z");
+    expect(updatedText(new Date(now.getTime() - 8 * 60_000).toISOString(), now)).toBe("Update 8 menit lalu");
+    expect(updatedText(null)).toBe("Belum ada laporan");
   });
 });

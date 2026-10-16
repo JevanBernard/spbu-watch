@@ -129,9 +129,9 @@ describe("processReport", () => {
   describe("geofence", () => {
     it.each([
       [0, 201],
-      [299, 201],
-      [300, 201],
-      [300.5, 403],
+      [499, 201],
+      [500, 201],
+      [500.5, 403],
       [5000, 403],
     ])("distance %s m -> %s", async (distance, status) => {
       const { deps, inserted } = makeDeps({ distanceM: async () => distance });
@@ -143,7 +143,7 @@ describe("processReport", () => {
     it("explains the rejection in Indonesian", async () => {
       const { deps } = makeDeps({ distanceM: async () => 1200 });
       const res = await processReport(queueBody, "ip", deps);
-      expect(res.body.error).toMatch(/300 meter/);
+      expect(res.body.error).toMatch(/500 meter/);
     });
   });
 

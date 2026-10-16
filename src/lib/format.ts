@@ -1,6 +1,7 @@
 import type { Fuel, QueueState, StockState } from "./status";
 import type { StationDTO } from "./api-types";
 import { CATEGORY_LABEL } from "./category";
+import { ROAD_FACTOR, TRAVEL_KMH } from "./config";
 
 export const QUEUE_LABEL: Record<QueueState, string> = {
   sepi: "Antrean sepi",
@@ -69,6 +70,16 @@ export function distanceM(a: { lat: number; lng: number }, b: { lat: number; lng
 
 export function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m / 10) * 10} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+/** Rough minutes by motorbike for a straight-line distance in metres (at least 1). Shown as "± N mnt". */
+export function travelMinutes(m: number): number {
+  return Math.max(1, Math.round(((m * ROAD_FACTOR) / 1000 / TRAVEL_KMH) * 60));
+}
+
+/** Short "update 8 menit lalu" text for a stock row. */
+export function updatedText(iso: string | null, now?: Date): string {
+  return iso ? `Update ${timeAgo(iso, now)}` : "Belum ada laporan";
 }
 
 /** Fuels to list in a station sheet: known fuels plus any with a stock status. */

@@ -208,7 +208,7 @@ export default function AdminClient() {
               className={`${input} mt-1`}
             />
           </label>
-          <button type="submit" className={`${btn} w-full bg-blue-900 text-white`}>
+          <button type="submit" className={`${btn} w-full bg-primary text-white`}>
             Masuk
           </button>
           {msg && <p className="text-sm font-semibold text-red-800">{msg}</p>}
@@ -225,7 +225,7 @@ export default function AdminClient() {
           Keluar
         </button>
       </header>
-      {msg && <p className="rounded bg-blue-50 p-2 text-sm font-semibold">{msg}</p>}
+      {msg && <p className="rounded bg-primary-fixed p-2 text-sm font-semibold">{msg}</p>}
 
       <section className="space-y-3">
         <h2 className="text-lg font-bold">{editingId ? "Ubah informasi resmi" : "Informasi resmi baru"}</h2>
@@ -297,7 +297,7 @@ export default function AdminClient() {
             </label>
           </div>
           <div className="flex gap-2">
-            <button type="submit" className={`${btn} bg-blue-900 text-white`}>
+            <button type="submit" className={`${btn} bg-primary text-white`}>
               {editingId ? "Simpan perubahan" : "Terbitkan"}
             </button>
             {editingId && (
@@ -321,7 +321,7 @@ export default function AdminClient() {
             <li key={u.id} className="space-y-1 p-3">
               <p className="font-bold">
                 {u.title}{" "}
-                {u.pinned && <span className="text-xs text-blue-900">[disematkan]</span>}{" "}
+                {u.pinned && <span className="text-xs text-primary">[disematkan]</span>}{" "}
                 {!u.active && <span className="text-xs text-red-800">[disembunyikan]</span>}
               </p>
               <p className="text-xs text-slate-600">

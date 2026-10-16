@@ -8,6 +8,6 @@ describe("config", () => {
     expect(config.HALF_LIFE_MIN).toBe(20);
     expect(config.MIN_DEVICES_FOR_OUT).toBe(3);
     expect(config.DOMINANCE).toBe(0.6);
-    expect(config.GEOFENCE_M).toBe(300);
+    expect(config.GEOFENCE_M).toBe(500);
   });
 });

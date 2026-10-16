@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import ServiceWorker from "@/components/ServiceWorker";
 import "./globals.css";
+
+const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-jakarta", display: "swap" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://spbu-watch.vercel.app";
 const TITLE = "SPBU Watch SARBAGITA";
@@ -32,13 +35,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1e3a8a",
+  themeColor: "#006194",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body className="bg-white text-slate-900 antialiased">
+    <html lang="id" className={jakarta.variable}>
+      <body className="bg-canvas text-ink antialiased">
         {children}
         <ServiceWorker />
       </body>

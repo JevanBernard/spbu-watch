@@ -56,7 +56,7 @@ export default function ShareDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -86,7 +86,7 @@ export default function ShareDialog({
             aria-label="Tautan"
             className="min-h-11 min-w-0 flex-1 rounded-md border border-slate-400 px-2 text-sm"
           />
-          <button type="button" onClick={copy} className="min-h-11 shrink-0 rounded-md bg-blue-900 px-4 text-sm font-bold text-white">
+          <button type="button" onClick={copy} className="min-h-11 shrink-0 rounded-md bg-primary px-4 text-sm font-bold text-white">
             Salin
           </button>
         </div>
@@ -108,7 +108,7 @@ export default function ShareDialog({
         </div>
 
         {canShare && (
-          <button type="button" onClick={nativeShare} className="mt-3 min-h-12 w-full rounded-md border-2 border-blue-900 text-base font-bold text-blue-900">
+          <button type="button" onClick={nativeShare} className="mt-3 min-h-12 w-full rounded-md border-2 border-primary text-base font-bold text-primary">
             Bagikan lewat aplikasi lain…
           </button>
         )}

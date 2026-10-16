@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import type { StationDTO } from "@/lib/api-types";
 import { getDeviceId } from "@/lib/device";
+import { GEOFENCE_M } from "@/lib/config";
 import { FUEL_LABEL, FUEL_ORDER } from "@/lib/format";
 import type { Fuel } from "@/lib/status";
 import TurnstileWidget, { TURNSTILE_SITE_KEY } from "./TurnstileWidget";
@@ -11,9 +12,9 @@ type Kind = "queue" | "stock";
 type Step = "locate" | "choose" | "sending" | "done" | "error";
 
 const QUEUE_CHOICES = [
-  { level: 0, label: "Sepi", hint: "Tidak antre, langsung dilayani", cls: "bg-green-700" },
-  { level: 1, label: "Sedang", hint: "Antre sebentar", cls: "bg-amber-600" },
-  { level: 2, label: "Panjang", hint: "Antrean panjang", cls: "bg-red-700" },
+  { level: 0, label: "Sepi", hint: "Tidak antre, langsung dilayani", cls: "bg-status-smooth", bars: 1 },
+  { level: 1, label: "Sedang", hint: "Antre sebentar", cls: "bg-status-moderate", bars: 2 },
+  { level: 2, label: "Panjang", hint: "Antrean panjang", cls: "bg-status-critical", bars: 3 },
 ];
 
 const COOLDOWN_MIN = 10;
@@ -21,16 +22,19 @@ const COOLDOWN_MIN = 10;
 export default function ReportFlow({
   station,
   kind,
+  knownCoords = null,
   onClose,
   onDone,
 }: {
   station: StationDTO;
   kind: Kind;
+  /** Position the visitor already shared (Lapor tab): skips the location step. Still checked by the server. */
+  knownCoords?: { lat: number; lng: number } | null;
   onClose: () => void;
   onDone: () => void;
 }) {
-  const [step, setStep] = useState<Step>("locate");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [step, setStep] = useState<Step>(knownCoords ? "choose" : "locate");
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(knownCoords);
   const [fuel, setFuel] = useState<Fuel | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [captcha, setCaptcha] = useState<string | null>(null);
@@ -100,14 +104,14 @@ export default function ReportFlow({
     <div
       role="dialog"
       aria-label={kind === "queue" ? "Laporkan antrean" : "Laporkan stok"}
-      className="space-y-3 rounded-lg border-2 border-blue-900 bg-blue-50 p-3"
+      className="space-y-3 rounded-2xl border-2 border-primary bg-white p-3 shadow-md"
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-bold">{kind === "queue" ? "Laporkan antrean" : "Laporkan stok BBM"}</h3>
         <button
           type="button"
           onClick={onClose}
-          className="min-h-11 min-w-11 rounded-md border border-slate-400 bg-white px-2 text-sm font-bold"
+          className="min-h-11 min-w-11 rounded-xl border border-line bg-white px-2 text-sm font-bold"
           aria-label="Tutup"
         >
           ✕
@@ -119,16 +123,16 @@ export default function ReportFlow({
         <div className="space-y-2">
           <p className="text-sm">
             Kami meminta lokasi Anda hanya untuk memastikan Anda berada di dekat SPBU ini
-            (maksimal 300 meter). Lokasi tidak disimpan.
+            (maksimal {GEOFENCE_M} meter). Lokasi tidak disimpan.
           </p>
           <button
             type="button"
             onClick={askLocation}
-            className="min-h-12 w-full rounded-md bg-blue-900 px-4 text-base font-bold text-white"
+            className="min-h-12 w-full rounded-xl bg-primary px-4 text-base font-bold text-white"
           >
             Izinkan lokasi dan lanjut
           </button>
-          {message && <p className="text-sm font-semibold text-red-800">{message}</p>}
+          {message && <p className="text-sm font-semibold text-status-critical">{message}</p>}
         </div>
       )}
 
@@ -148,10 +152,17 @@ export default function ReportFlow({
               type="button"
               disabled={blocked}
               onClick={() => submit({ queueLevel: c.level })}
-              className={`flex min-h-16 w-full flex-col items-start justify-center rounded-md px-4 text-left text-white disabled:opacity-40 ${c.cls}`}
+              className={`flex min-h-16 w-full items-center gap-3 rounded-xl px-4 text-left text-white disabled:opacity-40 ${c.cls}`}
             >
-              <span className="text-lg font-bold">{c.label}</span>
-              <span className="text-sm">{c.hint}</span>
+              <span aria-hidden className="flex items-end gap-0.5">
+                {Array.from({ length: c.bars }, (_, i) => (
+                  <span key={i} className="w-1.5 rounded-sm bg-white" style={{ height: 8 + i * 6 }} />
+                ))}
+              </span>
+              <span>
+                <span className="block text-lg font-bold">{c.label}</span>
+                <span className="block text-sm">{c.hint}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -167,10 +178,10 @@ export default function ReportFlow({
                 type="button"
                 onClick={() => setFuel(f)}
                 aria-pressed={fuel === f}
-                className={`min-h-12 rounded-md border-2 px-2 text-sm font-bold ${
+                className={`min-h-12 rounded-xl border-2 px-2 text-sm font-bold ${
                   fuel === f
-                    ? "border-blue-900 bg-blue-900 text-white"
-                    : "border-slate-400 bg-white text-slate-900"
+                    ? "border-primary bg-primary text-white"
+                    : "border-line bg-white text-slate-900"
                 }`}
               >
                 {FUEL_LABEL[f]}
@@ -183,7 +194,7 @@ export default function ReportFlow({
               type="button"
               disabled={!fuel || blocked}
               onClick={() => submit({ fuel, stockStatus: "available" })}
-              className="min-h-14 rounded-md bg-green-700 text-base font-bold text-white disabled:opacity-40"
+              className="min-h-14 rounded-xl bg-status-smooth text-base font-bold text-white disabled:opacity-40"
             >
               ✓ Ada
             </button>
@@ -191,7 +202,7 @@ export default function ReportFlow({
               type="button"
               disabled={!fuel || blocked}
               onClick={() => submit({ fuel, stockStatus: "out" })}
-              className="min-h-14 rounded-md bg-slate-800 text-base font-bold text-white disabled:opacity-40"
+              className="min-h-14 rounded-xl bg-slate-800 text-base font-bold text-white disabled:opacity-40"
             >
               ✕ Habis
             </button>
@@ -207,7 +218,7 @@ export default function ReportFlow({
 
       {step === "done" && (
         <div className="space-y-2">
-          <p className="text-base font-bold text-green-900">Terima kasih, laporan Anda terkirim.</p>
+          <p className="text-base font-bold text-status-smooth">Terima kasih, laporan Anda terkirim.</p>
           <p className="text-sm">
             Anda bisa mengirim laporan serupa untuk SPBU ini lagi setelah {COOLDOWN_MIN} menit.
             Peta akan memperbarui statusnya dalam beberapa saat.
@@ -215,7 +226,7 @@ export default function ReportFlow({
           <button
             type="button"
             onClick={onClose}
-            className="min-h-12 w-full rounded-md border-2 border-blue-900 font-bold text-blue-900"
+            className="min-h-12 w-full rounded-xl border-2 border-primary font-bold text-primary"
           >
             Selesai
           </button>
@@ -224,14 +235,14 @@ export default function ReportFlow({
 
       {step === "error" && (
         <div className="space-y-2">
-          <p className="text-sm font-semibold text-red-800">{message}</p>
+          <p className="text-sm font-semibold text-status-critical">{message}</p>
           <button
             type="button"
             onClick={() => {
               setMessage(null);
               setStep("locate"); // re-check the location (covers "too far" and denied cases)
             }}
-            className="min-h-12 w-full rounded-md border-2 border-blue-900 font-bold text-blue-900"
+            className="min-h-12 w-full rounded-xl border-2 border-primary font-bold text-primary"
           >
             Coba lagi
           </button>

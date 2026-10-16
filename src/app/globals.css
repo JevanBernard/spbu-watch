@@ -1,9 +1,53 @@
 @import "tailwindcss";
 
+/* Design tokens from the redesign (DESIGN.md). Status colours are slightly darker than the mockup so that
+   white text on them keeps at least 4.5:1 contrast outdoors. */
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-primary: #006194;
+  --color-primary-container: #007bb9;
+  --color-primary-fixed: #cce5ff;
+  --color-secondary: #006c4a;
+  --color-secondary-container: #82f5c1;
+  --color-on-secondary-container: #00714e;
+
+  --color-ink: #131b2e;
+  --color-canvas: #f8fafc;
+  --color-line: #cbd5e1;
+
+  --color-status-smooth: #047857;
+  --color-status-smooth-bg: #ecfdf5;
+  --color-status-moderate: #b45309;
+  --color-status-moderate-bg: #fffbeb;
+  --color-status-critical: #b91c1c;
+  --color-status-critical-bg: #fef2f2;
+  --color-status-stale: #475569;
+  --color-status-stale-bg: #f1f5f9;
+
+  --color-disclaimer-amber: #92400e;
+  --color-disclaimer-bg: #fef3c7;
+}
+
+/* Height of the bottom navigation bar, including the iPhone home-indicator inset. */
+/* Space above the map: only the notch inset, there is no top bar. */
+:root {
+  --head-h: env(safe-area-inset-top, 0px);
+}
+
+:root {
+  --nav-h: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
+
 /* Hide the scrollbar on horizontally scrolling rows (chips, carousel) but keep them scrollable. */
 .no-scrollbar {
   scrollbar-width: none;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Tabular numerals for distances, counts and times so they line up in lists. */
+.tnum {
+  font-variant-numeric: tabular-nums;
 }

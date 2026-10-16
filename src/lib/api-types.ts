@@ -1,5 +1,5 @@
 import type { StationCategory } from "./category";
-import type { Fuel, QueueStatus, StockStatus } from "./status";
+import type { Fuel, QueueState, QueueStatus, StockState, StockStatus } from "./status";
 
 export interface StationDTO {
   id: string;
@@ -30,4 +30,10 @@ export interface OfficialUpdateDTO {
   sourceUrl: string | null;
   publishedAt: string;
   pinned: boolean;
+}
+
+/** Hourly history of one station (oldest first). Same shape as `Timeline` in lib/timeline.ts. */
+export interface StationTimelineDTO {
+  slots: { at: string; queue: QueueState; stock: Partial<Record<Fuel, StockState>> }[];
+  reportCount: number;
 }

@@ -13,7 +13,7 @@ const CONTACT_URL = process.env.NEXT_PUBLIC_CONTACT_URL;
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-2xl space-y-6 p-4 pb-16 leading-relaxed">
-      <Link href="/" className="inline-flex min-h-11 items-center text-sm font-bold text-blue-900 underline">
+      <Link href="/" className="inline-flex min-h-11 items-center text-sm font-bold text-primary underline">
         ← Kembali ke peta
       </Link>
       <h1 className="text-2xl font-bold">Privasi</h1>
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <b>Lokasi persis Anda.</b> Koordinat dikirim saat melapor hanya untuk memastikan Anda
-            berada dalam 300 meter dari SPBU, lalu dibuang. Urutan daftar berdasarkan jarak
+            berada dalam 500 meter dari SPBU, lalu dibuang. Urutan daftar berdasarkan jarak
             dihitung di perangkat Anda dan tidak dikirim ke server.
           </li>
           <li>Plat nomor, wajah, foto, atau video. Aplikasi ini tidak menerima unggahan foto.</li>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
         <p>
           Untuk pertanyaan privasi atau permintaan penghapusan laporan:{" "}
           {CONTACT_URL ? (
-            <a href={CONTACT_URL} className="font-bold text-blue-900 underline" rel="noopener noreferrer">
+            <a href={CONTACT_URL} className="font-bold text-primary underline" rel="noopener noreferrer">
               {contactLabel(CONTACT_URL)}
             </a>
           ) : (

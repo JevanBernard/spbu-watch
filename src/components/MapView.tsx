@@ -15,11 +15,12 @@ const STYLE_URL = MAP_STYLE_URL;
 // The bundler breaks MapLibre's own worker URL; serve a copy from /public (scripts/copy_maplibre_worker.mjs).
 maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
+// Same hues as the status tokens in globals.css.
 const COLORS = {
-  sepi: "#15803d",
-  sedang: "#d97706",
+  sepi: "#047857",
+  sedang: "#b45309",
   panjang: "#b91c1c",
-  unknown: "#64748b",
+  unknown: "#475569",
 } as const;
 
 /** Marker icons: a coloured disc with 1/2/3 bars (queue length) or "?" so colour is never the only cue. */
@@ -99,10 +100,12 @@ interface Props {
   fitKey: string | null;
   selectedId: string | null;
   userLocation: { lat: number; lng: number } | null;
+  /** Bump to fly to the user's position (the "pusatkan lokasi" button). */
+  recenterKey: number;
   onSelect: (id: string) => void;
 }
 
-export default function MapView({ stations, fitKey, selectedId, userLocation, onSelect }: Props) {
+export default function MapView({ stations, fitKey, selectedId, userLocation, recenterKey, onSelect }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
@@ -156,6 +159,12 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, on
         cluster: true,
         clusterMaxZoom: CLUSTER_MAX_ZOOM,
         clusterRadius: 50,
+        // Count the queue levels inside each cluster so the cluster can take the colour of the most common one.
+        clusterProperties: {
+          n_sepi: ["+", ["case", ["==", ["get", "status"], "sepi"], 1, 0]],
+          n_sedang: ["+", ["case", ["==", ["get", "status"], "sedang"], 1, 0]],
+          n_panjang: ["+", ["case", ["==", ["get", "status"], "panjang"], 1, 0]],
+        },
       });
       map.addSource("me", {
         type: "geojson",
@@ -168,7 +177,27 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, on
         source: "stations",
         filter: ["has", "point_count"],
         paint: {
-          "circle-color": "#1e3a8a",
+          // Colour of the most common known queue level in the cluster (ties go to the more cautious level);
+          // grey when nothing in it has a recent report.
+          "circle-color": [
+            "case",
+            [
+              "all",
+              [">", ["get", "n_panjang"], 0],
+              [">=", ["get", "n_panjang"], ["get", "n_sedang"]],
+              [">=", ["get", "n_panjang"], ["get", "n_sepi"]],
+            ],
+            COLORS.panjang,
+            [
+              "all",
+              [">", ["get", "n_sedang"], 0],
+              [">=", ["get", "n_sedang"], ["get", "n_sepi"]],
+            ],
+            COLORS.sedang,
+            [">", ["get", "n_sepi"], 0],
+            COLORS.sepi,
+            COLORS.unknown,
+          ],
           "circle-radius": ["step", ["get", "point_count"], 18, 10, 22, 30, 28],
           "circle-stroke-width": 3,
           "circle-stroke-color": "#ffffff",
@@ -196,7 +225,7 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, on
           "circle-radius": 22,
           "circle-color": "rgba(0,0,0,0)",
           "circle-stroke-width": 4,
-          "circle-stroke-color": "#0f172a",
+          "circle-stroke-color": "#006194",
         },
       });
       map.addLayer({
@@ -223,12 +252,18 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, on
         },
       });
       map.addLayer({
+        id: "me-halo",
+        type: "circle",
+        source: "me",
+        paint: { "circle-radius": 24, "circle-color": "#006194", "circle-opacity": 0.2 },
+      });
+      map.addLayer({
         id: "me",
         type: "circle",
         source: "me",
         paint: {
           "circle-radius": 8,
-          "circle-color": "#2563eb",
+          "circle-color": "#006194",
           "circle-stroke-width": 3,
           "circle-stroke-color": "#ffffff",
         },
@@ -311,6 +346,15 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, on
         : [],
     });
   }, [userLocation, ready]);
+
+  // "Pusatkan lokasi" button.
+  const lastRecenter = useRef(recenterKey);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !userLocation || recenterKey === lastRecenter.current) return;
+    lastRecenter.current = recenterKey;
+    map.easeTo({ center: [userLocation.lng, userLocation.lat], zoom: Math.max(map.getZoom(), 14), duration: 600 });
+  }, [recenterKey, userLocation, ready]);
 
   if (failed) {
     return (

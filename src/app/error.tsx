@@ -10,7 +10,7 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
       <button
         type="button"
         onClick={reset}
-        className="min-h-12 rounded-md bg-blue-900 px-6 font-bold text-white"
+        className="min-h-12 rounded-md bg-primary px-6 font-bold text-white"
       >
         Coba lagi
       </button>

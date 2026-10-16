@@ -74,6 +74,7 @@ test("report flow reaches the choice step (nothing is submitted)", async ({ page
   await page.goto("/");
   await page.getByRole("button", { name: /Perbesar daftar/ }).click();
   await page.locator("li button").first().click();
+  await page.getByRole("button", { name: "Lapor kondisi" }).click();
   await page.getByRole("button", { name: "Laporkan antrean" }).click();
   await page.getByRole("button", { name: /Izinkan lokasi/ }).click();
   await expect(page.getByRole("button", { name: /Sepi/ })).toBeVisible();
@@ -129,4 +130,64 @@ test("filter chips narrow the map as well as the list", async ({ page }) => {
   // clearing the filter brings every station back on the map
   await page.getByRole("button", { name: "Semua", exact: true }).click();
   expect(Number(await map.getAttribute("data-station-count"))).toBe(total);
+});
+
+test("bottom navigation: Lapor tab asks for location, Info tab shows how to read the data", async ({ page }) => {
+  await page.goto("/");
+  const nav = page.getByRole("navigation", { name: "Menu utama" });
+  await nav.getByRole("button", { name: "Lapor" }).click();
+  await expect(page.getByRole("heading", { name: "Lapor kondisi SPBU" })).toBeVisible();
+  await page.getByRole("button", { name: /Izinkan lokasi/ }).click();
+  // the mocked position is in central Denpasar: either a station within 500 m is listed, or the empty state explains why not
+  await expect(page.getByText(/Belum ada SPBU dalam radius 500 meter/).or(page.getByRole("list", { name: /radius 500 meter/ }))).toBeVisible({ timeout: 15_000 });
+
+  await nav.getByRole("button", { name: "Info" }).click();
+  await expect(page.getByRole("heading", { name: "Cara membaca status" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Call Center Pertamina 135/ })).toBeVisible();
+  await nav.getByRole("button", { name: "Peta" }).click();
+  await expect(page.getByTestId("map")).toBeVisible();
+});
+
+test("main card shows the nearest station with travel estimate and alternatives within 5 km", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Gunakan lokasi saya" }).first().click();
+  await expect(page.getByRole("heading", { name: "SPBU terdekat dari Anda" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/± \d+ mnt/).first()).toBeVisible();
+  await expect(page.getByText("Ketersediaan produk BBM")).toBeVisible();
+  const alt = page.getByRole("region", { name: "Pilihan alternatif" });
+  await expect(alt.getByText(/Bukan peringkat ketersediaan BBM/)).toBeVisible();
+  // tapping an alternative makes it the main card instead of opening the full detail
+  await alt.getByRole("button").nth(1).click();
+  await expect(page.getByRole("heading", { name: "SPBU terpilih" })).toBeVisible();
+});
+
+test("station page: summary tiles, fuel chips and the 24-hour chart (history mocked, nothing written)", async ({ page }, info) => {
+  const now = Date.now();
+  const queue = ["unknown", "sepi", "sepi", "sedang", "panjang", "panjang", "sedang", "unknown", "sepi", "sedang"];
+  const stock = ["available", "available", "out", "unconfirmed", "unknown", "available"];
+  await page.route("**/api/stations/*", async (route) => {
+    const res = await route.fetch();
+    const json = await res.json();
+    json.timeline = {
+      reportCount: 37,
+      slots: Array.from({ length: 24 }, (_, i) => ({
+        at: new Date(now - (23 - i) * 3_600_000).toISOString(),
+        queue: queue[i % queue.length],
+        stock: { pertalite: stock[i % stock.length], pertamax: "available" },
+      })),
+    };
+    await route.fulfill({ response: res, json });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  const chart = page.getByRole("region", { name: "Riwayat 24 jam" });
+  await expect(chart.getByText("37 laporan")).toBeVisible();
+  await expect(chart.getByText(/Tinggi batang = panjang antrean/)).toBeVisible();
+  await expect(chart.getByRole("button", { name: "Pertamax" })).toBeVisible();
+  await expect(page.getByText("Laporan 24 jam")).toBeVisible();
+  await page.screenshot({ path: "test-results/shots/detail-top.png" });
+  await chart.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/shots/detail-chart.png" });
+  info.annotations.push({ type: "note", description: "screenshots in test-results/shots" });
 });

@@ -143,7 +143,7 @@ STOCK_TTL_MIN = 60
 HALF_LIFE_MIN = 20
 MIN_DEVICES_FOR_OUT = 3      // distinct devices needed before showing "habis"
 DOMINANCE = 0.6              // share of weighted votes needed to call a status
-GEOFENCE_M = 300
+GEOFENCE_M = 500
 ```
 
 **Queue status per station**
@@ -159,7 +159,7 @@ GEOFENCE_M = 300
 ## 8. Anti-abuse and anti-panic rules
 
 - **Rate limits** (server side): per device, one report per (station, kind, fuel) per 10 minutes and max 20 per hour overall; per `ip_hash`, max 60 per hour. Return HTTP 429 with an Indonesian message.
-- **Geofence**: the client sends its coordinates with each report. The server computes the distance to the station with PostGIS and **rejects reports farther than 300 m**. Coordinates are used for that check only and are never stored.
+- **Geofence**: the client sends its coordinates with each report. The server computes the distance to the station with PostGIS and **rejects reports farther than 500 m (raised from 300 m)**. Coordinates are used for that check only and are never stored.
 - **Anti-panic design** (all required):
   - Red "HABIS" only after the multi-device rule in Section 7; otherwise use neutral "Belum terkonfirmasi".
   - No ranking or list of "stations that still have stock", and no "nearest station with stock" feature in the MVP. The station list is sorted by distance or name, never by availability.

@@ -10,7 +10,13 @@ export const ADMIN_KEEP_DAYS = 30;
 /** An admin "habis" report counts as confirmed for this long; after that it shows as "belum terkonfirmasi" (the report time stays visible). */
 export const ADMIN_OUT_CONFIRMED_MIN = 6 * 60;
 export const DOMINANCE = 0.6; // share of weighted votes needed to call a status
-export const GEOFENCE_M = 300;
+export const GEOFENCE_M = 500;
+
+/** "Pilihan alternatif": other stations within this distance, listed by distance only (never by stock). */
+export const ALT_RADIUS_M = 5000;
+/** Rough travel-time estimate: motorbike, straight-line distance times a road factor. Not navigation. */
+export const TRAVEL_KMH = 25;
+export const ROAD_FACTOR = 1.3;
 
 // Report rate limits (SPEC section 8).
 export const REPORT_COOLDOWN_MIN = 10; // per device, per (station, kind, fuel)
