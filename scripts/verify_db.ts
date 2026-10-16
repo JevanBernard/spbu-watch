@@ -34,6 +34,11 @@ async function main() {
     },
     { label: "tabel visits (penghitung pengunjung)", migration: "0005_visits.sql", run: table("visits") },
     { label: "fungsi visit_stats", migration: "0005_visits.sql", run: () => db.rpc("visit_stats") },
+    {
+      label: "kolom reports.open_status (laporan SPBU buka/tutup)",
+      migration: "0007_open_reports.sql",
+      run: () => db.from("reports").select("open_status", { count: "exact", head: true }),
+    },
     { label: "tabel chat_messages", migration: "0006_chat.sql", run: table("chat_messages") },
     { label: "tabel chat_flags", migration: "0006_chat.sql", run: table("chat_flags") },
   ];

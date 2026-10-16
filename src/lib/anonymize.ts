@@ -3,6 +3,7 @@ export interface PublicReport {
   queueLevel: number | null;
   fuel: string | null;
   stockStatus: "available" | "out" | null;
+  openStatus: "open" | "closed" | null;
   createdAt: string;
 }
 
@@ -11,6 +12,7 @@ interface ReportLike {
   queue_level: number | null;
   fuel: string | null;
   stock_status: "available" | "out" | null;
+  open_status?: "open" | "closed" | null;
   created_at: string;
 }
 
@@ -24,6 +26,7 @@ export function anonymizeReports(rows: ReportLike[]): PublicReport[] {
     queueLevel: r.queue_level,
     fuel: r.fuel,
     stockStatus: r.stock_status,
+    openStatus: r.open_status ?? null,
     createdAt: r.created_at,
   }));
 }

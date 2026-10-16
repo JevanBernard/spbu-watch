@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ADMIN_DEVICE_ID } from "@/lib/config";
-import { computeQueueStatus, computeStockStatus, weight, type Report } from "@/lib/status";
+import { computeQueueStatus, computeStockStatus, weight, type Report, computeOpenReportStatus } from "@/lib/status";
 
 const NOW = new Date("2026-10-14T12:00:00Z");
 const ago = (min: number) => new Date(NOW.getTime() - min * 60_000);
@@ -252,5 +252,60 @@ describe("admin reports (CCTV)", () => {
     expect(old.status).toBe("unconfirmed");
     expect(old.lastReportAt).toBe(ago(7 * 60).toISOString());
     expect(old.stale).toBe(true);
+  });
+});
+
+describe("open / closed reports", () => {
+  const o = (deviceId: string, openStatus: "open" | "closed", minAgo: number): Report => ({
+    deviceId,
+    openStatus,
+    createdAt: ago(minAgo),
+  });
+
+  it("no reports: unknown", () => {
+    expect(computeOpenReportStatus([], NOW).status).toBe("unknown");
+  });
+  it("'buka' needs a 60% share, a single report is enough but marked low confidence", () => {
+    const st = computeOpenReportStatus([o("a", "open", 5)], NOW);
+    expect(st.status).toBe("open");
+    expect(st.confidence).toBe("low");
+  });
+  it("one visitor saying 'tutup' is only unconfirmed; three devices confirm it", () => {
+    expect(computeOpenReportStatus([o("a", "closed", 5)], NOW).status).toBe("unconfirmed");
+    expect(computeOpenReportStatus([o("a", "closed", 5), o("b", "closed", 4)], NOW).status).toBe("unconfirmed");
+    expect(computeOpenReportStatus([o("a", "closed", 5), o("b", "closed", 4), o("c", "closed", 3)], NOW).status).toBe("closed");
+  });
+  it("conflicting reports stay conflicting", () => {
+    const st = computeOpenReportStatus([o("a", "closed", 2), o("b", "open", 2), o("c", "closed", 2), o("d", "open", 2)], NOW);
+    expect(st.status).toBe("conflicting");
+  });
+  it("reports expire after the open-report TTL (two hours)", () => {
+    expect(computeOpenReportStatus([o("a", "open", 119)], NOW).status).toBe("open");
+    expect(computeOpenReportStatus([o("a", "open", 121)], NOW).status).toBe("unknown");
+  });
+  it("latest report per device counts", () => {
+    expect(computeOpenReportStatus([o("a", "closed", 30), o("a", "open", 5)], NOW).status).toBe("open");
+  });
+  it("hidden reports are ignored", () => {
+    expect(computeOpenReportStatus([{ ...o("a", "open", 5), hidden: true }], NOW).status).toBe("unknown");
+  });
+
+  describe("admin", () => {
+    it("a fresh admin 'tutup' counts as confirmed on its own and overrules visitors who said buka earlier", () => {
+      const visitors = [o("a", "open", 20), o("b", "open", 15), o("c", "open", 10)];
+      expect(computeOpenReportStatus([...visitors, o(ADMIN_DEVICE_ID, "closed", 2)], NOW).status).toBe("closed");
+    });
+    it("a visitor report made after the admin's goes back to the blend", () => {
+      const reports = [o(ADMIN_DEVICE_ID, "closed", 20), o("a", "open", 2), o("b", "open", 3), o("c", "open", 1)];
+      expect(computeOpenReportStatus(reports, NOW).status).toBe("open");
+    });
+    it("stays visible (stale) after the visitor TTL, goes neutral after six hours", () => {
+      const st = computeOpenReportStatus([o(ADMIN_DEVICE_ID, "closed", 3 * 60)], NOW);
+      expect(st.stale).toBe(true);
+      expect(st.fromAdmin).toBe(true);
+      const old = computeOpenReportStatus([o(ADMIN_DEVICE_ID, "closed", 7 * 60)], NOW);
+      expect(old.status).toBe("unknown");
+      expect(old.lastReportAt).toBe(ago(7 * 60).toISOString());
+    });
   });
 });

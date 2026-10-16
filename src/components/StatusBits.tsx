@@ -1,7 +1,7 @@
 import { CATEGORY_LABEL, type StationCategory } from "@/lib/category";
 import type { Fuel, QueueState, StockState } from "@/lib/status";
 import { QUEUE_LABEL, STOCK_LABEL, soldFuelsText } from "@/lib/format";
-import { openNow } from "@/lib/hours";
+import { effectiveOpen, type OpenReportLike } from "@/lib/hours";
 import { GES_SOURCE } from "@/lib/text";
 import { CheckCircleIcon } from "./ui";
 
@@ -130,7 +130,7 @@ export function Legend() {
   return (
     <p className="text-xs leading-relaxed text-slate-700">
       <b>Antrean:</b> 1 batang = sepi, 2 = sedang, 3 = panjang, ? = belum ada laporan terbaru.{" "}
-      <b>✕</b> merah = stok BBM habis (terkonfirmasi beberapa pelapor). Bulat = SPBU, kotak = Pertashop. Warna kelompok pin = status terbanyak di dalamnya (abu-abu = belum ada laporan).
+      <b>✕</b> merah = stok BBM habis (terkonfirmasi beberapa pelapor). Bulat = SPBU, kotak = Pertashop. Warna kelompok pin = status terbanyak di dalamnya (abu-abu = belum ada laporan). Pin pudar = SPBU yang sedang tutup menurut jam bukanya.
     </p>
   );
 }
@@ -190,9 +190,17 @@ export function FuelsSold({
   );
 }
 
-/** Open / closed now (WITA), from the opening hours when they are known and understood. */
-export function OpenBadge({ hours, is24h }: { hours: string | null; is24h: boolean }) {
-  const o = openNow(hours, is24h);
+/** Open / closed now (WITA): the opening hours when known and understood, overruled by confirmed reports. */
+export function OpenBadge({
+  hours,
+  is24h,
+  report,
+}: {
+  hours: string | null;
+  is24h: boolean;
+  report?: OpenReportLike;
+}) {
+  const o = effectiveOpen({ openingHours: hours, is24h, open: report });
   if (o.state === "unknown") return null;
   const cls = o.state === "open" ? "bg-secondary-container text-on-secondary-container" : "bg-slate-200 text-slate-800";
   return <span className={`rounded px-2 py-0.5 font-bold ${cls}`}>{o.state === "open" ? "✓ " : "✕ "}{o.label}</span>;

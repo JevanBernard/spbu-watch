@@ -21,7 +21,7 @@ const dbRow = {
 describe("anonymizeReports", () => {
   it("exposes only kind, level, fuel, status and time", () => {
     const [out] = anonymizeReports([dbRow]);
-    expect(Object.keys(out).sort()).toEqual(["createdAt", "fuel", "kind", "queueLevel", "stockStatus"]);
+    expect(Object.keys(out).sort()).toEqual(["createdAt", "fuel", "kind", "openStatus", "queueLevel", "stockStatus"]);
   });
   it("never contains the device id, ip hash, report id or station id anywhere in the JSON", () => {
     const json = JSON.stringify(anonymizeReports([dbRow, { ...dbRow, kind: "queue" as const, queue_level: 2 }]));

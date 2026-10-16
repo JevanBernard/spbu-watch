@@ -1,11 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { ADMIN_DEVICE_ID, ADMIN_KEEP_DAYS, FUEL_SOLD_WINDOW_DAYS, STOCK_TTL_MIN } from "./config";
+import { ADMIN_DEVICE_ID, ADMIN_KEEP_DAYS, FUEL_SOLD_WINDOW_DAYS, OPEN_TTL_MIN, STOCK_TTL_MIN } from "./config";
 import { fuelListComplete, gesInfo, stationCategory } from "./category";
 import { fuelsReportedSold, type AvailableReport } from "./fuels-sold";
 import {
+  computeOpenReportStatus,
   computeQueueStatus,
   computeStockStatus,
   type Fuel,
+  type OpenReportStatus,
   type QueueStatus,
   type Report,
   type StockStatus,
@@ -34,6 +36,7 @@ export interface ReportRow {
   queue_level: number | null;
   fuel: Fuel | null;
   stock_status: "available" | "out" | null;
+  open_status?: "open" | "closed" | null; // only present once migration 0007 has been run
   device_id: string;
   hidden: boolean;
   created_at: string;
@@ -41,8 +44,22 @@ export interface ReportRow {
 
 export const STATION_COLUMNS =
   "id,name,brand,operator,regency,lat,lng,address,opening_hours,is_24h,fuels,has_ev_charging,pertamina_code";
-export const REPORT_COLUMNS =
-  "id,station_id,kind,queue_level,fuel,stock_status,device_id,hidden,created_at";
+const REPORT_COLUMNS_BASE = "id,station_id,kind,queue_level,fuel,stock_status,device_id,hidden,created_at";
+export const REPORT_COLUMNS = `${REPORT_COLUMNS_BASE},open_status`;
+
+/**
+ * Runs `load` with the column list that includes `open_status`. If the database has not had migration 0007 yet,
+ * the column does not exist: run it again without, so the rest of the app keeps working (open reports are then
+ * simply not read).
+ */
+export async function withOpenColumn<T>(load: (columns: string) => PromiseLike<T>): Promise<T> {
+  try {
+    return await load(REPORT_COLUMNS);
+  } catch (err) {
+    if (/open_status/i.test(err instanceof Error ? err.message : String(err))) return load(REPORT_COLUMNS_BASE);
+    throw err;
+  }
+}
 
 const PAGE = 1000; // Supabase API returns at most 1000 rows per request by default.
 
@@ -69,11 +86,13 @@ export function toReport(r: ReportRow): Report {
     queueLevel: r.queue_level,
     fuel: r.fuel,
     stockStatus: r.stock_status,
+    openStatus: r.open_status ?? null,
   };
 }
 
 export interface StationStatus {
   queue: QueueStatus;
+  open: OpenReportStatus;
   stock: Partial<Record<Fuel, StockStatus>>;
 }
 
@@ -87,7 +106,7 @@ export function computeStationStatus(
   for (const r of reports) if (r.fuel) fuels.add(r.fuel);
   const stock: Partial<Record<Fuel, StockStatus>> = {};
   for (const fuel of fuels) stock[fuel] = computeStockStatus(reports, fuel, now);
-  return { queue: computeQueueStatus(reports, now), stock };
+  return { queue: computeQueueStatus(reports, now), stock, open: computeOpenReportStatus(reports, now) };
 }
 
 const FUEL_ORDER: Fuel[] = ["pertalite", "pertamax", "pertamax_turbo", "solar", "dexlite", "pertamina_dex"];
@@ -131,16 +150,18 @@ export async function loadAdminReports(
   stationId?: string,
 ): Promise<ReportRow[]> {
   const since = new Date(now.getTime() - ADMIN_KEEP_DAYS * 86_400_000).toISOString();
-  const rows = await fetchAllPages<ReportRow>((from, to) => {
-    let q = service
-      .from("reports")
-      .select(REPORT_COLUMNS)
-      .eq("device_id", ADMIN_DEVICE_ID)
-      .eq("hidden", false)
-      .gte("created_at", since);
-    if (stationId) q = q.eq("station_id", stationId);
-    return q.order("created_at", { ascending: false }).order("id").range(from, to);
-  });
+  const rows = await withOpenColumn((columns) =>
+    fetchAllPages<ReportRow>((from, to) => {
+      let q = service
+        .from("reports")
+        .select(columns)
+        .eq("device_id", ADMIN_DEVICE_ID)
+        .eq("hidden", false)
+        .gte("created_at", since);
+      if (stationId) q = q.eq("station_id", stationId);
+      return q.order("created_at", { ascending: false }).order("id").range(from, to).returns<ReportRow[]>();
+    }),
+  );
   const seen = new Set<string>();
   return rows.filter((r) => {
     const key = `${r.station_id}|${r.kind}|${r.fuel ?? ""}`; // newest first, so the first one wins
@@ -161,19 +182,22 @@ export async function loadStationsWithStatus(
   anon: SupabaseClient,
   now = new Date(),
 ) {
-  const since = new Date(now.getTime() - STOCK_TTL_MIN * 60_000).toISOString(); // longest TTL
+  const since = new Date(now.getTime() - Math.max(STOCK_TTL_MIN, OPEN_TTL_MIN) * 60_000).toISOString(); // longest TTL
   const stations = await fetchAllPages<StationRow>((from, to) =>
     anon.from("stations").select(STATION_COLUMNS).eq("active", true).order("id").range(from, to),
   );
-  const reports = await fetchAllPages<ReportRow>((from, to) =>
-    service
-      .from("reports")
-      .select(REPORT_COLUMNS)
-      .eq("hidden", false)
-      .gte("created_at", since)
-      .order("created_at", { ascending: false })
-      .order("id")
-      .range(from, to),
+  const reports = await withOpenColumn((columns) =>
+    fetchAllPages<ReportRow>((from, to) =>
+      service
+        .from("reports")
+        .select(columns)
+        .eq("hidden", false)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
+        .returns<ReportRow[]>(),
+    ),
   );
   const sold = await loadSoldReports(service, now);
   const byStation = new Map<string, Report[]>();

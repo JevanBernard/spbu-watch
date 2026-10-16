@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import type { StationDTO, StationTimelineDTO } from "@/lib/api-types";
 import { FUEL_LABEL, FUEL_ORDER, STOCK_LABEL, stationFuels, timeAgo } from "@/lib/format";
-import { openNow } from "@/lib/hours";
+import { effectiveOpen } from "@/lib/hours";
 import type { Fuel, QueueState, StockState } from "@/lib/status";
 import { queueTone } from "./StatusBits";
 import { ClockIcon, GasIcon, TimerIcon } from "./ui";
@@ -53,7 +53,8 @@ export function SummaryTiles({ station, timeline }: { station: StationDTO; timel
   const main: Fuel | undefined = fuels.includes("pertalite") ? "pertalite" : fuels[0];
   const st = main ? station.stock[main] : undefined;
   const stockTone = STOCK_TONE[st?.status ?? "unknown"];
-  const open = openNow(station.openingHours, station.is24h);
+  const open = effectiveOpen(station);
+  const rep = station.open;
   const q = station.queue;
   const qt = queueTone(q.status);
 
@@ -71,7 +72,18 @@ export function SummaryTiles({ station, timeline }: { station: StationDTO; timel
         label="Buka"
         icon={<ClockIcon />}
         value={open.state === "open" ? "Buka" : open.state === "closed" ? "Tutup" : "Belum diketahui"}
-        sub={station.is24h ? "24 jam" : (station.openingHours ?? undefined)}
+        sub={
+          open.reported
+            ? `${rep.reportCount} pelapor · ${timeAgo(rep.lastReportAt)}`
+            : rep.status === "unconfirmed"
+              ? "Ada laporan tutup, belum terkonfirmasi"
+              : rep.status === "conflicting"
+                ? "Laporan buka/tutup beragam"
+                : station.is24h
+                  ? "24 jam"
+                  : (station.openingHours ?? undefined)
+        }
+        box={open.state === "closed" ? "border-slate-400 bg-status-stale-bg" : "border-line bg-white"}
         valueCls={open.state === "open" ? "text-status-smooth" : "text-slate-900"}
       />
       <Tile

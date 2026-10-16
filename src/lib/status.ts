@@ -1,10 +1,13 @@
 import {
   ADMIN_DEVICE_ID,
+  ADMIN_OPEN_SHOW_MIN,
   ADMIN_OUT_CONFIRMED_MIN,
   ADMIN_QUEUE_SHOW_MIN,
   DOMINANCE,
   HALF_LIFE_MIN,
+  MIN_DEVICES_FOR_CLOSED,
   MIN_DEVICES_FOR_OUT,
+  OPEN_TTL_MIN,
   QUEUE_TTL_MIN,
   STOCK_TTL_MIN,
 } from "./config";
@@ -24,10 +27,12 @@ export interface Report {
   queueLevel?: number | null; // 0 sepi, 1 sedang, 2 panjang
   fuel?: Fuel | null;
   stockStatus?: "available" | "out" | null;
+  openStatus?: "open" | "closed" | null; // "SPBU buka / tutup" reports
 }
 
 export type QueueState = "sepi" | "sedang" | "panjang" | "unknown";
 export type StockState = "available" | "out" | "unconfirmed" | "conflicting" | "unknown";
+export type OpenReportState = "open" | "closed" | "unconfirmed" | "conflicting" | "unknown";
 export type Confidence = "none" | "low" | "normal";
 
 interface Summary {
@@ -46,6 +51,10 @@ export interface QueueStatus extends Summary {
 
 export interface StockStatus extends Summary {
   status: StockState;
+}
+
+export interface OpenReportStatus extends Summary {
+  status: OpenReportState;
 }
 
 const MS_PER_MIN = 60_000;
@@ -157,6 +166,46 @@ export function computeStockStatus(
       outUsed.length >= MIN_DEVICES_FOR_OUT ||
       outUsed.some((u) => u.report.deviceId === ADMIN_DEVICE_ID && u.age < ADMIN_OUT_CONFIRMED_MIN);
     return { status: confirmed ? "out" : "unconfirmed", ...summary };
+  }
+  return { status: "conflicting", ...summary };
+}
+
+/**
+ * What visitors and the admin say about the station being open right now ("SPBU buka / tutup" reports).
+ * Same shape of rules as stock: "buka" needs a 60% share, a red-flag "tutup" needs several devices (or the admin),
+ * a fresh admin observation that nobody contradicted since decides on its own, and an old admin report only
+ * leaves its time behind.
+ */
+export function computeOpenReportStatus(reports: Report[], now: Date = new Date()): OpenReportStatus {
+  const used = latestPerDevice(
+    reports,
+    OPEN_TTL_MIN,
+    now,
+    (r) => r.openStatus === "open" || r.openStatus === "closed",
+  );
+  const summary = summarize(used, OPEN_TTL_MIN);
+  if (used.length === 0) return { status: "unknown", ...summary };
+
+  const newestAge = Math.min(...used.map((u) => u.age));
+  if (newestAge >= ADMIN_OPEN_SHOW_MIN) return { status: "unknown", ...summary };
+
+  const admin = used.find((u) => u.report.deviceId === ADMIN_DEVICE_ID);
+  if (admin && admin.age < OPEN_TTL_MIN && used.every((u) => u === admin || u.age >= admin.age)) {
+    return { status: admin.report.openStatus === "closed" ? "closed" : "open", ...summary };
+  }
+
+  const totalW = used.reduce((s, u) => s + u.w, 0);
+  const closedUsed = used.filter((u) => u.report.openStatus === "closed");
+  const closedShare = closedUsed.reduce((s, u) => s + u.w, 0) / totalW;
+  const openShare = 1 - closedShare;
+  const EPS = 1e-9;
+
+  if (openShare >= DOMINANCE - EPS) return { status: "open", ...summary };
+  if (closedShare >= DOMINANCE - EPS) {
+    const confirmed =
+      closedUsed.length >= MIN_DEVICES_FOR_CLOSED ||
+      closedUsed.some((u) => u.report.deviceId === ADMIN_DEVICE_ID && u.age < ADMIN_OUT_CONFIRMED_MIN);
+    return { status: confirmed ? "closed" : "unconfirmed", ...summary };
   }
   return { status: "conflicting", ...summary };
 }

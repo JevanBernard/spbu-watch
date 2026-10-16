@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
 import type { StationCategory } from "@/lib/category";
 import { getDeviceId } from "@/lib/device";
+import { effectiveOpen, matchesOpenFilter, type OpenFilter } from "@/lib/hours";
 import { clearAdminToken, getAdminToken } from "@/lib/admin-session";
 import { ALT_RADIUS_M } from "@/lib/config";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
@@ -12,6 +13,7 @@ import type { Fuel } from "@/lib/status";
 import { useRefreshing } from "@/lib/use-refreshing";
 import AdminEditPanel from "./AdminEditPanel";
 import AdminLoginDialog from "./AdminLoginDialog";
+import AdminMultiPanel from "./AdminMultiPanel";
 import BottomNav, { type AppTab } from "./BottomNav";
 import InfoTab from "./InfoTab";
 import NearbyCarousel, { type NearbyItem } from "./NearbyCarousel";
@@ -70,12 +72,19 @@ export default function HomeClient() {
   // Admin mode: the token is kept for this browser session only. Read after mount so server and client markup match.
   const [adminToken, setAdminTokenState] = useState<string | null>(null);
   const [adminLogin, setAdminLogin] = useState(false);
+  // Admin "pilih banyak": tick several stations and set one queue level for all.
+  const [multi, setMulti] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
+  const togglePick = (id: string) =>
+    setPicked((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]));
   useEffect(() => {
     queueMicrotask(() => setAdminTokenState(getAdminToken()));
   }, []);
   const logoutAdmin = () => {
     clearAdminToken();
     setAdminTokenState(null);
+    setMulti(false);
+    setPicked([]);
   };
 
   // Anonymous visitor heartbeat: once on load, then every 2 minutes while the tab is visible.
@@ -121,6 +130,7 @@ export default function HomeClient() {
   const [search, setSearch] = useState("");
   const [regency, setRegency] = useState("");
   const [only24h, setOnly24h] = useState(false);
+  const [openFilter, setOpenFilter] = useState<OpenFilter>("");
   const [fuelFilter, setFuelFilter] = useState<Fuel | "">("");
   const [kind, setKind] = useState<Kind>("");
   const [moreFilters, setMoreFilters] = useState(false);
@@ -175,11 +185,12 @@ export default function HomeClient() {
         .filter((s) => matchesSearch(s, search))
         .filter((s) => !regency || s.regency === regency)
         .filter((s) => !only24h || s.is24h)
+        .filter((s) => matchesOpenFilter(s, openFilter))
         .filter((s) => matchesFuelFilter(s, fuelFilter))
         .filter(
           (s) => !kind || (kind === "ges" ? s.isGes : s.category === kind),
         ),
-    [stations, search, regency, only24h, kind, fuelFilter],
+    [stations, search, regency, only24h, openFilter, kind, fuelFilter],
   );
 
   // Sorted by distance or name only, never by availability (anti-panic rule).
@@ -222,14 +233,15 @@ export default function HomeClient() {
     const open = selectedId ? stations.find((s) => s.id === selectedId) : null;
     return open && !filtered.includes(open) ? [...filtered, open] : filtered;
   }, [filtered, stations, selectedId]);
-  const filtersOn = Boolean(kind || only24h || fuelFilter || regency);
+  const filtersOn = Boolean(kind || only24h || openFilter || fuelFilter || regency);
   const fitKey = filtersOn
-    ? [kind, only24h, fuelFilter, regency].join("|")
+    ? [kind, only24h, openFilter, fuelFilter, regency].join("|")
     : null;
   const selectedDistance = selected && me ? distanceM(me, selected) : null;
   const activeFilters =
     (kind ? 1 : 0) +
     (only24h ? 1 : 0) +
+    (openFilter ? 1 : 0) +
     (fuelFilter ? 1 : 0) +
     (regency ? 1 : 0);
 
@@ -263,6 +275,7 @@ export default function HomeClient() {
   const clearFilters = () => {
     setKind("");
     setOnly24h(false);
+    setOpenFilter("");
     setFuelFilter("");
     setRegency("");
   };
@@ -299,6 +312,18 @@ export default function HomeClient() {
         24 jam
       </Chip>
       <Chip
+        active={openFilter === "open"}
+        onClick={() => setOpenFilter((v) => (v === "open" ? "" : "open"))}
+      >
+        Buka sekarang
+      </Chip>
+      <Chip
+        active={openFilter === "closed"}
+        onClick={() => setOpenFilter((v) => (v === "closed" ? "" : "closed"))}
+      >
+        Tutup
+      </Chip>
+      <Chip
         active={fuelFilter === "pertalite"}
         onClick={() => toggleFuel("pertalite")}
       >
@@ -321,6 +346,10 @@ export default function HomeClient() {
     : 0;
   const hoursKnown = stations.filter((s) => s.is24h || s.openingHours).length;
   const stations24h = stations.filter((s) => s.is24h).length;
+  // Hours that are known and understood (not just present), as used by the open / closed filter.
+  const hoursKnownNow = stations.filter(
+    (s) => effectiveOpen(s).state !== "unknown",
+  ).length;
 
   return (
     <div className="bg-canvas relative h-dvh w-full overflow-hidden">
@@ -337,11 +366,12 @@ export default function HomeClient() {
             selectedId={selectedId}
             userLocation={me}
             recenterKey={recenterKey}
-            onSelect={focus}
+            pickedIds={picked}
+            onSelect={multi ? togglePick : focus}
             // A tap on empty map clears the selection, also from the detail view. Only when a report or a chat
             // message is half written does it ask first, so a stray tap cannot throw it away.
             onBackgroundClick={() => {
-              if (!selectedId) return;
+              if (multi || !selectedId) return;
               if (detailOpen) {
                 const unsent = draft.current.report || draft.current.chat;
                 if (unsent && !confirm("Tutup detail SPBU? Laporan atau pesan yang belum dikirim akan hilang.")) return;
@@ -409,8 +439,22 @@ export default function HomeClient() {
             >
               <p className="min-w-0 text-[11px] font-bold">
                 MODE ADMIN
-                <span className="font-normal opacity-90"> · ketuk pin SPBU untuk mengubah kondisinya</span>
+                <span className="font-normal opacity-90">
+                  {multi ? " · memilih banyak SPBU" : " · ketuk pin SPBU untuk mengubah kondisinya"}
+                </span>
               </p>
+              <button
+                type="button"
+                aria-pressed={multi}
+                onClick={() => {
+                  setMulti((v) => !v);
+                  setPicked([]);
+                  if (!multi) focus(null);
+                }}
+                className="min-h-8 shrink-0 rounded-lg bg-white/15 px-2 text-[11px] font-bold"
+              >
+                {multi ? "Selesai pilih" : "Pilih banyak"}
+              </button>
               <button
                 type="button"
                 onClick={logoutAdmin}
@@ -445,7 +489,7 @@ export default function HomeClient() {
           className={`border-line absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-3xl border-t bg-white shadow-[0_-4px_16px_rgba(15,23,42,0.14)] transition-[height] duration-200 md:top-0 md:right-auto md:bottom-[var(--nav-h)] md:left-0 md:h-auto md:w-[440px] md:rounded-none md:border-t-0 md:border-r md:pt-4 md:shadow-lg ${
             full
               ? "h-[88%]"
-              : adminToken && activeStation
+              : adminToken && (activeStation || multi)
                 ? "h-auto max-h-[62%] md:max-h-none"
                 : "h-auto max-h-[38%] md:max-h-none"
           }`}
@@ -591,6 +635,21 @@ export default function HomeClient() {
                       </select>
                     </label>
                     <label className="block text-xs font-semibold text-slate-600">
+                      Jam buka
+                      <select
+                        value={openFilter}
+                        onChange={(e) =>
+                          setOpenFilter(e.target.value as OpenFilter)
+                        }
+                        aria-label="Filter jam buka"
+                        className={`${selectCls} mt-1`}
+                      >
+                        <option value="">Semua</option>
+                        <option value="open">Buka sekarang</option>
+                        <option value="closed">Tutup sekarang</option>
+                      </select>
+                    </label>
+                    <label className="block text-xs font-semibold text-slate-600">
                       BBM yang dijual
                       <select
                         value={fuelFilter}
@@ -629,6 +688,17 @@ export default function HomeClient() {
                     24 jam, dari {hoursKnown} SPBU yang jam bukanya diketahui
                     (total {stations.length}). SPBU lain bisa saja 24 jam. Cek
                     pengumuman resmi.
+                  </p>
+                )}
+                {openFilter && (
+                  <p className="text-xs text-slate-700">
+                    Filter ini memakai jam buka yang tercatat dan laporan
+                    buka/tutup, dan hanya menampilkan SPBU yang statusnya
+                    diketahui. Status buka/tutup baru diketahui untuk {hoursKnownNow} dari {stations.length} SPBU;{" "}
+                    {stations.length - hoursKnownNow} lainnya tidak tampil di
+                    sini karena belum diketahui (bisa saja sedang{" "}
+                    {openFilter === "open" ? "buka" : "tutup"}). Cek pengumuman
+                    resmi.
                   </p>
                 )}
                 {geoMsg && <p className="text-xs text-slate-700">{geoMsg}</p>}
@@ -689,9 +759,10 @@ export default function HomeClient() {
                 <section aria-label="SPBU terdekat">
                   <NearbyCarousel
                     items={nearby}
-                    activeId={selectedId}
-                    onActivate={focus}
-                    onOpen={(id) => openDetail(id)}
+                    activeId={multi ? null : selectedId}
+                    pickedIds={multi ? picked : undefined}
+                    onActivate={multi ? () => {} : focus}
+                    onOpen={(id) => (multi ? togglePick(id) : openDetail(id))}
                   />
                 </section>
               ) : altFrom ? (
@@ -718,7 +789,19 @@ export default function HomeClient() {
                 </div>
               )}
 
-              {adminToken && activeStation && (
+              {adminToken && multi && (
+                <div className="px-4 pt-1">
+                  <AdminMultiPanel
+                    token={adminToken}
+                    ids={picked}
+                    names={picked.map((id) => stations.find((s) => s.id === id)?.name ?? "?")}
+                    onSaved={stationsQ.reload}
+                    onAuthFail={logoutAdmin}
+                    onClear={() => setPicked([])}
+                  />
+                </div>
+              )}
+              {adminToken && !multi && activeStation && (
                 <div className="px-4 pt-1">
                   <AdminEditPanel
                     key={activeStation.id}

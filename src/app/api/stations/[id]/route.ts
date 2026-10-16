@@ -10,9 +10,9 @@ import {
   loadSoldReports,
   mergeReports,
   publicStation,
-  REPORT_COLUMNS,
   STATION_COLUMNS,
   toReport,
+  withOpenColumn,
   type ReportRow,
   type StationRow,
 } from "@/lib/stations";
@@ -40,16 +40,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!station) return NextResponse.json({ error: "SPBU tidak ditemukan." }, { status: 404 });
 
     const since = new Date(now.getTime() - HISTORY_WINDOW_MIN * 60_000).toISOString();
-    const { data: rows, error: repErr } = await serviceClient()
-      .from("reports")
-      .select(REPORT_COLUMNS)
-      .eq("station_id", id)
-      .eq("hidden", false)
-      .gte("created_at", since)
-      .order("created_at", { ascending: false })
-      .limit(3000)
-      .returns<ReportRow[]>();
-    if (repErr) throw new Error(repErr.message);
+    const { data: rows } = await withOpenColumn(async (columns) => {
+      const res = await serviceClient()
+        .from("reports")
+        .select(columns)
+        .eq("station_id", id)
+        .eq("hidden", false)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(3000)
+        .returns<ReportRow[]>();
+      if (res.error) throw new Error(res.error.message);
+      return res;
+    });
     const history = rows ?? [];
     const recentSince = now.getTime() - DETAIL_WINDOW_MIN * 60_000;
     const reports = history.filter((r) => new Date(r.created_at).getTime() >= recentSince);

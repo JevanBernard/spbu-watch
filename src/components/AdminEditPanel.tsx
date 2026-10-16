@@ -15,12 +15,15 @@ const QUEUE_OPTIONS: { level: number; state: Exclude<QueueState, "unknown">; sho
 
 type Stock = "available" | "out";
 
+type OpenChoice = "open" | "closed";
+
 interface Saved {
   id: string;
   label: string;
   /** What this report set, so "Urungkan" can take the highlight away again. */
   queue?: QueueState;
   fuel?: Fuel;
+  open?: OpenChoice;
 }
 
 /**
@@ -47,15 +50,18 @@ export default function AdminEditPanel({
   // What the admin just set. Shown at once (the list refresh takes a moment); the server state is the fallback.
   const [mineQueue, setMineQueue] = useState<QueueState | null>(null);
   const [mineStock, setMineStock] = useState<Partial<Record<Fuel, Stock>>>({});
+  const [mineOpen, setMineOpen] = useState<OpenChoice | null>(null);
+  const [confirmClosed, setConfirmClosed] = useState(false);
 
   const send = async (
     body: Record<string, unknown>,
     label: string,
-    mark: { queue?: QueueState; fuel?: Fuel; stock?: Stock },
+    mark: { queue?: QueueState; fuel?: Fuel; stock?: Stock; open?: OpenChoice },
   ) => {
     setBusy(true);
     setError(null);
     setConfirmOut(null);
+    setConfirmClosed(false);
     try {
       const res = await adminFetch("/api/admin/reports", token, {
         method: "POST",
@@ -70,8 +76,9 @@ export default function AdminEditPanel({
         setError(data.error ?? "Gagal menyimpan. Coba lagi.");
         return;
       }
-      setSaved({ id: data.id, label, queue: mark.queue, fuel: mark.fuel });
+      setSaved({ id: data.id, label, queue: mark.queue, fuel: mark.fuel, open: mark.open });
       if (mark.queue) setMineQueue(mark.queue);
+      if (mark.open) setMineOpen(mark.open);
       if (mark.fuel && mark.stock) setMineStock((m) => ({ ...m, [mark.fuel!]: mark.stock }));
       onSaved();
     } catch {
@@ -96,6 +103,7 @@ export default function AdminEditPanel({
         return;
       }
       if (saved.queue) setMineQueue(null);
+      if (saved.open) setMineOpen(null);
       const undoneFuel = saved.fuel;
       if (undoneFuel) {
         setMineStock((m) => {
@@ -148,6 +156,67 @@ export default function AdminEditPanel({
             );
           })}
         </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <p className="text-xs font-bold text-slate-900">SPBU sekarang</p>
+        {(() => {
+          const status = station.open.status;
+          const current: OpenChoice | null = mineOpen ?? (status === "open" || status === "closed" ? status : null);
+          return confirmClosed ? (
+            <div className="space-y-2 rounded-xl bg-slate-100 p-2">
+              <p className="text-xs font-semibold text-slate-900">
+                Tandai SPBU ini TUTUP? Ini langsung tampil untuk semua pengunjung dan memudarkan pin di peta.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => send({ kind: "open", openStatus: "closed" }, "SPBU tutup", { open: "closed" })}
+                  className="min-h-11 rounded-lg bg-slate-800 text-sm font-bold text-white disabled:opacity-50"
+                >
+                  Ya, tutup
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmClosed(false)}
+                  className="min-h-11 rounded-lg border border-line bg-white text-sm font-bold text-slate-800"
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2" role="group" aria-label="Buka atau tutup">
+              <button
+                type="button"
+                disabled={busy}
+                aria-pressed={current === "open"}
+                onClick={() => send({ kind: "open", openStatus: "open" }, "SPBU buka", { open: "open" })}
+                className={`min-h-12 rounded-xl border-2 px-1 text-sm font-bold disabled:opacity-50 ${
+                  current === "open"
+                    ? "border-slate-900 bg-status-smooth text-white"
+                    : "border-status-smooth/50 bg-status-smooth-bg text-status-smooth"
+                }`}
+              >
+                {current === "open" && "✓ "}Buka
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                aria-pressed={current === "closed"}
+                onClick={() => setConfirmClosed(true)}
+                className={`min-h-12 rounded-xl border-2 px-1 text-sm font-bold disabled:opacity-50 ${
+                  current === "closed"
+                    ? "border-slate-900 bg-slate-800 text-white"
+                    : "border-slate-400 bg-slate-100 text-slate-800"
+                }`}
+              >
+                {current === "closed" && "✕ "}Tutup
+              </button>
+            </div>
+          );
+        })()}
       </div>
 
       <div>

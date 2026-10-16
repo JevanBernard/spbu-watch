@@ -20,10 +20,11 @@ interface Update {
 interface AdminReport {
   id: string;
   station: string;
-  kind: "queue" | "stock";
+  kind: "queue" | "stock" | "open";
   queueLevel: number | null;
   fuel: Fuel | null;
   stockStatus: "available" | "out" | null;
+  openStatus?: "open" | "closed" | null;
   device: string;
   hidden: boolean;
   createdAt: string;
@@ -467,7 +468,9 @@ export default function AdminClient() {
               <p className="text-sm">
                 {r.kind === "queue"
                   ? QUEUE_LABEL[(["sepi", "sedang", "panjang"] as const)[r.queueLevel ?? 0]]
-                  : `${FUEL_LABEL[r.fuel!]}: ${r.stockStatus === "out" ? "HABIS" : "ada"}`}
+                  : r.kind === "open"
+                    ? `SPBU ${r.openStatus === "closed" ? "TUTUP" : "buka"}`
+                    : `${FUEL_LABEL[r.fuel!]}: ${r.stockStatus === "out" ? "HABIS" : "ada"}`}
               </p>
               <p className="text-xs text-slate-600">
                 {timeAgo(r.createdAt)} · {r.device.startsWith("admin") ? "admin (CCTV)" : `perangkat ${r.device}`}

@@ -1,5 +1,5 @@
 import type { StationCategory } from "./category";
-import type { Fuel, QueueState, QueueStatus, StockState, StockStatus } from "./status";
+import type { Fuel, OpenReportStatus, QueueState, QueueStatus, StockState, StockStatus } from "./status";
 
 export interface StationDTO {
   id: string;
@@ -19,6 +19,8 @@ export interface StationDTO {
   isGes: boolean;
   fuelsComplete: boolean; // true: `fuels` is the verified full list of fuels sold
   queue: QueueStatus;
+  /** What visitors and the admin report about the station being open now ("SPBU buka / tutup"). */
+  open: OpenReportStatus;
   stock: Partial<Record<Fuel, StockStatus>>;
 }
 

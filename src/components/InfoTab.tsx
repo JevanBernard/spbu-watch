@@ -5,6 +5,7 @@ import type { OfficialUpdateDTO } from "@/lib/api-types";
 import {
   DOMINANCE,
   GEOFENCE_M,
+  MIN_DEVICES_FOR_CLOSED,
   MIN_DEVICES_FOR_OUT,
   QUEUE_TTL_MIN,
   REPORT_COOLDOWN_MIN,
@@ -72,6 +73,11 @@ export default function InfoTab({
               &quot;HABIS&quot; (merah) baru tampil jika minimal {MIN_DEVICES_FOR_OUT} perangkat berbeda melaporkannya
               (atau admin memantau langsung) dan mayoritas laporan (minimal {Math.round(DOMINANCE * 100)}%) sepakat.
               Selain itu tampil &quot;Belum terkonfirmasi&quot;, yang bukan berarti BBM habis.
+            </li>
+            <li>
+              Laporan &quot;SPBU tutup&quot; diperlakukan seperti &quot;habis&quot;: baru tampil sebagai tutup setelah minimal{" "}
+              {MIN_DEVICES_FOR_CLOSED} perangkat berbeda melaporkannya (atau admin memantau langsung). SPBU yang sedang tutup
+              tampak pudar di peta. Jam buka tercatat dipakai bila belum ada laporan.
             </li>
             <li>
               Laporan hanya bisa dikirim dari jarak maksimal {GEOFENCE_M} meter dari SPBU, dengan jeda{" "}

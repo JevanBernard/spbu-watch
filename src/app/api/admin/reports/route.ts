@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { ADMIN_DEVICE_ID } from "@/lib/config";
 import { adminReportSchema } from "@/lib/reports";
 import { serviceClient } from "@/lib/supabase";
+import { withOpenColumn } from "@/lib/stations";
 
 export const dynamic = "force-dynamic";
 
@@ -10,10 +11,11 @@ const WINDOW_HOURS = 24;
 
 interface Row {
   id: string;
-  kind: "queue" | "stock";
+  kind: "queue" | "stock" | "open";
   queue_level: number | null;
   fuel: string | null;
   stock_status: string | null;
+  open_status?: string | null;
   device_id: string;
   hidden: boolean;
   created_at: string;
@@ -26,14 +28,18 @@ export async function GET(req: Request) {
   if (denied) return denied;
   try {
     const since = new Date(Date.now() - WINDOW_HOURS * 3_600_000).toISOString();
-    const { data, error } = await serviceClient()
-      .from("reports")
-      .select("id,kind,queue_level,fuel,stock_status,device_id,hidden,created_at,stations(name,regency)")
-      .gte("created_at", since)
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .returns<Row[]>();
-    if (error) throw new Error(error.message);
+    // Without the open_status column (migration 0007 not run yet) the list is loaded without it.
+    const { data } = await withOpenColumn(async (columns) => {
+      const res = await serviceClient()
+        .from("reports")
+        .select(`${columns.replace("id,station_id,", "id,")},stations(name,regency)`)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(200)
+        .returns<Row[]>();
+      if (res.error) throw new Error(res.error.message);
+      return res;
+    });
     return NextResponse.json({
       reports: (data ?? []).map((r) => ({
         id: r.id,
@@ -42,6 +48,7 @@ export async function GET(req: Request) {
         queueLevel: r.queue_level,
         fuel: r.fuel,
         stockStatus: r.stock_status,
+        openStatus: r.open_status ?? null,
         device: r.device_id.slice(0, 8),
         hidden: r.hidden,
         createdAt: r.created_at,
@@ -72,6 +79,7 @@ export async function POST(req: Request) {
       queue_level: r.kind === "queue" ? (r.queueLevel ?? null) : null,
       fuel: r.kind === "stock" ? (r.fuel ?? null) : null,
       stock_status: r.kind === "stock" ? (r.stockStatus ?? null) : null,
+      ...(r.kind === "open" ? { open_status: r.openStatus } : {}),
       device_id: ADMIN_DEVICE_ID,
       ip_hash: "admin",
     }).select("id").single();

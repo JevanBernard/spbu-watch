@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { StationDTO, StationTimelineDTO } from "@/lib/api-types";
+import type { PublicChatMessage } from "@/lib/chat";
+import { readChatSeen, writeChatSeen } from "@/lib/chat-seen";
+import { getDeviceId } from "@/lib/device";
 import { CATEGORY_LABEL } from "@/lib/category";
 import { FUEL_LABEL, FUEL_ORDER, formatDistance, reportedText } from "@/lib/format";
 import { asOfText, FUEL_PRICES, priceOf, rupiah } from "@/lib/prices";
@@ -53,17 +56,40 @@ export default function StationDetail({
   onReported: () => void;
 }) {
   const [tab, setTab] = useState<Tab>("ringkasan");
-  const [reporting, setReporting] = useState<"choose" | "queue" | "stock" | null>(startReporting ? "choose" : null);
+  const [reporting, setReporting] = useState<"choose" | "queue" | "stock" | "open" | null>(startReporting ? "choose" : null);
   const [sharing, setSharing] = useState(false);
   const reportBox = useRef<HTMLDivElement>(null);
   const [timeline, setTimeline] = useState<StationTimelineDTO | null | "error">(null);
 
   const [reloadKey, setReloadKey] = useState(0);
+
+  // "New messages" badge on the Obrolan tab: messages from other people since this browser last read the chat.
+  const [chatNew, setChatNew] = useState(0);
+  useEffect(() => {
+    if (tab === "obrolan") return; // being read right now
+    let cancelled = false;
+    fetch(`/api/stations/${station.id}/chat`, { cache: "no-store", headers: { "x-device-id": getDeviceId() } })
+      .then((res) => (res.ok ? (res.json() as Promise<{ messages: PublicChatMessage[] }>) : Promise.reject(new Error("chat"))))
+      .then((json) => {
+        if (cancelled) return;
+        const seen = readChatSeen(station.id);
+        setChatNew(json.messages.filter((m) => !m.mine && new Date(m.createdAt).getTime() > seen).length);
+      })
+      .catch(() => {}); // no badge when the chat cannot be read
+    return () => {
+      cancelled = true;
+    };
+  }, [station.id, tab]);
+  // Leaving the chat tab counts everything shown there as read.
+  useEffect(() => {
+    if (tab !== "obrolan") return;
+    return () => writeChatSeen(station.id);
+  }, [tab, station.id]);
   const draftCb = useRef(onDraftChange);
   useEffect(() => {
     draftCb.current = onDraftChange;
   });
-  const reportOpen = reporting === "queue" || reporting === "stock";
+  const reportOpen = reporting === "queue" || reporting === "stock" || reporting === "open";
   useEffect(() => {
     draftCb.current?.("report", reportOpen);
   }, [reportOpen]);
@@ -131,7 +157,7 @@ export default function StationDetail({
         <h2 className="mt-1 text-xl leading-snug font-bold text-slate-900">{station.name}</h2>
         <p className="mt-0.5 text-sm text-slate-600">{station.address ?? station.regency}</p>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
-          <OpenBadge hours={station.openingHours} is24h={station.is24h} />
+          <OpenBadge hours={station.openingHours} is24h={station.is24h} report={station.open} />
           {distance !== null && (
             <span className="tnum rounded bg-primary-fixed px-2 py-0.5 font-bold text-primary">
               {formatDistance(distance)} · <TravelEstimate distance={distance} />
@@ -150,12 +176,24 @@ export default function StationDetail({
             role="tab"
             type="button"
             aria-selected={tab === t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              if (t.id === "obrolan") {
+                writeChatSeen(station.id); // opening it counts as reading
+                setChatNew(0);
+              }
+            }}
             className={`min-h-11 flex-1 border-b-4 px-2 text-sm font-bold ${
               tab === t.id ? "border-primary text-primary" : "border-transparent text-slate-600"
             }`}
           >
             {t.label}
+            {t.id === "obrolan" && chatNew > 0 && tab !== "obrolan" && (
+              <span className="bg-primary tnum ml-1 inline-block min-w-5 rounded-full px-1.5 text-[11px] leading-5 text-white">
+                {chatNew > 9 ? "9+" : chatNew}
+                <span className="sr-only"> pesan baru</span>
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -197,7 +235,7 @@ export default function StationDetail({
             <Timeline24h station={station} timeline={timeline} />
 
             <div ref={reportBox}>
-              {reporting === "queue" || reporting === "stock" ? (
+              {reporting === "queue" || reporting === "stock" || reporting === "open" ? (
                 <ReportFlow
                   key={reporting}
                   station={station}
@@ -222,6 +260,13 @@ export default function StationDetail({
                       className="min-h-14 rounded-2xl border-2 border-primary bg-white px-2 text-base font-bold text-primary"
                     >
                       Laporkan stok
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setReporting("open")}
+                      className="border-primary text-primary col-span-2 min-h-14 rounded-2xl border-2 bg-white px-2 text-base font-bold"
+                    >
+                      Laporkan buka/tutup
                     </button>
                   </div>
                   <button

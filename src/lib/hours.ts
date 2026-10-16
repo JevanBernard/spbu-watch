@@ -1,3 +1,5 @@
+import { timeAgo } from "./format";
+
 export interface OpenState {
   state: "open" | "closed" | "unknown";
   label: string;
@@ -71,4 +73,51 @@ export function openNow(openingHours: string | null | undefined, is24h: boolean,
     return { state: "closed", label: `Tutup sekarang · jam buka ${hhmm(s)}–${hhmm(e)}` };
   }
   return { state: "closed", label: "Tutup hari ini" };
+}
+
+/** The part of a station's "SPBU buka / tutup" report status that decides what is shown. */
+export interface OpenReportLike {
+  status: "open" | "closed" | "unconfirmed" | "conflicting" | "unknown";
+  fromAdmin: boolean;
+  lastReportAt: string | null;
+}
+
+export interface EffectiveOpen extends OpenState {
+  /** True when the answer comes from reports (visitors or admin) instead of the recorded opening hours. */
+  reported: boolean;
+}
+
+/**
+ * Open or closed right now, combining the recorded opening hours with what people report. A confirmed "tutup"
+ * report wins over the hours (a closed gate beats a schedule); a confirmed "buka" report only fills in when the hours
+ * say closed or are unknown. Unconfirmed or mixed reports change nothing here (the station page mentions them).
+ */
+export function effectiveOpen(
+  s: { openingHours: string | null; is24h: boolean; open?: OpenReportLike },
+  now: Date = new Date(),
+): EffectiveOpen {
+  const fixed = openNow(s.openingHours, s.is24h, now);
+  const r = s.open;
+  if (r && (r.status === "closed" || r.status === "open")) {
+    const who = r.fromAdmin ? "pantauan admin" : "laporan warga";
+    const when = r.lastReportAt ? ` (${timeAgo(r.lastReportAt, now)})` : "";
+    if (r.status === "closed") return { state: "closed", label: `Tutup menurut ${who}${when}`, reported: true };
+    if (fixed.state !== "open") return { state: "open", label: `Buka menurut ${who}${when}`, reported: true };
+  }
+  return { ...fixed, reported: false };
+}
+
+export type OpenFilter = "" | "open" | "closed";
+
+/**
+ * Filter "buka sekarang" / "tutup": only stations whose opening hours are known AND say so. Stations with unknown
+ * hours match neither (the page says how many there are), so the filter never claims more than the data knows.
+ */
+export function matchesOpenFilter(
+  s: { openingHours: string | null; is24h: boolean; open?: OpenReportLike },
+  filter: OpenFilter,
+  now: Date = new Date(),
+): boolean {
+  if (!filter) return true;
+  return effectiveOpen(s, now).state === filter;
 }

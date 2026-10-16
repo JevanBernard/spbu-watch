@@ -10,7 +10,7 @@ try {
 }
 
 const DEVICE = `e2e-${Math.random().toString(36).slice(2, 12)}`;
-const PUBLIC_KEYS = ["createdAt", "fuel", "kind", "queueLevel", "stockStatus"];
+const PUBLIC_KEYS = ["createdAt", "fuel", "kind", "openStatus", "queueLevel", "stockStatus"];
 
 test.describe("write flow", () => {
   test.skip(process.env.E2E_WRITE !== "1", "set E2E_WRITE=1 to run (writes to the database)");

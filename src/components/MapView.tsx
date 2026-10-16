@@ -6,8 +6,10 @@ import type { GeoJSONSource, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { StationDTO } from "@/lib/api-types";
 import { hasConfirmedOut } from "@/lib/format";
+import { effectiveOpen } from "@/lib/hours";
 import { MAP_STYLE_URL } from "@/lib/map";
 
+const NO_IDS: string[] = [];
 const DENPASAR: [number, number] = [115.2166, -8.65];
 const CLUSTER_MAX_ZOOM = 11; // clusters below zoom 12
 const STYLE_URL = MAP_STYLE_URL;
@@ -89,7 +91,14 @@ function toGeoJSON(stations: StationDTO[]): GeoJSON.FeatureCollection {
     features: stations.map((s) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [s.lng, s.lat] },
-      properties: { id: s.id, status: s.queue.status, out: hasConfirmedOut(s), shop: s.category === "pertashop" },
+      properties: {
+        id: s.id,
+        status: s.queue.status,
+        out: hasConfirmedOut(s),
+        shop: s.category === "pertashop",
+        // Closed right now (recorded hours, or confirmed "tutup" reports): drawn faded.
+        closed: effectiveOpen(s).state === "closed",
+      },
     })),
   };
 }
@@ -99,6 +108,8 @@ interface Props {
   /** Changes whenever the filters change; null when no filter is active. Used to re-frame the map. */
   fitKey: string | null;
   selectedId: string | null;
+  /** Extra stations ringed on the map (admin "pilih banyak"). Pass a stable array. */
+  pickedIds?: string[];
   userLocation: { lat: number; lng: number } | null;
   /** Bump to fly to the user's position (the "pusatkan lokasi" button). */
   recenterKey: number;
@@ -111,6 +122,7 @@ export default function MapView({
   stations,
   fitKey,
   selectedId,
+  pickedIds = NO_IDS,
   userLocation,
   recenterKey,
   onSelect,
@@ -232,7 +244,7 @@ export default function MapView({
         id: "selected-ring",
         type: "circle",
         source: "stations",
-        filter: ["==", ["get", "id"], ""],
+        filter: ["in", ["get", "id"], ["literal", [""]]],
         paint: {
           "circle-radius": 22,
           "circle-color": "rgba(0,0,0,0)",
@@ -250,6 +262,7 @@ export default function MapView({
           "icon-allow-overlap": true,
           "icon-size": 1,
         },
+        paint: { "icon-opacity": ["case", ["get", "closed"], 0.45, 1] },
       });
       map.addLayer({
         id: "stock-out",
@@ -344,10 +357,17 @@ export default function MapView({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    map.setFilter("selected-ring", ["==", ["get", "id"], selectedId ?? ""]);
     const s = selectedId ? stationsRef.current.find((x) => x.id === selectedId) : null;
     if (s) map.easeTo({ center: [s.lng, s.lat], zoom: Math.max(map.getZoom(), 14), duration: 600 });
   }, [selectedId, ready]);
+
+  // Rings: the selected station plus any stations picked in admin multi-select.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    const ids = [...(selectedId ? [selectedId] : []), ...pickedIds];
+    map.setFilter("selected-ring", ["in", ["get", "id"], ["literal", ids.length ? ids : [""]]]);
+  }, [selectedId, pickedIds, ready]);
 
   useEffect(() => {
     const map = mapRef.current;

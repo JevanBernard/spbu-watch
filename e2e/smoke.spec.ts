@@ -492,3 +492,163 @@ test("tapping empty map clears the selected station, tapping a card selects it a
   page.on("dialog", (d) => d.accept()); // "yes, close it"
   expect(await tapEmptyMap(async () => (await detailTab.count()) === 0), "detail did not close after confirming").toBe(true);
 });
+
+test("open / closed filters: confirmed hours only, with an honest note about the rest", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  const summary = page.getByText(/^\d+ dari \d+ SPBU/);
+  const totalOf = async () => Number((await summary.textContent())!.match(/dari (\d+) SPBU/)![1]);
+  await expect.poll(totalOf, { timeout: 15_000 }).toBeGreaterThan(100); // wait until the stations have loaded
+  const total = await totalOf();
+
+  await page.getByRole("button", { name: "Buka sekarang", exact: true }).click();
+  await expect(page.getByText(/Status buka\/tutup baru diketahui untuk \d+ dari \d+ SPBU/)).toBeVisible();
+  const open = Number((await summary.textContent())!.match(/^(\d+) dari/)![1]);
+  expect(open).toBeGreaterThan(0); // the 24-hour stations are always open
+  expect(open).toBeLessThan(total); // stations without known hours are not claimed to be open
+
+  await page.getByRole("button", { name: "Tutup", exact: true }).click(); // switches from "open" to "closed"
+  const closed = Number((await summary.textContent())!.match(/^(\d+) dari/)![1]);
+  expect(open + closed).toBeLessThan(total);
+
+  await page.getByRole("button", { name: "Semua", exact: true }).click();
+  await expect(page.getByText(new RegExp(`^${total} dari ${total} SPBU`))).toBeVisible();
+});
+
+test("admin mode: pick several stations and set one queue level for all (save and undo are mocked)", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  const posts: unknown[] = [];
+  const hides: string[] = [];
+  await page.route("**/api/admin/reports", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    posts.push(route.request().postDataJSON());
+    return route.fulfill({ status: 201, json: { ok: true, id: `00000000-0000-4000-8000-00000000010${posts.length}` } });
+  });
+  await page.route("**/api/admin/reports/*/hide", (route) => {
+    hides.push(route.request().url());
+    return route.fulfill({ status: 200, json: { ok: true } });
+  });
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.getByRole("button", { name: "Gunakan lokasi saya" }).first().click();
+
+  await page.getByRole("button", { name: "Pilih banyak" }).click();
+  const panel = page.getByRole("region", { name: "Edit banyak SPBU (admin)" });
+  await expect(panel.getByText("Pilih SPBU di peta")).toBeVisible();
+  await expect(panel.getByRole("button", { name: "Sedang" })).toBeDisabled(); // nothing picked yet
+
+  const cards = page.getByRole("region", { name: "SPBU terdekat" }).getByRole("button");
+  await expect(cards.nth(1)).toBeVisible({ timeout: 15_000 });
+  await cards.nth(0).click();
+  await cards.nth(1).click();
+  await expect(panel.getByText("2 SPBU dipilih")).toBeVisible();
+  await expect(cards.nth(0)).toHaveAttribute("aria-pressed", "true");
+
+  // tapping a picked card again takes it out
+  await cards.nth(1).click();
+  await expect(panel.getByText("1 SPBU dipilih")).toBeVisible();
+  await cards.nth(1).click();
+
+  await panel.getByRole("button", { name: "Sedang" }).click();
+  await expect(panel.getByText(/Tersimpan: Antrean sedang untuk 2 SPBU/)).toBeVisible();
+  expect(posts).toHaveLength(2);
+  expect(posts.every((p) => (p as { kind: string; queueLevel: number }).kind === "queue" && (p as { queueLevel: number }).queueLevel === 1)).toBe(true);
+
+  await panel.getByRole("button", { name: "Urungkan" }).click();
+  await expect.poll(() => hides.length).toBe(2);
+
+  await page.getByRole("button", { name: "Selesai pilih" }).click();
+  await expect(panel).toHaveCount(0);
+});
+
+test("chat tab shows how many new messages there are, and clears it once it is opened (chat mocked)", async ({ page }) => {
+  const now = Date.now();
+  const message = (id: string, minAgo: number, mine = false) => ({
+    id,
+    nickname: "Pengendara 4F2A",
+    body: `pesan ${id}`,
+    createdAt: new Date(now - minAgo * 60_000).toISOString(),
+    mine,
+  });
+  await page.route(/\/api\/stations\/[0-9a-f-]+\/chat$/, (route) =>
+    route.fulfill({ json: { messages: [message("a", 30), message("b", 10), message("c", 5, true)] } }),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  const tab = page.getByRole("tab", { name: /Obrolan/ });
+  await expect(tab).toContainText("2"); // two from others; the one that is mine does not count
+  await tab.click();
+  await expect(page.getByText("pesan a")).toBeVisible();
+  await expect(tab).not.toContainText("2");
+
+  // after leaving the tab nothing is new any more, because everything shown was read
+  await page.getByRole("tab", { name: "Ringkasan" }).click();
+  await page.waitForTimeout(800);
+  await expect(page.getByRole("tab", { name: /Obrolan/ })).not.toContainText("2");
+});
+
+test("report flow: the buka/tutup report reaches its choice step (nothing is submitted)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  await page.getByRole("button", { name: "Lapor kondisi" }).click();
+  await page.getByRole("button", { name: "Laporkan buka/tutup" }).click();
+  await page.getByRole("button", { name: /Izinkan lokasi/ }).click();
+  await expect(page.getByText("Apakah SPBU ini sedang buka?")).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: /SPBU buka/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /SPBU tutup/ })).toBeVisible();
+  await expect(page.getByText(/baru ditampilkan setelah beberapa orang melapor/)).toBeVisible();
+});
+
+test("the Lapor tab offers buka/tutup too (positioned at a real station)", async ({ page, request }) => {
+  const { stations } = (await (await request.get("/api/stations")).json()) as { stations: { lat: number; lng: number }[] };
+  await page.context().setGeolocation({ latitude: stations[0].lat, longitude: stations[0].lng });
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Lapor" }).click();
+  await page.getByRole("button", { name: "Izinkan lokasi" }).click();
+  await page.getByRole("list", { name: /radius 500 meter/ }).getByRole("button").first().click();
+  await expect(page.getByRole("button", { name: "Laporkan buka/tutup" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Laporkan antrean" })).toBeVisible();
+});
+
+test("admin mode: Buka / Tutup selection, with a confirmation before Tutup (the save request is mocked)", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  const posts: { kind: string; openStatus?: string }[] = [];
+  await page.route("**/api/admin/reports", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    posts.push(route.request().postDataJSON());
+    return route.fulfill({ status: 201, json: { ok: true, id: "00000000-0000-4000-8000-000000000201" } });
+  });
+  await page.route("**/api/admin/reports/*/hide", (route) => route.fulfill({ status: 200, json: { ok: true } }));
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+
+  const edit = page.getByRole("region", { name: "Edit kondisi (admin)" });
+  const group = edit.getByRole("group", { name: "Buka atau tutup" });
+  await group.getByRole("button", { name: "Buka" }).click();
+  await expect(group.getByRole("button", { name: /Buka/ })).toHaveAttribute("aria-pressed", "true");
+
+  // "Tutup" asks first, and Batal sends nothing
+  await group.getByRole("button", { name: "Tutup" }).click();
+  await expect(edit.getByText(/Tandai SPBU ini TUTUP/)).toBeVisible();
+  await edit.getByRole("button", { name: "Batal" }).click();
+  expect(posts).toHaveLength(1);
+
+  await group.getByRole("button", { name: "Tutup" }).click();
+  await edit.getByRole("button", { name: "Ya, tutup" }).click();
+  await expect(group.getByRole("button", { name: /Tutup/ })).toHaveAttribute("aria-pressed", "true");
+  expect(posts.map((p) => p.openStatus)).toEqual(["open", "closed"]);
+  expect(posts.every((p) => p.kind === "open")).toBe(true);
+
+  await edit.getByRole("button", { name: "Urungkan" }).click();
+  await expect(group.getByRole("button", { name: /Tutup/ })).toHaveAttribute("aria-pressed", "false");
+});

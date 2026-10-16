@@ -12,6 +12,7 @@ function fakeSupabase(tables: Record<string, Row[]>): SupabaseClient {
     let window: [number, number] | null = null;
     const b = {
       select: () => b,
+      returns: () => b,
       eq: (c: string, v: unknown) => (filters.push((r) => r[c] === v), b),
       gte: (c: string, v: string) => (filters.push((r) => String(r[c]) >= v), b),
       order: (c: string, o?: { ascending?: boolean }) => (orders.push([c, o?.ascending !== false]), b),

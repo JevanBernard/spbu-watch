@@ -16,16 +16,30 @@ const FUELS = [
   "pertamina_dex",
 ] as const;
 
-/** kind decides which of queueLevel / fuel+stockStatus are required. Shared by user and admin reports. */
+/** kind decides which of queueLevel / fuel+stockStatus / openStatus are required. Shared by user and admin reports. */
 function checkKind(
-  v: { kind: "queue" | "stock"; queueLevel?: number; fuel?: string; stockStatus?: string },
+  v: {
+    kind: "queue" | "stock" | "open";
+    queueLevel?: number;
+    fuel?: string;
+    stockStatus?: string;
+    openStatus?: string;
+  },
   ctx: z.RefinementCtx,
 ) {
   const bad = (message: string) => ctx.addIssue({ code: "custom", message });
   if (v.kind === "queue") {
     if (v.queueLevel === undefined) bad("queueLevel wajib untuk laporan antrean");
-    if (v.fuel !== undefined || v.stockStatus !== undefined) bad("fuel/stockStatus tidak boleh");
+    if (v.fuel !== undefined || v.stockStatus !== undefined || v.openStatus !== undefined) {
+      bad("fuel/stockStatus/openStatus tidak boleh");
+    }
+  } else if (v.kind === "open") {
+    if (v.openStatus === undefined) bad("openStatus wajib untuk laporan buka/tutup");
+    if (v.queueLevel !== undefined || v.fuel !== undefined || v.stockStatus !== undefined) {
+      bad("queueLevel/fuel/stockStatus tidak boleh untuk laporan buka/tutup");
+    }
   } else {
+    if (v.openStatus !== undefined) bad("openStatus tidak boleh untuk laporan stok");
     if (v.fuel === undefined || v.stockStatus === undefined) bad("fuel dan stockStatus wajib");
     if (v.queueLevel !== undefined) bad("queueLevel tidak boleh untuk laporan stok");
   }
@@ -33,10 +47,11 @@ function checkKind(
 
 const reportFields = {
   stationId: z.string().uuid(),
-  kind: z.enum(["queue", "stock"]),
+  kind: z.enum(["queue", "stock", "open"]),
   queueLevel: z.number().int().min(0).max(2).optional(),
   fuel: z.enum(FUELS).optional(),
   stockStatus: z.enum(["available", "out"]).optional(),
+  openStatus: z.enum(["open", "closed"]).optional(),
 };
 
 /** Admin report (from CCTV): no device, location or captcha; the route checks the admin token instead. */
@@ -58,10 +73,12 @@ export type ReportInput = z.infer<typeof reportSchema>;
 
 export interface NewReportRow {
   station_id: string;
-  kind: "queue" | "stock";
+  kind: "queue" | "stock" | "open";
   queue_level: number | null;
   fuel: string | null;
   stock_status: string | null;
+  /** Only set for "open" reports; left out of the row otherwise so older databases (before migration 0007) accept it. */
+  open_status?: string;
   device_id: string;
   ip_hash: string;
 }
@@ -153,6 +170,7 @@ export async function processReport(
     queue_level: r.kind === "queue" ? (r.queueLevel ?? null) : null,
     fuel: r.kind === "stock" ? (r.fuel ?? null) : null,
     stock_status: r.kind === "stock" ? (r.stockStatus ?? null) : null,
+    ...(r.kind === "open" ? { open_status: r.openStatus } : {}),
     device_id: r.deviceId,
     ip_hash: ipHash,
   });

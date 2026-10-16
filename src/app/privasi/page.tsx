@@ -26,8 +26,8 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-bold">Yang kami simpan</h2>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Isi laporan:</b> SPBU yang dilaporkan, tingkat antrean atau status stok (jenis BBM,
-            ada atau habis), dan waktu laporan.
+            <b>Isi laporan:</b> SPBU yang dilaporkan, tingkat antrean, status stok (jenis BBM,
+            ada atau habis) atau status buka/tutup SPBU, dan waktu laporan.
           </li>
           <li>
             <b>Pesan obrolan:</b> isi pesan yang Anda kirim di obrolan sebuah SPBU, nama samaran acak

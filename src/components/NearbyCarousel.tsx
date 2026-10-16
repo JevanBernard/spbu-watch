@@ -17,11 +17,14 @@ export interface NearbyItem {
 export default function NearbyCarousel({
   items,
   activeId,
+  pickedIds,
   onActivate,
   onOpen,
 }: {
   items: NearbyItem[];
   activeId: string | null;
+  /** Admin multi-select: ticked stations. When set, tapping a card is meant to toggle it. */
+  pickedIds?: string[];
   /** The reader swiped another card into the middle: show it on the map. */
   onActivate: (id: string) => void;
   onOpen: (id: string) => void;
@@ -76,6 +79,7 @@ export default function NearbyCarousel({
             station={station}
             distance={distance}
             active={station.id === activeId}
+            picked={pickedIds?.includes(station.id)}
             onOpen={() => onOpen(station.id)}
           />
         </li>

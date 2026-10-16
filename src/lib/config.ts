@@ -16,6 +16,14 @@ export const ADMIN_OUT_CONFIRMED_MIN = 6 * 60;
 /** After this long an admin queue report is no longer shown as a status (queues change in minutes). Only the
  * "last watched by admin X ago" text stays. Stock keeps its own rule (ADMIN_OUT_CONFIRMED_MIN, ADMIN_KEEP_DAYS). */
 export const ADMIN_QUEUE_SHOW_MIN = 120;
+/**
+ * "SPBU buka / tutup" reports. Valid for OPEN_TTL_MIN. A confirmed "tutup" needs MIN_DEVICES_FOR_CLOSED devices
+ * (like "habis"), or the admin who watches the station directly. An admin report older than ADMIN_OPEN_SHOW_MIN
+ * is no longer shown as a status.
+ */
+export const OPEN_TTL_MIN = 120;
+export const MIN_DEVICES_FOR_CLOSED = 3;
+export const ADMIN_OPEN_SHOW_MIN = 6 * 60;
 export const DOMINANCE = 0.6; // share of weighted votes needed to call a status
 export const GEOFENCE_M = 500;
 

@@ -38,7 +38,7 @@ export default function StationCard({
           </span>
           <span className="line-clamp-1 block text-sm text-slate-600">{s.address ?? s.regency}</span>
           <span className="flex flex-wrap items-center gap-1.5 text-xs">
-            <OpenBadge hours={s.openingHours} is24h={s.is24h} />
+            <OpenBadge hours={s.openingHours} is24h={s.is24h} report={s.open} />
             <CategoryBadge category={s.category} />
             {s.isGes && <GesBadge />}
           </span>
@@ -66,11 +66,14 @@ export function NearbyCard({
   station: s,
   distance,
   active,
+  picked = false,
   onOpen,
 }: {
   station: StationDTO;
   distance: number | null;
   active: boolean;
+  /** Ticked in admin multi-select. */
+  picked?: boolean;
   onOpen: () => void;
 }) {
   const tone = queueTone(s.queue.status);
@@ -79,10 +82,16 @@ export function NearbyCard({
       type="button"
       onClick={onOpen}
       aria-current={active ? "true" : undefined}
-      className={`flex h-full w-full flex-col gap-1.5 rounded-2xl border bg-white p-3 text-left shadow-sm ${
-        active ? "border-primary ring-primary/25 ring-2" : "border-line"
+      aria-pressed={picked ? true : undefined}
+      className={`relative flex h-full w-full flex-col gap-1.5 rounded-2xl border bg-white p-3 text-left shadow-sm ${
+        active || picked ? "border-primary ring-primary/25 ring-2" : "border-line"
       }`}
     >
+      {picked && (
+        <span className="bg-primary absolute -top-2 -right-1 flex size-6 items-center justify-center rounded-full text-sm font-bold text-white shadow">
+          ✓
+        </span>
+      )}
       <span className="flex items-start gap-2.5">
         <span className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${tone.tile}`}>
           <GasIcon />
@@ -98,7 +107,7 @@ export function NearbyCard({
       <span className="line-clamp-1 block text-xs text-slate-600">{s.address ?? s.regency}</span>
       <span className="flex flex-wrap items-center gap-1.5 text-xs">
         <CategoryBadge category={s.category} />
-        <OpenBadge hours={s.openingHours} is24h={s.is24h} />
+        <OpenBadge hours={s.openingHours} is24h={s.is24h} report={s.open} />
         <QueueBadge status={s.queue.status} />
       </span>
     </button>

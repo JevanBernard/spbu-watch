@@ -8,7 +8,7 @@ import ReportFlow from "./ReportFlow";
 import { CategoryBadge, QueueBadge } from "./StatusBits";
 import { LocateIcon } from "./ui";
 
-type Kind = "queue" | "stock";
+type Kind = "queue" | "stock" | "open";
 type Coords = { lat: number; lng: number };
 
 /**
@@ -177,6 +177,13 @@ export default function ReportTab({
                 className="min-h-16 rounded-2xl border-2 border-primary bg-white px-2 text-base font-bold text-primary"
               >
                 Laporkan stok
+              </button>
+              <button
+                type="button"
+                onClick={() => setKind("open")}
+                className="col-span-2 min-h-14 rounded-2xl border-2 border-primary bg-white px-2 text-base font-bold text-primary"
+              >
+                Laporkan buka/tutup
               </button>
             </div>
           )}

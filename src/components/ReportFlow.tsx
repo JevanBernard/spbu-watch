@@ -8,7 +8,7 @@ import { FUEL_LABEL, FUEL_ORDER } from "@/lib/format";
 import type { Fuel } from "@/lib/status";
 import TurnstileWidget, { TURNSTILE_SITE_KEY } from "./TurnstileWidget";
 
-type Kind = "queue" | "stock";
+type Kind = "queue" | "stock" | "open";
 type Step = "locate" | "choose" | "sending" | "done" | "error";
 
 const QUEUE_CHOICES = [
@@ -18,6 +18,12 @@ const QUEUE_CHOICES = [
 ];
 
 const COOLDOWN_MIN = 10;
+
+const KIND_TITLE: Record<Kind, string> = {
+  queue: "Laporkan antrean",
+  stock: "Laporkan stok",
+  open: "Laporkan buka/tutup",
+};
 
 export default function ReportFlow({
   station,
@@ -103,11 +109,11 @@ export default function ReportFlow({
   return (
     <div
       role="dialog"
-      aria-label={kind === "queue" ? "Laporkan antrean" : "Laporkan stok"}
+      aria-label={KIND_TITLE[kind]}
       className="space-y-3 rounded-2xl border-2 border-primary bg-white p-3 shadow-md"
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-bold">{kind === "queue" ? "Laporkan antrean" : "Laporkan stok BBM"}</h3>
+        <h3 className="font-bold">{kind === "stock" ? "Laporkan stok BBM" : KIND_TITLE[kind]}</h3>
         <button
           type="button"
           onClick={onClose}
@@ -210,6 +216,40 @@ export default function ReportFlow({
           <p className="text-xs text-slate-700">
             Laporkan &quot;Habis&quot; hanya jika Anda melihat sendiri BBM itu tidak tersedia di SPBU
             ini. Status &quot;habis&quot; baru ditampilkan setelah beberapa orang melapor.
+          </p>
+        </div>
+      )}
+
+      {step === "choose" && kind === "open" && (
+        <div className="space-y-2">
+          <p className="text-sm font-semibold">Apakah SPBU ini sedang buka?</p>
+          <button
+            type="button"
+            disabled={blocked}
+            onClick={() => submit({ openStatus: "open" })}
+            className="flex min-h-16 w-full items-center gap-3 rounded-xl bg-status-smooth px-4 text-left text-white disabled:opacity-40"
+          >
+            <span aria-hidden className="text-2xl font-bold">✓</span>
+            <span>
+              <span className="block text-lg font-bold">SPBU buka</span>
+              <span className="block text-sm">Melayani pembeli sekarang</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            disabled={blocked}
+            onClick={() => submit({ openStatus: "closed" })}
+            className="flex min-h-16 w-full items-center gap-3 rounded-xl bg-slate-800 px-4 text-left text-white disabled:opacity-40"
+          >
+            <span aria-hidden className="text-2xl font-bold">✕</span>
+            <span>
+              <span className="block text-lg font-bold">SPBU tutup</span>
+              <span className="block text-sm">Gerbang atau pompa ditutup, tidak melayani</span>
+            </span>
+          </button>
+          <p className="text-xs text-slate-700">
+            Laporkan &quot;tutup&quot; hanya jika Anda melihat sendiri SPBU ini tidak melayani. Status
+            &quot;tutup&quot; baru ditampilkan setelah beberapa orang melapor.
           </p>
         </div>
       )}

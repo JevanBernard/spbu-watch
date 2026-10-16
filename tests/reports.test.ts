@@ -224,3 +224,44 @@ describe("adminReportSchema", () => {
     expect(adminReportSchema.safeParse({ stationId: STATION, kind: "queue", queueLevel: 1, deviceId: "x" }).success).toBe(false);
   });
 });
+
+describe("open / closed reports (kind 'open')", () => {
+  const openBody = { stationId: STATION, kind: "open", openStatus: "closed", deviceId: "device-abc-123", lat: -8.65, lng: 115.2166 };
+
+  it("accepts a report that says the station is open or closed", () => {
+    expect(reportSchema.safeParse(openBody).success).toBe(true);
+    expect(reportSchema.safeParse({ ...openBody, openStatus: "open" }).success).toBe(true);
+  });
+  it.each([
+    ["without a status", { ...openBody, openStatus: undefined }],
+    ["with an unknown status", { ...openBody, openStatus: "maybe" }],
+    ["with a queue level", { ...openBody, queueLevel: 1 }],
+    ["with a fuel", { ...openBody, fuel: "pertalite" }],
+    ["with a stock status", { ...openBody, stockStatus: "out" }],
+    ["a queue report that carries openStatus", { ...queueBody, openStatus: "open" }],
+    ["a stock report that carries openStatus", { ...stockBody, openStatus: "open" }],
+  ])("rejects %s", (_, body) => {
+    expect(reportSchema.safeParse(body).success).toBe(false);
+  });
+
+  it("the admin schema takes it too, without device, position or captcha", () => {
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "open", openStatus: "closed" }).success).toBe(true);
+    expect(adminReportSchema.safeParse({ stationId: STATION, kind: "open" }).success).toBe(false);
+  });
+
+  it("is stored with open_status, and the other kinds do not carry that column (older databases keep working)", async () => {
+    const a = makeDeps();
+    expect((await processReport(openBody, "ip", a.deps)).status).toBe(201);
+    expect(a.inserted[0]).toMatchObject({ kind: "open", open_status: "closed", queue_level: null, fuel: null, stock_status: null });
+
+    const b = makeDeps();
+    await processReport(queueBody, "ip", b.deps);
+    expect(Object.keys(b.inserted[0])).not.toContain("open_status");
+  });
+
+  it("is held to the same geofence as other reports", async () => {
+    const { deps, inserted } = makeDeps({ distanceM: async () => 5000 });
+    expect((await processReport(openBody, "ip", deps)).status).toBe(403);
+    expect(inserted).toHaveLength(0);
+  });
+});
