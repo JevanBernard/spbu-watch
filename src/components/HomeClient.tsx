@@ -10,6 +10,7 @@ import { clearAdminToken, getAdminToken } from "@/lib/admin-session";
 import { ALT_RADIUS_M } from "@/lib/config";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
 import type { Fuel } from "@/lib/status";
+import { EMPTY_STATS, type SiteStats } from "@/lib/site-stats";
 import { useRefreshing } from "@/lib/use-refreshing";
 import AdminEditPanel from "./AdminEditPanel";
 import AdminLoginDialog from "./AdminLoginDialog";
@@ -21,6 +22,7 @@ import ReportTab from "./ReportTab";
 import { buildAppCard } from "@/lib/share-card";
 import ShareDialog from "./ShareDialog";
 import SiteFooter from "./SiteFooter";
+import StatsStrip from "./StatsStrip";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
 import { Legend } from "./StatusBits";
@@ -60,6 +62,8 @@ export default function HomeClient() {
     (j: { stations: StationDTO[] }) => j.stations,
     [],
   );
+  // Shared by the strip on the map and the Statistik panel in the Info tab: one request, refreshed every minute.
+  const statsQ = useRefreshing<SiteStats>("/api/stats", (j: SiteStats) => j, EMPTY_STATS);
   const officialQ = useRefreshing<OfficialUpdateDTO[]>(
     "/api/official",
     (j: { updates: OfficialUpdateDTO[] }) => j.updates,
@@ -438,6 +442,7 @@ export default function HomeClient() {
               </div>
             )}
           </div>
+          <StatsStrip stats={statsQ.data} />
           {adminToken && (
             <div
               data-testid="admin-banner"
@@ -840,6 +845,7 @@ export default function HomeClient() {
           <div className="bg-canvas md:border-line absolute inset-0 z-40 overflow-y-auto overscroll-contain md:right-auto md:bottom-[var(--nav-h)] md:w-[440px] md:border-r">
             <InfoTab
               updates={officialQ.data}
+              stats={statsQ.data}
               updatedAt={officialQ.updatedAt}
               onShare={() => setShareApp(true)}
               adminActive={Boolean(adminToken)}

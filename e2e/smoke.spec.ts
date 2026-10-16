@@ -709,3 +709,102 @@ test("share as a picture: the app card from the Info tab has no station data", a
   ]);
   expect(download.suggestedFilename()).toBe("spbu-watch-spbu-watch-story.png");
 });
+
+test("Info tab statistics: online now, visitors today and reports in the last 24 hours (stats mocked)", async ({ page }) => {
+  await page.route(/\/api\/stats(\?.*)?$/, (route) =>
+    route.fulfill({
+      json: { today: 1316, online: 24, total: 48210, since: "2026-10-10", reports24h: { total: 37, queue: 20, stock: 14, open: 3 } },
+    }),
+  );
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  const stats = page.getByRole("region", { name: "Statistik" });
+  await expect(stats.getByText("1.316")).toBeVisible(); // Indonesian thousands separator
+  await expect(stats.getByText("pengunjung hari ini")).toBeVisible();
+  await expect(stats.getByText("24", { exact: true })).toBeVisible();
+  await expect(stats.getByText("online sekarang")).toBeVisible();
+  await expect(stats.getByText("48.210")).toBeVisible();
+  await expect(stats.getByText("total pengunjung", { exact: true })).toBeVisible();
+  await expect(stats.getByText("sejak 10 Oktober 2026")).toBeVisible();
+  await expect(stats.getByText(/Orang yang kembali di hari lain dihitung lagi/)).toBeVisible();
+  await expect(stats.getByText("37", { exact: true })).toBeVisible();
+  await expect(stats.getByText("laporan dalam 24 jam")).toBeVisible();
+  await expect(stats.getByText(/antrean 20 · stok 14 · buka\/tutup 3/)).toBeVisible();
+});
+
+test("Info tab statistics: a part that cannot be read shows a dash, the rest still shows (stats mocked)", async ({ page }) => {
+  await page.route(/\/api\/stats(\?.*)?$/, (route) =>
+    route.fulfill({ json: { today: 80, online: 3, total: null, since: null, reports24h: null } }),
+  );
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  const stats = page.getByRole("region", { name: "Statistik" });
+  await expect(stats.getByText("80", { exact: true })).toBeVisible();
+  await expect(stats.getByText("–", { exact: true })).toBeVisible();
+  await expect(stats.getByText(/antrean .* · stok/)).toHaveCount(0);
+  await expect(stats.getByText("total pengunjung", { exact: true })).toHaveCount(0); // no total until migration 0008 is run
+});
+
+test("stats API: visitor counters and the 24-hour report counts add up, and are only numbers", async ({ request }) => {
+  const res = await request.get("/api/stats");
+  expect(res.status()).toBe(200);
+  const body = await res.json();
+  expect(Object.keys(body).sort()).toEqual(["online", "reports24h", "since", "today", "total"]);
+  if (body.total !== null) expect(Number.isInteger(body.total)).toBe(true);
+  const r = body.reports24h;
+  if (r !== null) {
+    expect(Object.keys(r).sort()).toEqual(["open", "queue", "stock", "total"]);
+    expect(r.total).toBe(r.queue + r.stock + r.open);
+    for (const n of Object.values(r)) expect(Number.isInteger(n)).toBe(true);
+  }
+});
+
+test.describe("stats strip on the map", () => {
+  const stats = { today: 1316, online: 24, total: 48210, since: "2026-10-10", reports24h: { total: 37, queue: 20, stock: 14, open: 3 } };
+
+  test("one line under the disclaimer badge, above the filters, with all four numbers (stats mocked)", async ({ page }) => {
+    await page.route(/\/api\/stats(\?.*)?$/, (route) => route.fulfill({ json: stats }));
+    await page.goto("/");
+    const strip = page.getByTestId("stats-strip");
+    await expect(strip).toBeVisible({ timeout: 15_000 });
+    await expect(strip).toContainText("24 online");
+    await expect(strip).toContainText("1.316 hari ini");
+    await expect(strip).toContainText("48.210 total");
+    await expect(strip).toContainText("37 laporan/24 jam");
+    await expect(strip).toHaveAttribute("aria-label", /Statistik: 24 pengunjung online/);
+
+    const disclaimer = await page.getByRole("button", { name: "Detail disclaimer" }).evaluate((el) => {
+      const r = el.parentElement!.parentElement!.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, width: r.width };
+    });
+    const s = (await strip.boundingBox())!;
+    const chips = (await page.getByRole("button", { name: "Pertashop", exact: true }).boundingBox())!;
+    expect(s.y).toBeGreaterThanOrEqual(disclaimer.bottom - 1); // directly under the badge
+    expect(s.y).toBeLessThan(disclaimer.bottom + 12);
+    expect(chips.y).toBeGreaterThan(s.y + s.height - 1); // and above the filter chips
+    expect(s.height).toBeLessThanOrEqual(34); // a single line, not a block
+    expect(Math.abs(s.width - disclaimer.width)).toBeLessThan(4); // as long as the badge
+    const sideways = await strip.evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+    expect(sideways, "the four numbers should fit on one line on a 375 px phone").toBe(true);
+  });
+
+  test("parts that cannot be read are left out, and nothing shows when none can be read (stats mocked)", async ({ page }) => {
+    await page.route(/\/api\/stats(\?.*)?$/, (route) =>
+      route.fulfill({ json: { today: 80, online: null, total: null, since: null, reports24h: null } }),
+    );
+    await page.goto("/");
+    const strip = page.getByTestId("stats-strip");
+    await expect(strip).toContainText("80 hari ini");
+    await expect(strip).not.toContainText("online");
+    await expect(strip).not.toContainText("laporan");
+  });
+
+  test("hidden entirely when there are no numbers at all (stats mocked)", async ({ page }) => {
+    await page.route(/\/api\/stats(\?.*)?$/, (route) =>
+      route.fulfill({ json: { today: null, online: null, total: null, since: null, reports24h: null } }),
+    );
+    await page.goto("/");
+    await page.waitForTimeout(1500);
+    await expect(page.getByTestId("stats-strip")).toHaveCount(0);
+  });
+});

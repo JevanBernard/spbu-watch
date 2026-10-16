@@ -11,17 +11,28 @@ import {
   REPORT_COOLDOWN_MIN,
   STOCK_TTL_MIN,
 } from "@/lib/config";
-import { useRefreshing } from "@/lib/use-refreshing";
-import { countText } from "@/lib/visits-format";
+import type { SiteStats } from "@/lib/site-stats";
+import { countText, sinceText } from "@/lib/visits-format";
 import { OfficialList } from "./OfficialPanel";
 import SiteFooter from "./SiteFooter";
 import { Legend } from "./StatusBits";
 import { PhoneIcon, ShareIcon } from "./ui";
 
+function StatTile({ value, label, tone, sub }: { value: number | null; label: string; tone?: string; sub?: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-white p-3 text-center shadow-sm">
+      <p className={`tnum text-2xl font-bold ${tone ?? "text-slate-900"}`}>{value === null ? "–" : countText(value)}</p>
+      <p className="mt-0.5 text-xs leading-tight font-semibold text-slate-600">{label}</p>
+      {sub && <p className="mt-0.5 text-[11px] leading-tight text-slate-500">{sub}</p>}
+    </div>
+  );
+}
+
 const h2 = "mb-2 text-base font-bold text-slate-900";
 
 export default function InfoTab({
   updates,
+  stats,
   updatedAt,
   onShare,
   adminActive,
@@ -29,17 +40,13 @@ export default function InfoTab({
   onAdminLogout,
 }: {
   updates: OfficialUpdateDTO[];
+  stats: SiteStats;
   updatedAt: Date | null;
   onShare: () => void;
   adminActive: boolean;
   onAdminLogin: () => void;
   onAdminLogout: () => void;
 }) {
-  const stats = useRefreshing<{ today: number | null; online: number | null }>(
-    "/api/stats",
-    (j: { today: number | null; online: number | null }) => j,
-    { today: null, online: null },
-  );
   return (
     <div className="mx-auto max-w-xl space-y-6 px-4 pt-4 pb-8">
       <header>
@@ -54,6 +61,40 @@ export default function InfoTab({
           <span className="block text-xs opacity-90">Kanal resmi untuk kepastian pasokan</span>
         </span>
       </a>
+
+      {(stats.online !== null ||
+        stats.today !== null ||
+        stats.total !== null ||
+        stats.reports24h !== null) && (
+        <section aria-label="Statistik">
+          <h2 className={h2}>Statistik</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <StatTile value={stats.online} label="online sekarang" tone="text-status-smooth" />
+            <StatTile value={stats.today} label="pengunjung hari ini" />
+            {stats.total !== null && (
+              <StatTile
+                value={stats.total}
+                label="total pengunjung"
+                sub={stats.since ? `sejak ${sinceText(stats.since)}` : undefined}
+              />
+            )}
+            <StatTile value={stats.reports24h?.total ?? null} label="laporan dalam 24 jam" tone="text-primary" />
+          </div>
+          {stats.total !== null && (
+            <p className="mt-2 text-xs text-slate-600">
+              Total pengunjung menjumlahkan pengunjung tiap hari. Orang yang kembali di hari lain dihitung lagi, karena
+              kami sengaja tidak melacak pengunjung antarhari demi privasi.
+            </p>
+          )}
+          {stats.reports24h && (
+            <p className="tnum mt-2 text-xs text-slate-600">
+              Laporan 24 jam terakhir: antrean {countText(stats.reports24h.queue)} · stok{" "}
+              {countText(stats.reports24h.stock)} · buka/tutup {countText(stats.reports24h.open)}. Diperbarui
+              tiap menit.
+            </p>
+          )}
+        </section>
+      )}
 
       <section>
         <h2 className={h2}>Informasi resmi</h2>
@@ -98,12 +139,6 @@ export default function InfoTab({
           <ShareIcon />
           Bagikan aplikasi (tautan &amp; QR)
         </button>
-        {stats.data.online !== null && stats.data.today !== null && (
-          <p className="tnum text-sm text-slate-700">
-            <span aria-hidden className="mr-1.5 inline-block size-2 rounded-full bg-status-smooth" />
-            <b>{countText(stats.data.online)}</b> online · <b>{countText(stats.data.today)}</b> pengunjung hari ini
-          </p>
-        )}
       </section>
 
       <SiteFooter withDisclaimer updatedAt={updatedAt} className="border-t border-line px-0 pt-4" />

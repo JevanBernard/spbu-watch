@@ -9,11 +9,13 @@ provider's pricing page before launch; they change.
 ## 1. Supabase
 
 - [ ] Project created (region Singapore). Paid plan **not** enabled.
-- [ ] Run `supabase/migrations/0001` to `0007` in the SQL Editor, in order (paste the file contents).
+- [ ] Run `supabase/migrations/0001` to `0008` in the SQL Editor, in order (paste the file contents).
   - 0005 adds the visitor counter, 0006 the live chat (`chat_messages`, `chat_flags`). Until 0006 is run, the chat tab
     shows "Obrolan belum bisa dimuat" and everything else keeps working.
   - 0007 adds the "SPBU buka/tutup" report (`reports.open_status`). **Run it before deploying the matching app version.**
     The app still starts without it (open reports are just not read), and `pnpm verify:db` shows what is missing.
+  - 0008 adds the all-time visitor total (`visit_daily`, `visit_totals()`). It counts from the visits still stored
+    (at most 7 days), so the total starts there. Until it is run the total tile is simply not shown.
   - 0004 and 0006 use `pg_cron`; if it errors, enable **Database → Extensions → pg_cron** and run it again,
     or schedule `pnpm purge:reports` daily instead (GitHub Actions with the two Supabase secrets).
 - [ ] `pnpm seed` (stations) and `pnpm seed:official` (Call Center 135 only) run once against the project.

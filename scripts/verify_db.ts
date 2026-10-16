@@ -34,6 +34,7 @@ async function main() {
     },
     { label: "tabel visits (penghitung pengunjung)", migration: "0005_visits.sql", run: table("visits") },
     { label: "fungsi visit_stats", migration: "0005_visits.sql", run: () => db.rpc("visit_stats") },
+    { label: "fungsi visit_totals (total pengunjung)", migration: "0008_visit_totals.sql", run: () => db.rpc("visit_totals") },
     {
       label: "kolom reports.open_status (laporan SPBU buka/tutup)",
       migration: "0007_open_reports.sql",
