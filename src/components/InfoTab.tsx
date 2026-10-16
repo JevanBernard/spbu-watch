@@ -23,10 +23,16 @@ export default function InfoTab({
   updates,
   updatedAt,
   onShare,
+  adminActive,
+  onAdminLogin,
+  onAdminLogout,
 }: {
   updates: OfficialUpdateDTO[];
   updatedAt: Date | null;
   onShare: () => void;
+  adminActive: boolean;
+  onAdminLogin: () => void;
+  onAdminLogout: () => void;
 }) {
   const stats = useRefreshing<{ today: number | null; online: number | null }>(
     "/api/stats",
@@ -95,11 +101,22 @@ export default function InfoTab({
       </section>
 
       <SiteFooter withDisclaimer updatedAt={updatedAt} className="border-t border-line px-0 pt-4" />
-      <p className="text-center">
-        <Link href="/admin" className="inline-flex min-h-11 items-center text-xs text-slate-500 underline">
-          Masuk admin
-        </Link>
-      </p>
+      <div className="flex flex-col items-center gap-1 text-xs">
+        {adminActive ? (
+          <>
+            <Link href="/admin" className="inline-flex min-h-11 items-center font-bold text-primary underline">
+              Kelola info resmi dan moderasi laporan
+            </Link>
+            <button type="button" onClick={onAdminLogout} className="min-h-11 text-slate-600 underline">
+              Keluar mode admin
+            </button>
+          </>
+        ) : (
+          <button type="button" onClick={onAdminLogin} className="min-h-11 text-slate-500 underline">
+            Masuk mode admin
+          </button>
+        )}
+      </div>
     </div>
   );
 }

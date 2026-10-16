@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   }
   const r = parsed.data;
   try {
-    const { error } = await serviceClient().from("reports").insert({
+    const { data, error } = await serviceClient().from("reports").insert({
       station_id: r.stationId,
       kind: r.kind,
       queue_level: r.kind === "queue" ? (r.queueLevel ?? null) : null,
@@ -74,13 +74,14 @@ export async function POST(req: Request) {
       stock_status: r.kind === "stock" ? (r.stockStatus ?? null) : null,
       device_id: ADMIN_DEVICE_ID,
       ip_hash: "admin",
-    });
+    }).select("id").single();
     if (error) {
       // 23503 = foreign key violation: the station does not exist.
       if (error.code === "23503") return NextResponse.json({ error: "SPBU tidak ditemukan." }, { status: 404 });
       throw new Error(error.message);
     }
-    return NextResponse.json({ ok: true }, { status: 201 });
+    // The id lets the admin UI undo the report (hide) right after sending it.
+    return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
   } catch (err) {
     console.error("POST /api/admin/reports", err);
     return NextResponse.json({ error: "Gagal menyimpan laporan." }, { status: 500 });

@@ -40,7 +40,7 @@ Boundaries are fetched once from Nominatim and cached in `data/regency_boundarie
 | `pnpm seed` | Load `data/stations.csv` into Supabase |
 | `pnpm seed:official` | Insert the Call Center 135 entry (only) |
 | `pnpm fake-reports` / `--clear` | Dev-only fake reports to check UI states |
-| `pnpm purge:reports` | Delete reports older than 30 days (if pg_cron is not used) |
+| `pnpm purge:reports` | Delete reports older than 30 days and chat messages older than 2 days (if pg_cron is not used) |
 
 Database SQL lives in `supabase/migrations/` (run in order in the Supabase SQL Editor).
 Deployment steps: [DEPLOY.md](DEPLOY.md). Privacy: `/privasi`.

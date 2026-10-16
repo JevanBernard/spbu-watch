@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+try {
+  process.loadEnvFile(".env"); // ADMIN_TOKEN for the admin-mode test; variables may also already be set
+} catch {
+  // no .env file
+}
+
 test("home page: disclaimer, map loads under the CSP, station list, no console errors", async ({
   page,
 }) => {
@@ -190,4 +196,135 @@ test("station page: summary tiles, fuel chips and the 24-hour chart (history moc
   await chart.scrollIntoViewIfNeeded();
   await page.screenshot({ path: "test-results/shots/detail-chart.png" });
   info.annotations.push({ type: "note", description: "screenshots in test-results/shots" });
+});
+
+test("admin mode: a wrong token is refused", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill("definitely-not-the-token");
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await expect(page.getByText("Token salah.")).toBeVisible();
+  await expect(page.getByTestId("admin-banner")).toHaveCount(0);
+});
+
+test("admin mode: tapping a station on the map shows the edit block (nothing is saved)", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await expect(page.getByTestId("admin-banner")).toBeVisible();
+
+  // the session survives a reload
+  await page.reload();
+  await expect(page.getByTestId("admin-banner")).toBeVisible();
+
+  // open a station from the list: the edit block sits on top of the summary
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  const edit = page.getByRole("region", { name: "Edit kondisi (admin)" });
+  await expect(edit).toBeVisible();
+  await expect(edit.getByRole("button", { name: "Sepi" })).toBeVisible();
+  await edit.getByRole("button", { name: "Ubah stok BBM" }).click();
+  await edit.getByRole("button", { name: "Habis" }).first().click();
+  await expect(edit.getByText(/langsung tampil merah/)).toBeVisible(); // asks to confirm; we cancel
+  await edit.getByRole("button", { name: "Batal" }).click();
+
+  await page.getByRole("button", { name: "Kembali ke daftar SPBU" }).click();
+  await page.getByRole("button", { name: "Perkecil daftar" }).click();
+  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(page.getByTestId("admin-banner")).toHaveCount(0);
+});
+
+test("admin mode: Ada / Habis show which one is selected (the save request is mocked)", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  await page.route("**/api/admin/reports", async (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({ status: 201, json: { ok: true, id: "00000000-0000-4000-8000-000000000001" } });
+    }
+    return route.continue();
+  });
+  await page.route("**/api/admin/reports/*/hide", (route) => route.fulfill({ status: 200, json: { ok: true } }));
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+
+  const edit = page.getByRole("region", { name: "Edit kondisi (admin)" });
+  await edit.getByRole("button", { name: "Ubah stok BBM" }).click();
+  const lite = edit.getByRole("group", { name: "Stok Pertalite", exact: true });
+  const max = edit.getByRole("group", { name: "Stok Pertamax", exact: true });
+
+  await lite.getByRole("button", { name: "Ada" }).click();
+  await expect(lite.getByRole("button", { name: "Ada" })).toHaveAttribute("aria-pressed", "true");
+  await expect(lite.getByRole("button", { name: "Habis" })).toHaveAttribute("aria-pressed", "false");
+
+  await max.getByRole("button", { name: "Habis" }).click();
+  await edit.getByRole("button", { name: "Ya, habis" }).click();
+  await expect(max.getByRole("button", { name: "Habis" })).toHaveAttribute("aria-pressed", "true");
+  await expect(max.getByRole("button", { name: "Ada" })).toHaveAttribute("aria-pressed", "false");
+
+  // undo takes the highlight away again
+  await edit.getByRole("button", { name: "Urungkan" }).click();
+  await expect(max.getByRole("button", { name: "Habis" })).toHaveAttribute("aria-pressed", "false");
+});
+
+test("admin mode: one tap on a queue level selects it and reloads the list past the CDN cache", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  await page.route("**/api/admin/reports", async (route) => {
+    if (route.request().method() === "POST") {
+      return route.fulfill({ status: 201, json: { ok: true, id: "00000000-0000-4000-8000-000000000002" } });
+    }
+    return route.continue();
+  });
+  const listRequests: string[] = [];
+  page.on("request", (r) => {
+    if (/\/api\/stations(\?|$)/.test(r.url())) listRequests.push(r.url());
+  });
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+
+  const edit = page.getByRole("region", { name: "Edit kondisi (admin)" });
+  const before = listRequests.length;
+  await edit.getByRole("button", { name: /Sedang/ }).click();
+  await expect(edit.getByRole("button", { name: /Sedang/ })).toHaveAttribute("aria-pressed", "true");
+  await expect.poll(() => listRequests.slice(before).some((u) => /[?&]fresh=\d+/.test(u))).toBe(true);
+
+  // choosing another level moves the selection in one tap as well
+  await edit.getByRole("button", { name: /Panjang/ }).click();
+  await expect(edit.getByRole("button", { name: /Panjang/ })).toHaveAttribute("aria-pressed", "true");
+  await expect(edit.getByRole("button", { name: /Sedang/ })).toHaveAttribute("aria-pressed", "false");
+});
+
+test("station chat tab: notice, and writing is limited to people near the station (nothing is sent)", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  await page.getByRole("tab", { name: "Obrolan" }).click();
+  await expect(page.getByText(/Belum diverifikasi/)).toBeVisible();
+  await expect(page.getByText(/tidak mengubah/)).toBeVisible();
+  // the position is not known yet, so there is no message box, only the explanation and the location button
+  await expect(page.getByText(/Hanya pengguna dalam radius 500 meter/)).toBeVisible();
+  await expect(page.getByLabel(/Tulis pesan/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Izinkan lokasi" })).toBeVisible();
+});
+
+test("chat API: reading needs no login, bad ids and bodies are refused, nothing leaks", async ({ request }) => {
+  expect((await request.get("/api/stations/not-a-uuid/chat")).status()).toBe(400);
+  const id = "00000000-0000-4000-8000-000000000000";
+  const post = await request.post(`/api/stations/${id}/chat`, { data: { nope: true } });
+  expect(post.status()).toBe(400);
+  expect((await request.post(`/api/stations/${id}/chat/not-a-uuid/flag`, { data: {} })).status()).toBe(400);
+  expect((await request.get("/api/admin/chat")).status()).toBe(401); // moderation needs the admin token
+  expect((await request.post(`/api/admin/chat/${id}/hide`)).status()).toBe(401);
 });

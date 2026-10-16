@@ -8,9 +8,15 @@ export function useRefreshing<T>(url: string, pick: (json: never) => T, initial:
   const [error, setError] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
-  const load = useCallback(async () => {
+  // The API routes send `stale-while-revalidate`. Browsers apply it too, so a plain fetch can be answered from
+  // the browser cache with the PREVIOUS data while a refresh runs in the background: every update would then
+  // show one step late (an admin tap seemed to need two taps). `no-cache` always checks with the server.
+  // `fresh` additionally gives the request its own URL so it also skips the CDN copy (up to ~90 s old); it is used
+  // right after the visitor or admin saved something, so their change shows at once.
+  const load = useCallback(async (fresh = false) => {
     try {
-      const res = await fetch(url);
+      const target = fresh ? `${url}${url.includes("?") ? "&" : "?"}fresh=${Date.now()}` : url;
+      const res = await fetch(target, { cache: fresh ? "no-store" : "no-cache" });
       if (!res.ok) throw new Error(String(res.status));
       setData(pick((await res.json()) as never));
       setUpdatedAt(new Date());
@@ -25,7 +31,7 @@ export function useRefreshing<T>(url: string, pick: (json: never) => T, initial:
     let timer: ReturnType<typeof setInterval> | undefined;
     const start = () => {
       load();
-      timer = setInterval(load, REFRESH_MS);
+      timer = setInterval(() => load(), REFRESH_MS);
     };
     const stop = () => clearInterval(timer);
     const onVisibility = () => {
@@ -40,5 +46,7 @@ export function useRefreshing<T>(url: string, pick: (json: never) => T, initial:
     };
   }, [load]);
 
-  return { data, error, updatedAt, reload: load };
+  const reload = useCallback(() => load(true), [load]);
+
+  return { data, error, updatedAt, reload };
 }

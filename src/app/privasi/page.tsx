@@ -30,6 +30,13 @@ export default function PrivacyPage() {
             ada atau habis), dan waktu laporan.
           </li>
           <li>
+            <b>Pesan obrolan:</b> isi pesan yang Anda kirim di obrolan sebuah SPBU, nama samaran acak
+            (misalnya &quot;Pengendara 4F2A&quot;, berbeda di setiap SPBU dan tidak bisa dihubungkan ke
+            Anda), SPBU, dan waktu kirim, bersama ID perangkat acak dan hash IP seperti di bawah. Pesan
+            hanya tampil 6 jam dan dihapus otomatis setelah 2 hari. Obrolan tidak mengubah status
+            antrean atau stok. Jangan menulis data pribadi di obrolan.
+          </li>
+          <li>
             <b>ID perangkat acak:</b> kode acak yang dibuat di peramban Anda dan disimpan di
             penyimpanan lokal peramban. Kode ini bukan nama, nomor telepon, atau akun, dan hanya
             dipakai untuk membatasi laporan ganda dan menghitung berapa perangkat berbeda yang
@@ -52,8 +59,8 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-bold">Yang tidak kami simpan</h2>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Lokasi persis Anda.</b> Koordinat dikirim saat melapor hanya untuk memastikan Anda
-            berada dalam 500 meter dari SPBU, lalu dibuang. Urutan daftar berdasarkan jarak
+            <b>Lokasi persis Anda.</b> Koordinat dikirim saat melapor atau mengirim pesan obrolan hanya
+            untuk memastikan Anda berada dalam 500 meter dari SPBU, lalu dibuang. Urutan daftar berdasarkan jarak
             dihitung di perangkat Anda dan tidak dikirim ke server.
           </li>
           <li>Plat nomor, wajah, foto, atau video. Aplikasi ini tidak menerima unggahan foto.</li>

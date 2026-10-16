@@ -27,3 +27,14 @@ export const IP_MAX_PER_HOUR = 60;
 // Only "available" reports count: a report of "out" must never remove a fuel from the list.
 export const FUEL_SOLD_MIN_DEVICES = 2;
 export const FUEL_SOLD_WINDOW_DAYS = 30;
+
+// Live chat per station (see lib/chat.ts). Reading is open to everyone; writing needs to be within GEOFENCE_M.
+export const CHAT_MAX_LEN = 200;
+export const CHAT_VISIBLE_HOURS = 6; // older messages are not shown
+export const CHAT_RETENTION_DAYS = 2; // and are deleted after this long
+export const CHAT_COOLDOWN_SEC = 10; // between two messages from one device
+export const CHAT_DUPLICATE_MIN = 10; // the same text from one device at one station is refused for this long
+export const CHAT_DEVICE_MAX_PER_HOUR = 30;
+export const CHAT_IP_MAX_PER_HOUR = 120;
+export const CHAT_FLAGS_TO_HIDE = 3; // different devices that must flag a message before it is hidden
+export const CHAT_POLL_MS = 5_000; // refresh interval while the chat tab is open

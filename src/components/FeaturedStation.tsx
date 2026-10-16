@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { StationDTO } from "@/lib/api-types";
 import { GEOFENCE_M } from "@/lib/config";
 import { formatDistance, reportedText, travelMinutes } from "@/lib/format";
@@ -23,11 +24,14 @@ export default function FeaturedStation({
   distance,
   onDetail,
   onReport,
+  adminSlot = null,
 }: {
   station: StationDTO;
   distance: number | null;
   onDetail: () => void;
   onReport: () => void;
+  /** Admin edit block, shown only in admin mode. */
+  adminSlot?: ReactNode;
 }) {
   const q = s.queue;
   const inRange = distance !== null && distance <= GEOFENCE_M;
@@ -71,6 +75,8 @@ export default function FeaturedStation({
           &quot;Belum terkonfirmasi&quot; berarti baru sedikit pelapor. Itu bukan berarti BBM habis.
         </p>
       </div>
+
+      {adminSlot}
 
       <div className="grid grid-cols-2 gap-2.5">
         <button

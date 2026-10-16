@@ -232,7 +232,7 @@ TURNSTILE_SECRET_KEY=               # optional
 
 ## 13. Out of scope for the MVP
 
-Google Maps scraping, photo uploads, user accounts or login, push notifications, automatic scraping of social media, CCTV video analytics, paid data APIs (BestTime, SerpApi, TomTom, HERE), payments, and any claim that data is official.
+Google Maps scraping, photo uploads, user accounts or login, push notifications (a per-station live chat was added later by decision, see supabase/migrations/0006_chat.sql; it never affects statuses), automatic scraping of social media, CCTV video analytics, paid data APIs (BestTime, SerpApi, TomTom, HERE), payments, and any claim that data is official.
 
 ## 14. Definition of done for the MVP
 

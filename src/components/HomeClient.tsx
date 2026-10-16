@@ -5,10 +5,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { OfficialUpdateDTO, StationDTO } from "@/lib/api-types";
 import type { StationCategory } from "@/lib/category";
 import { getDeviceId } from "@/lib/device";
+import { clearAdminToken, getAdminToken } from "@/lib/admin-session";
 import { ALT_RADIUS_M } from "@/lib/config";
 import { distanceM, matchesFuelFilter, matchesSearch } from "@/lib/format";
 import type { Fuel } from "@/lib/status";
 import { useRefreshing } from "@/lib/use-refreshing";
+import AdminEditPanel from "./AdminEditPanel";
+import AdminLoginDialog from "./AdminLoginDialog";
 import BottomNav, { type AppTab } from "./BottomNav";
 import FeaturedStation from "./FeaturedStation";
 import InfoTab from "./InfoTab";
@@ -64,6 +67,17 @@ export default function HomeClient() {
   const [shareApp, setShareApp] = useState(false);
   const [tab, setTab] = useState<AppTab>("peta");
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+
+  // Admin mode: the token is kept for this browser session only. Read after mount so server and client markup match.
+  const [adminToken, setAdminTokenState] = useState<string | null>(null);
+  const [adminLogin, setAdminLogin] = useState(false);
+  useEffect(() => {
+    queueMicrotask(() => setAdminTokenState(getAdminToken()));
+  }, []);
+  const logoutAdmin = () => {
+    clearAdminToken();
+    setAdminTokenState(null);
+  };
 
   // Anonymous visitor heartbeat: once on load, then every 2 minutes while the tab is visible.
   useEffect(() => {
@@ -324,6 +338,21 @@ export default function HomeClient() {
             {/* While the list or a station is open the sheet covers most of the map: keep only the disclaimer on top. */}
             {!full && <OfficialPanel updates={officialQ.data} onOpen={() => setTab("info")} />}
           </div>
+          {adminToken && (
+            <div data-testid="admin-banner" className="pointer-events-auto flex items-center justify-between gap-2 rounded-xl bg-ink px-3 py-1.5 text-white shadow-md">
+              <p className="min-w-0 text-xs font-bold">
+                MODE ADMIN
+                <span className="font-normal opacity-90"> · ketuk pin SPBU untuk mengubah kondisinya</span>
+              </p>
+              <button
+                type="button"
+                onClick={logoutAdmin}
+                className="min-h-11 shrink-0 rounded-lg px-2 text-xs font-bold underline"
+              >
+                Keluar
+              </button>
+            </div>
+          )}
           {!full && (
             <>
               <div className="pointer-events-auto">{chips}</div>
@@ -366,6 +395,22 @@ export default function HomeClient() {
               station={selected}
               distance={selectedDistance}
               startReporting={startReport}
+              adminToken={adminToken}
+              me={me}
+              geoMsg={geoMsg}
+              onLocate={() => locate(true)}
+              adminPanel={
+                adminToken
+                  ? (onSaved) => (
+                      <AdminEditPanel
+                        station={selected}
+                        token={adminToken}
+                        onSaved={onSaved}
+                        onAuthFail={logoutAdmin}
+                      />
+                    )
+                  : null
+              }
               onBack={closeDetail}
               onReported={stationsQ.reload}
             />
@@ -529,6 +574,17 @@ export default function HomeClient() {
                   distance={featuredDistance}
                   onDetail={() => openDetail(featured.id)}
                   onReport={() => openDetail(featured.id, true)}
+                  adminSlot={
+                    adminToken && (
+                      <AdminEditPanel
+                        key={featured.id}
+                        station={featured}
+                        token={adminToken}
+                        onSaved={stationsQ.reload}
+                        onAuthFail={logoutAdmin}
+                      />
+                    )
+                  }
                 />
               ) : (
                 <div className="space-y-2 rounded-2xl border border-line bg-canvas p-4">
@@ -604,12 +660,30 @@ export default function HomeClient() {
         )}
         {tab === "info" && (
           <div className="absolute inset-0 z-40 overflow-y-auto overscroll-contain bg-canvas">
-            <InfoTab updates={officialQ.data} updatedAt={officialQ.updatedAt} onShare={() => setShareApp(true)} />
+            <InfoTab
+              updates={officialQ.data}
+              updatedAt={officialQ.updatedAt}
+              onShare={() => setShareApp(true)}
+              adminActive={Boolean(adminToken)}
+              onAdminLogin={() => setAdminLogin(true)}
+              onAdminLogout={logoutAdmin}
+            />
           </div>
         )}
       </div>
 
       <BottomNav tab={tab} onChange={changeTab} />
+
+      {adminLogin && (
+        <AdminLoginDialog
+          onClose={() => setAdminLogin(false)}
+          onLoggedIn={(t) => {
+            setAdminTokenState(t);
+            setAdminLogin(false);
+            setTab("peta");
+          }}
+        />
+      )}
 
       {shareApp && (
         <ShareDialog

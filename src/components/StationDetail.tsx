@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { StationDTO, StationTimelineDTO } from "@/lib/api-types";
 import { CATEGORY_LABEL } from "@/lib/category";
 import { FUEL_LABEL, FUEL_ORDER, formatDistance, reportedText } from "@/lib/format";
@@ -7,15 +7,17 @@ import { GES_SOURCE } from "@/lib/text";
 import { TravelEstimate } from "./FeaturedStation";
 import ReportFlow from "./ReportFlow";
 import SiteFooter from "./SiteFooter";
+import StationChat from "./StationChat";
 import { FuelChips, SummaryTiles, Timeline24h } from "./StationInsights";
 import ShareDialog from "./ShareDialog";
 import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBlock } from "./StatusBits";
 import { BackIcon, NavIcon, ReportPinIcon, ShareIcon, routeUrl } from "./ui";
 
-type Tab = "ringkasan" | "harga" | "info";
+type Tab = "ringkasan" | "obrolan" | "harga" | "info";
 const TABS: { id: Tab; label: string }[] = [
   { id: "ringkasan", label: "Ringkasan" },
-  { id: "harga", label: "Harga BBM" },
+  { id: "obrolan", label: "Obrolan" },
+  { id: "harga", label: "Harga" },
   { id: "info", label: "Info" },
 ];
 
@@ -25,6 +27,11 @@ export default function StationDetail({
   station,
   distance,
   startReporting = false,
+  adminPanel = null,
+  adminToken = null,
+  me = null,
+  geoMsg = null,
+  onLocate,
   onBack,
   onReported,
 }: {
@@ -32,6 +39,14 @@ export default function StationDetail({
   distance: number | null;
   /** Open with the "what do you want to report?" choice already showing. */
   startReporting?: boolean;
+  /** Admin edit block, shown only in admin mode. Built by the parent so it can save and refresh the list. */
+  adminPanel?: ((onSaved: () => void) => ReactNode) | null;
+  /** Lets an admin hide chat messages right where they read them. */
+  adminToken?: string | null;
+  /** The visitor's position (kept in memory only) for the chat's "within 500 m" check. */
+  me?: { lat: number; lng: number } | null;
+  geoMsg?: string | null;
+  onLocate: () => void;
   onBack: () => void;
   onReported: () => void;
 }) {
@@ -45,7 +60,10 @@ export default function StationDetail({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/stations/${station.id}`)
+    // After a save (reloadKey > 0) bypass the CDN copy so the new report shows in the history at once.
+    fetch(reloadKey > 0 ? `/api/stations/${station.id}?fresh=${Date.now()}` : `/api/stations/${station.id}`, {
+      cache: "no-cache", // see use-refreshing.ts: avoid the browser answering with the previous data
+    })
       .then((res) => {
         if (!res.ok) throw new Error(String(res.status));
         return res.json() as Promise<{ timeline?: StationTimelineDTO }>;
@@ -130,6 +148,11 @@ export default function StationDetail({
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3">
         {tab === "ringkasan" && (
           <>
+            {adminPanel?.(() => {
+              onReported();
+              setReloadKey((k) => k + 1);
+            })}
+
             <SummaryTiles station={station} timeline={timeline === "error" ? null : timeline} />
 
             <section className={card}>
@@ -196,6 +219,17 @@ export default function StationDetail({
               ) : null}
             </div>
           </>
+        )}
+
+        {tab === "obrolan" && (
+          <StationChat
+            station={station}
+            distance={distance}
+            me={me}
+            geoMsg={geoMsg}
+            onLocate={onLocate}
+            adminToken={adminToken}
+          />
         )}
 
         {tab === "harga" && (

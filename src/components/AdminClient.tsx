@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/admin-session";
 import { FUEL_LABEL, FUEL_ORDER, QUEUE_LABEL, timeAgo } from "@/lib/format";
 import type { StationDTO } from "@/lib/api-types";
 import type { Fuel } from "@/lib/status";
@@ -23,6 +25,15 @@ interface AdminReport {
   fuel: Fuel | null;
   stockStatus: "available" | "out" | null;
   device: string;
+  hidden: boolean;
+  createdAt: string;
+}
+
+interface AdminChat {
+  id: string;
+  station: string;
+  nickname: string;
+  body: string;
   hidden: boolean;
   createdAt: string;
 }
@@ -54,6 +65,7 @@ export default function AdminClient() {
   const [msg, setMsg] = useState<string | null>(null);
   const [updates, setUpdates] = useState<Update[]>([]);
   const [reports, setReports] = useState<AdminReport[]>([]);
+  const [chat, setChat] = useState<AdminChat[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm());
   const [stations, setStations] = useState<AdminStation[]>([]);
@@ -75,9 +87,10 @@ export default function AdminClient() {
 
   const load = useCallback(
     async (tok: string) => {
-      const [u, r] = await Promise.all([
+      const [u, r, c] = await Promise.all([
         api("/api/admin/official", tok),
         api("/api/admin/reports", tok),
+        api("/api/admin/chat", tok),
       ]);
       if (u.status === 401) {
         setAuthed(false);
@@ -91,6 +104,7 @@ export default function AdminClient() {
       }
       setUpdates(u.data.updates);
       setReports(r.ok ? r.data.reports : []);
+      setChat(c.ok ? c.data.messages : []); // empty until migration 0006 (chat) has been run
       if (stations.length === 0) {
         const s = await fetch("/api/stations")
           .then((x) => x.json())
@@ -104,16 +118,29 @@ export default function AdminClient() {
     [api, stations.length],
   );
 
+  // Reuse the session started in the map's admin mode, so the token is typed once per browser tab.
+  useEffect(() => {
+    const saved = getAdminToken();
+    if (!saved) return;
+    queueMicrotask(() => {
+      setToken(saved);
+      void load(saved);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    await load(token);
+    if (await load(token)) setAdminToken(token);
   };
 
   const logout = () => {
+    clearAdminToken();
     setToken("");
     setAuthed(false);
     setUpdates([]);
     setReports([]);
+    setChat([]);
   };
 
   const save = async (e: React.FormEvent) => {
@@ -186,6 +213,13 @@ export default function AdminClient() {
     setMsg(`Laporan terkirim: ${label}.`);
   };
 
+  const hideChat = async (m: AdminChat) => {
+    if (!confirm("Sembunyikan pesan obrolan ini?")) return;
+    const res = await api(`/api/admin/chat/${m.id}/hide`, token, { method: "POST" });
+    await load(token);
+    setMsg(res.ok ? "Pesan disembunyikan." : (res.data.error ?? "Gagal."));
+  };
+
   const hide = async (r: AdminReport) => {
     if (!confirm("Sembunyikan laporan ini? Laporan tidak akan dihitung lagi.")) return;
     const res = await api(`/api/admin/reports/${r.id}/hide`, token, { method: "POST" });
@@ -220,7 +254,12 @@ export default function AdminClient() {
   return (
     <main className="mx-auto max-w-2xl space-y-8 p-4 pb-16">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Admin SPBU Watch</h1>
+        <div>
+          <h1 className="text-xl font-bold">Admin SPBU Watch</h1>
+          <Link href="/" className="text-sm font-bold text-primary underline">
+            Ubah kondisi SPBU lewat peta
+          </Link>
+        </div>
         <button onClick={logout} className={`${btn} border border-slate-400`}>
           Keluar
         </button>
@@ -437,6 +476,29 @@ export default function AdminClient() {
                 <p className="text-xs font-bold">Disembunyikan</p>
               ) : (
                 <button onClick={() => hide(r)} className={`${btn} border border-red-800 text-red-800`}>
+                  Sembunyikan
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-bold">Moderasi obrolan (24 jam terakhir)</h2>
+        <ul className="divide-y divide-slate-200 rounded-md border border-slate-300">
+          {chat.length === 0 && <li className="p-3 text-sm text-slate-600">Belum ada pesan.</li>}
+          {chat.map((m) => (
+            <li key={m.id} className={`space-y-1 p-3 ${m.hidden ? "bg-slate-100 opacity-60" : ""}`}>
+              <p className="text-sm font-bold">{m.station}</p>
+              <p className="text-sm break-words">{m.body}</p>
+              <p className="text-xs text-slate-600">
+                {timeAgo(m.createdAt)} · {m.nickname}
+              </p>
+              {m.hidden ? (
+                <p className="text-xs font-bold">Disembunyikan</p>
+              ) : (
+                <button onClick={() => hideChat(m)} className={`${btn} border border-red-800 text-red-800`}>
                   Sembunyikan
                 </button>
               )}
