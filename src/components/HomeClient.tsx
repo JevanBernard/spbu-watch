@@ -18,6 +18,7 @@ import BottomNav, { type AppTab } from "./BottomNav";
 import InfoTab from "./InfoTab";
 import NearbyCarousel, { type NearbyItem } from "./NearbyCarousel";
 import ReportTab from "./ReportTab";
+import { buildAppCard } from "@/lib/share-card";
 import ShareDialog from "./ShareDialog";
 import SiteFooter from "./SiteFooter";
 import StationDetail from "./StationDetail";
@@ -66,6 +67,11 @@ export default function HomeClient() {
   );
   const stations = stationsQ.data;
   const [shareApp, setShareApp] = useState(false);
+  // Built once per opening of the dialog, so the picture is not redrawn on every render.
+  const appCard = useMemo(
+    () => (shareApp ? buildAppCard(window.location.origin) : null),
+    [shareApp],
+  );
   const [tab, setTab] = useState<AppTab>("peta");
   const [disclaimerOpen, setDisclaimerOpen] = useState(false);
 
@@ -862,6 +868,7 @@ export default function HomeClient() {
           url={window.location.origin}
           title="Bagikan SPBU Watch"
           text="Pantau antrean dan stok BBM di SPBU Denpasar, Badung, Gianyar, dan Tabanan dari laporan warga."
+          card={appCard ?? undefined}
           onClose={() => setShareApp(false)}
         />
       )}

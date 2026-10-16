@@ -652,3 +652,60 @@ test("admin mode: Buka / Tutup selection, with a confirmation before Tutup (the 
   await edit.getByRole("button", { name: "Urungkan" }).click();
   await expect(group.getByRole("button", { name: /Tutup/ })).toHaveAttribute("aria-pressed", "false");
 });
+
+/** [width, height] from the header of a PNG file, or null when it is not a PNG. */
+function pngSize(file: Buffer): [number, number] | null {
+  const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (file.length < 24 || !file.subarray(0, 8).equals(sig)) return null;
+  return [file.readUInt32BE(16), file.readUInt32BE(20)];
+}
+
+test("share as a picture: a station card as Story and square PNG, drawn in the browser", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push(m.text());
+  });
+  page.on("pageerror", (e) => errors.push(e.message));
+
+  await page.goto("/");
+  await page.getByRole("button", { name: /Perbesar daftar/ }).click();
+  await page.locator("li button").first().click();
+  await page.getByRole("button", { name: /Bagikan SPBU ini/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Bagikan" });
+  await expect(dialog.getByText("Gambar untuk Story dan media sosial")).toBeVisible();
+  await expect(dialog.getByAltText(/Pratinjau gambar/)).toBeVisible({ timeout: 15_000 });
+  await expect(dialog.getByText(/Instagram tidak bisa diposting langsung dari web/)).toBeVisible();
+
+  for (const [label, size, tag] of [
+    ["Story (9:16)", [1080, 1920], "story"],
+    ["Persegi (1:1)", [1080, 1080], "square"],
+  ] as const) {
+    await dialog.getByRole("button", { name: label }).click();
+    await expect(dialog.getByRole("button", { name: label })).toHaveAttribute("aria-pressed", "true");
+    await expect(dialog.getByAltText(/Pratinjau gambar/)).toHaveAttribute("height", String(size[1]), { timeout: 15_000 });
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      dialog.getByRole("link", { name: "Unduh gambar (PNG)" }).click(),
+    ]);
+    expect(download.suggestedFilename()).toMatch(new RegExp(`^spbu-watch-.+-${tag}\.png$`));
+    const path = await download.path();
+    const fs = await import("node:fs");
+    const bytes = fs.readFileSync(path);
+    expect(pngSize(bytes), "not a PNG").toEqual(size);
+    expect(bytes.length).toBeGreaterThan(30_000); // something was actually drawn
+  }
+  expect(errors, errors.join("\n")).toEqual([]); // blob: previews must pass the CSP
+});
+
+test("share as a picture: the app card from the Info tab has no station data", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: /Bagikan aplikasi/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Bagikan" });
+  await expect(dialog.getByAltText(/Pratinjau gambar Cek antrean dan stok BBM/)).toBeVisible({ timeout: 15_000 });
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    dialog.getByRole("link", { name: "Unduh gambar (PNG)" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toBe("spbu-watch-spbu-watch-story.png");
+});

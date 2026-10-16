@@ -11,6 +11,7 @@ import ReportFlow from "./ReportFlow";
 import SiteFooter from "./SiteFooter";
 import StationChat from "./StationChat";
 import { FuelChips, SummaryTiles, Timeline24h } from "./StationInsights";
+import { buildStationCard, type CardModel } from "@/lib/share-card";
 import ShareDialog from "./ShareDialog";
 import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBlock } from "./StatusBits";
 import { BackIcon, NavIcon, ReportPinIcon, ShareIcon, TravelEstimate, routeUrl } from "./ui";
@@ -57,7 +58,8 @@ export default function StationDetail({
 }) {
   const [tab, setTab] = useState<Tab>("ringkasan");
   const [reporting, setReporting] = useState<"choose" | "queue" | "stock" | "open" | null>(startReporting ? "choose" : null);
-  const [sharing, setSharing] = useState(false);
+  // The picture is a snapshot: it is built (with the time) when the reader taps share, not on every render.
+  const [shareCard, setShareCard] = useState<CardModel | null>(null);
   const reportBox = useRef<HTMLDivElement>(null);
   const [timeline, setTimeline] = useState<StationTimelineDTO | null | "error">(null);
 
@@ -147,7 +149,7 @@ export default function StationDetail({
           <span className="flex-1 text-sm font-semibold text-slate-600">Daftar SPBU</span>
           <button
             type="button"
-            onClick={() => setSharing(true)}
+            onClick={() => setShareCard(buildStationCard(station, new Date(), `${window.location.origin}/?spbu=${station.id}`))}
             aria-label="Bagikan SPBU ini (tautan & QR)"
             className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-primary"
           >
@@ -406,12 +408,13 @@ export default function StationDetail({
         </a>
       </div>
 
-      {sharing && (
+      {shareCard && (
         <ShareDialog
-          url={`${window.location.origin}/?spbu=${station.id}`}
+          url={shareCard.url}
           title={station.name}
           text="Lihat antrean dan stok BBM SPBU ini di SPBU Watch SARBAGITA."
-          onClose={() => setSharing(false)}
+          card={shareCard}
+          onClose={() => setShareCard(null)}
         />
       )}
     </div>
