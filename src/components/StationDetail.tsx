@@ -4,14 +4,13 @@ import { CATEGORY_LABEL } from "@/lib/category";
 import { FUEL_LABEL, FUEL_ORDER, formatDistance, reportedText } from "@/lib/format";
 import { asOfText, FUEL_PRICES, priceOf, rupiah } from "@/lib/prices";
 import { GES_SOURCE } from "@/lib/text";
-import { TravelEstimate } from "./FeaturedStation";
 import ReportFlow from "./ReportFlow";
 import SiteFooter from "./SiteFooter";
 import StationChat from "./StationChat";
 import { FuelChips, SummaryTiles, Timeline24h } from "./StationInsights";
 import ShareDialog from "./ShareDialog";
 import { CategoryBadge, FuelsSold, GesBadge, OpenBadge, QueueBlock } from "./StatusBits";
-import { BackIcon, NavIcon, ReportPinIcon, ShareIcon, routeUrl } from "./ui";
+import { BackIcon, NavIcon, ReportPinIcon, ShareIcon, TravelEstimate, routeUrl } from "./ui";
 
 type Tab = "ringkasan" | "obrolan" | "harga" | "info";
 const TABS: { id: Tab; label: string }[] = [
@@ -32,6 +31,7 @@ export default function StationDetail({
   me = null,
   geoMsg = null,
   onLocate,
+  onDraftChange,
   onBack,
   onReported,
 }: {
@@ -47,6 +47,8 @@ export default function StationDetail({
   me?: { lat: number; lng: number } | null;
   geoMsg?: string | null;
   onLocate: () => void;
+  /** Something unsent is open here (a report being filled in, or chat text): the parent asks before closing. */
+  onDraftChange?: (kind: "report" | "chat", dirty: boolean) => void;
   onBack: () => void;
   onReported: () => void;
 }) {
@@ -57,6 +59,20 @@ export default function StationDetail({
   const [timeline, setTimeline] = useState<StationTimelineDTO | null | "error">(null);
 
   const [reloadKey, setReloadKey] = useState(0);
+  const draftCb = useRef(onDraftChange);
+  useEffect(() => {
+    draftCb.current = onDraftChange;
+  });
+  const reportOpen = reporting === "queue" || reporting === "stock";
+  useEffect(() => {
+    draftCb.current?.("report", reportOpen);
+  }, [reportOpen]);
+  useEffect(
+    () => () => {
+      draftCb.current?.("report", false);
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -229,6 +245,7 @@ export default function StationDetail({
             geoMsg={geoMsg}
             onLocate={onLocate}
             adminToken={adminToken}
+            onDraftChange={(dirty) => draftCb.current?.("chat", dirty)}
           />
         )}
 

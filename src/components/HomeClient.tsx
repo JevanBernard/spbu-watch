@@ -13,13 +13,11 @@ import { useRefreshing } from "@/lib/use-refreshing";
 import AdminEditPanel from "./AdminEditPanel";
 import AdminLoginDialog from "./AdminLoginDialog";
 import BottomNav, { type AppTab } from "./BottomNav";
-import FeaturedStation from "./FeaturedStation";
 import InfoTab from "./InfoTab";
-import OfficialPanel from "./OfficialPanel";
+import NearbyCarousel, { type NearbyItem } from "./NearbyCarousel";
 import ReportTab from "./ReportTab";
 import ShareDialog from "./ShareDialog";
 import SiteFooter from "./SiteFooter";
-import { StationMini } from "./StationCard";
 import StationDetail from "./StationDetail";
 import StationList, { type ListItem } from "./StationList";
 import { Legend } from "./StatusBits";
@@ -46,7 +44,7 @@ const MapView = dynamic(() => import("./MapView"), {
 });
 
 const REGENCIES = ["Denpasar", "Badung", "Gianyar", "Tabanan"];
-const ALT_SHOWN = 5;
+const NEARBY_MAX = 20;
 
 type Kind = "" | StationCategory | "ges";
 
@@ -106,6 +104,7 @@ export default function HomeClient() {
   // "peek": map first with the main card. "full": list or station detail.
   const [full, setFull] = useState(false);
   const returnFull = useRef(false); // whether the full list was open before the detail
+  const draft = useRef({ report: false, chat: false }); // unsent text in the open station detail
   useEffect(() => {
     const sharedId = new URLSearchParams(window.location.search).get("spbu");
     const wide = window.matchMedia("(min-width: 768px)").matches;
@@ -200,20 +199,24 @@ export default function HomeClient() {
   const selected = selectedId
     ? (stations.find((s) => s.id === selectedId) ?? null)
     : null;
-  // Main card: the station in focus, else the nearest one (only when the position is known).
-  const featured = selected ?? (me ? (items[0]?.station ?? null) : null);
-  const featuredDistance = featured && me ? distanceM(me, featured) : null;
-  // "Pilihan alternatif": other stations within ALT_RADIUS_M of the visitor (or of the chosen station when the
-  // position is unknown), nearest first. Distance only: never ordered or labelled by stock.
+  // "SPBU terdekat": stations within ALT_RADIUS_M of the visitor (or of the chosen station when the position is
+  // unknown), nearest first. Distance only: never ordered or labelled by stock.
   const altFrom = me ?? selected;
-  const alternatives = useMemo(() => {
-    if (!altFrom || !featured) return [];
-    return filtered
-      .filter((s) => s.id !== featured.id)
+  const nearby: NearbyItem[] = useMemo(() => {
+    if (!altFrom) return [];
+    const list: NearbyItem[] = filtered
       .map((s) => ({ station: s, distance: distanceM(altFrom, s) }))
       .filter((x) => x.distance <= ALT_RADIUS_M)
-      .sort((a, b) => a.distance - b.distance);
-  }, [filtered, altFrom, featured]);
+      .sort((a, b) => a.distance - b.distance)
+      .map((x) => ({ station: x.station, distance: me ? x.distance : null }));
+    // The station in focus is always in the row, even when it is outside the radius.
+    if (selected && !list.some((x) => x.station.id === selected.id)) {
+      list.unshift({ station: selected, distance: me ? distanceM(me, selected) : null });
+    }
+    return list.slice(0, NEARBY_MAX);
+  }, [filtered, altFrom, me, selected]);
+  const activeId = selectedId ?? nearby[0]?.station.id ?? null;
+  const activeStation = activeId ? (stations.find((s) => s.id === activeId) ?? null) : null;
   // The map shows exactly the stations the filters and search leave in the list (plus the open station).
   const mapStations = useMemo(() => {
     const open = selectedId ? stations.find((s) => s.id === selectedId) : null;
@@ -335,23 +338,37 @@ export default function HomeClient() {
             userLocation={me}
             recenterKey={recenterKey}
             onSelect={focus}
+            // A tap on empty map clears the selection, also from the detail view. Only when a report or a chat
+            // message is half written does it ask first, so a stray tap cannot throw it away.
+            onBackgroundClick={() => {
+              if (!selectedId) return;
+              if (detailOpen) {
+                const unsent = draft.current.report || draft.current.chat;
+                if (unsent && !confirm("Tutup detail SPBU? Laporan atau pesan yang belum dikirim akan hilang.")) return;
+                closeDetail(); // back to the list if the detail was opened from it, else to the map
+                setSelectedId(null);
+                syncUrl(null);
+                return;
+              }
+              focus(null);
+            }}
           />
         </div>
 
-        {/* Top: disclaimer, official information and quick filters (always above the station list) */}
+        {/* Top: disclaimer and quick filters, kept small so the map stays big */}
         <div className="pointer-events-none absolute inset-x-0 top-0 z-10 space-y-1 p-2 md:right-auto md:left-[440px] md:w-96 md:p-4">
-          <div className="border-line/70 pointer-events-auto overflow-hidden rounded-2xl border bg-white shadow-lg">
-            <div className="bg-disclaimer-bg text-disclaimer-amber flex items-center gap-2 px-3 py-2">
-              <span className="shrink-0">
+          <div className="border-line/70 pointer-events-auto overflow-hidden rounded-xl border bg-white shadow-md">
+            <div className="bg-disclaimer-bg text-disclaimer-amber flex items-center gap-1.5 py-1 pr-1 pl-2.5">
+              <span className="shrink-0 [&_svg]:size-4">
                 <ShieldIcon />
               </span>
-              <p className="min-w-0 flex-1 text-[11px] leading-snug font-semibold">
+              <p className="min-w-0 flex-1 text-[10.5px] leading-tight font-semibold">
                 Data indikatif laporan warga · Bukan informasi resmi Pertamina
               </p>
               <a
                 href="tel:135"
                 aria-label="Telepon Call Center Pertamina 135"
-                className="flex min-h-11 shrink-0 items-center gap-1 rounded-lg bg-white px-2.5 text-xs font-bold shadow-sm"
+                className="flex h-8 shrink-0 items-center gap-1 rounded-lg bg-white px-2 text-[11px] font-bold shadow-sm [&_svg]:size-3.5"
               >
                 <PhoneIcon />
                 135
@@ -361,7 +378,7 @@ export default function HomeClient() {
                 onClick={() => setDisclaimerOpen((o) => !o)}
                 aria-expanded={disclaimerOpen}
                 aria-label="Detail disclaimer"
-                className={`flex size-11 shrink-0 items-center justify-center rounded-lg transition-transform ${
+                className={`flex size-8 shrink-0 items-center justify-center rounded-lg transition-transform [&_svg]:size-4 ${
                   disclaimerOpen ? "rotate-180" : ""
                 }`}
               >
@@ -374,45 +391,30 @@ export default function HomeClient() {
                   <InfoIcon />
                 </span>
                 <div className="space-y-1">
-                  <p className="text-sm font-bold text-slate-900">
-                    Transparansi data
-                  </p>
+                  <p className="text-sm font-bold text-slate-900">Transparansi data</p>
                   <p>
-                    Data berasal dari laporan warga dan diperbarui tiap menit,
-                    jadi bisa saja belum sesuai kondisi terkini. Cek kanal resmi
-                    untuk kepastian. Aplikasi ini bukan produk Pertamina dan
-                    tidak memakai merek Pertamina.
+                    Data berasal dari laporan warga dan diperbarui tiap menit, jadi bisa saja belum sesuai kondisi
+                    terkini. Cek kanal resmi untuk kepastian. Aplikasi ini bukan produk Pertamina dan tidak memakai
+                    merek Pertamina.
                   </p>
-                  <p className="text-status-smooth font-semibold">
-                    Lokasi Anda tidak disimpan di server.
-                  </p>
+                  <p className="text-status-smooth font-semibold">Lokasi Anda tidak disimpan di server.</p>
                 </div>
               </div>
             )}
-            {/* While the list or a station is open the sheet covers most of the map: keep only the disclaimer on top. */}
-            <div className={full ? "hidden md:block" : ""}>
-              <OfficialPanel
-                updates={officialQ.data}
-                onOpen={() => setTab("info")}
-              />
-            </div>
           </div>
           {adminToken && (
             <div
               data-testid="admin-banner"
-              className="bg-ink pointer-events-auto flex items-center justify-between gap-2 rounded-xl px-3 py-1.5 text-white shadow-md"
+              className="bg-ink pointer-events-auto flex items-center justify-between gap-2 rounded-lg py-0.5 pr-1 pl-2.5 text-white shadow-md"
             >
-              <p className="min-w-0 text-xs font-bold">
+              <p className="min-w-0 text-[11px] font-bold">
                 MODE ADMIN
-                <span className="font-normal opacity-90">
-                  {" "}
-                  · ketuk pin SPBU untuk mengubah kondisinya
-                </span>
+                <span className="font-normal opacity-90"> · ketuk pin SPBU untuk mengubah kondisinya</span>
               </p>
               <button
                 type="button"
                 onClick={logoutAdmin}
-                className="min-h-11 shrink-0 rounded-lg px-2 text-xs font-bold underline"
+                className="min-h-8 shrink-0 rounded-lg px-2 text-[11px] font-bold underline"
               >
                 Keluar
               </button>
@@ -420,17 +422,16 @@ export default function HomeClient() {
           )}
           <div className={`space-y-1 ${full ? "hidden md:block" : ""}`}>
             <div className="pointer-events-auto">{chips}</div>
-            <div className="flex items-start justify-between gap-2">
+            <div className="pointer-events-none hidden items-start justify-between gap-2 md:flex">
               <span className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-bold tracking-wide text-slate-900 uppercase shadow-sm">
                 <span className="bg-status-smooth size-2 animate-pulse rounded-full" />
                 Koridor SARBAGITA
               </span>
               <div className="pointer-events-auto">
                 <IconButton
+                  compact
                   label="Pusatkan ke lokasi saya"
-                  onClick={() =>
-                    me ? setRecenterKey((k) => k + 1) : locate(false, true)
-                  }
+                  onClick={() => (me ? setRecenterKey((k) => k + 1) : locate(false, true))}
                 >
                   <LocateIcon />
                 </IconButton>
@@ -442,9 +443,24 @@ export default function HomeClient() {
         {/* Bottom sheet (mobile) / left panel (desktop) */}
         <div
           className={`border-line absolute inset-x-0 bottom-0 z-20 flex flex-col rounded-t-3xl border-t bg-white shadow-[0_-4px_16px_rgba(15,23,42,0.14)] transition-[height] duration-200 md:top-0 md:right-auto md:bottom-[var(--nav-h)] md:left-0 md:h-auto md:w-[440px] md:rounded-none md:border-t-0 md:border-r md:pt-4 md:shadow-lg ${
-            full ? "h-[88%]" : "h-[50%]"
+            full
+              ? "h-[88%]"
+              : adminToken && activeStation
+                ? "h-auto max-h-[62%] md:max-h-none"
+                : "h-auto max-h-[38%] md:max-h-none"
           }`}
         >
+          {!full && (
+            <div className="absolute -top-12 right-3 md:hidden">
+              <IconButton
+                compact
+                label="Pusatkan ke lokasi saya"
+                onClick={() => (me ? setRecenterKey((k) => k + 1) : locate(false, true))}
+              >
+                <LocateIcon />
+              </IconButton>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setFull((o) => !o)}
@@ -464,6 +480,9 @@ export default function HomeClient() {
               me={me}
               geoMsg={geoMsg}
               onLocate={() => locate(true)}
+              onDraftChange={(kind, dirty) => {
+                draft.current[kind] = dirty;
+              }}
               adminPanel={
                 adminToken
                   ? (onSaved) => (
@@ -641,83 +660,56 @@ export default function HomeClient() {
               />
             </div>
           ) : (
-            <div
-              ref={scroller}
-              className="min-h-0 flex-1 space-y-3.5 overflow-y-auto overscroll-contain px-4 pb-4"
-            >
-              <div className="flex items-center justify-between gap-2">
+            <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-2">
+              <div className="flex items-center justify-between gap-2 px-4">
                 <div className="min-w-0">
-                  <h2 className="truncate text-lg font-bold tracking-tight text-slate-900">
-                    {selected
-                      ? "SPBU terpilih"
-                      : me
-                        ? "SPBU terdekat dari Anda"
+                  <h2 className="truncate text-sm font-bold text-slate-900">
+                    {me
+                      ? `SPBU terdekat dalam radius ${ALT_RADIUS_M / 1000} km`
+                      : selected
+                        ? `SPBU dalam ${ALT_RADIUS_M / 1000} km dari SPBU terpilih`
                         : "SPBU di Bali"}
                   </h2>
-                  <p className="text-xs text-slate-600">
+                  <p className="text-[11px] text-slate-600">
                     {me
-                      ? "Jarak dihitung di perangkat Anda dan tidak disimpan"
+                      ? "Diurutkan menurut jarak, bukan ketersediaan BBM"
                       : "Aktifkan lokasi untuk melihat jarak"}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  {selected ? (
-                    <button
-                      type="button"
-                      onClick={() => focus(null)}
-                      className="bg-primary-fixed/60 text-primary min-h-11 rounded-xl px-3 text-xs font-bold"
-                    >
-                      Lepas pilihan
-                    </button>
-                  ) : me ? (
-                    <span className="bg-primary-fixed/60 text-primary flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-bold">
-                      <LocateIcon />
-                      GPS aktif
-                    </span>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setFull(true)}
-                    className="border-line text-primary hidden min-h-11 rounded-xl border bg-white px-3 text-xs font-bold md:block"
-                  >
-                    Daftar SPBU
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setFull(true)}
+                  className="text-primary min-h-9 shrink-0 px-1 text-xs font-bold"
+                >
+                  Lihat daftar
+                </button>
               </div>
 
-              {featured ? (
-                <FeaturedStation
-                  key={featured.id}
-                  station={featured}
-                  distance={featuredDistance}
-                  onDetail={() => openDetail(featured.id)}
-                  onReport={() => openDetail(featured.id, true)}
-                  adminSlot={
-                    adminToken && (
-                      <AdminEditPanel
-                        key={featured.id}
-                        station={featured}
-                        token={adminToken}
-                        onSaved={stationsQ.reload}
-                        onAuthFail={logoutAdmin}
-                      />
-                    )
-                  }
-                />
+              {nearby.length > 0 ? (
+                <section aria-label="SPBU terdekat">
+                  <NearbyCarousel
+                    items={nearby}
+                    activeId={selectedId}
+                    onActivate={focus}
+                    onOpen={(id) => openDetail(id)}
+                  />
+                </section>
+              ) : altFrom ? (
+                <p className="bg-canvas mx-4 mt-2 rounded-xl p-3 text-sm text-slate-700">
+                  Tidak ada SPBU dalam {ALT_RADIUS_M / 1000} km
+                  {filtersOn ? " yang cocok dengan filter" : ""}.
+                </p>
               ) : (
-                <div className="border-line bg-canvas space-y-2 rounded-2xl border p-4">
-                  <p className="text-sm font-semibold text-slate-900">
-                    Lihat SPBU terdekat dari Anda
-                  </p>
+                <div className="border-line bg-canvas mx-4 mt-2 space-y-2 rounded-2xl border p-3">
+                  <p className="text-sm font-semibold text-slate-900">Lihat SPBU terdekat dari Anda</p>
                   <p className="text-xs text-slate-600">
-                    Lokasi hanya dipakai di perangkat ini untuk mengurutkan
-                    jarak, dan tidak disimpan. Atau ketuk salah satu pin di
-                    peta.
+                    Lokasi hanya dipakai di perangkat ini untuk mengurutkan jarak, dan tidak disimpan. Atau ketuk salah
+                    satu pin di peta.
                   </p>
                   <button
                     type="button"
                     onClick={() => locate(false, true)}
-                    className="bg-primary flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl text-base font-bold text-white"
+                    className="bg-primary flex min-h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white"
                   >
                     <LocateIcon />
                     Gunakan lokasi saya
@@ -726,50 +718,18 @@ export default function HomeClient() {
                 </div>
               )}
 
-              {featured && altFrom && (
-                <section className="space-y-2" aria-label="Pilihan alternatif">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold tracking-wider text-slate-600 uppercase">
-                      Pilihan alternatif lain
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => setFull(true)}
-                      className="text-primary min-h-11 text-xs font-bold"
-                    >
-                      Lihat semua ({alternatives.length})
-                    </button>
-                  </div>
-                  {alternatives.length > 0 ? (
-                    <>
-                      <ul className="space-y-2">
-                        {alternatives
-                          .slice(0, ALT_SHOWN)
-                          .map(({ station, distance }) => (
-                            <li key={station.id}>
-                              <StationMini
-                                station={station}
-                                distance={distance}
-                                onSelect={focus}
-                              />
-                            </li>
-                          ))}
-                      </ul>
-                      <p className="text-[11px] text-slate-600">
-                        SPBU lain dalam {ALT_RADIUS_M / 1000} km{" "}
-                        {me ? "dari Anda" : "dari SPBU ini"}, diurutkan menurut
-                        jarak. Bukan peringkat ketersediaan BBM.
-                      </p>
-                    </>
-                  ) : (
-                    <p className="bg-canvas rounded-xl p-3 text-sm text-slate-700">
-                      Tidak ada SPBU lain dalam {ALT_RADIUS_M / 1000} km
-                      {filtersOn ? " yang cocok dengan filter" : ""}.
-                    </p>
-                  )}
-                </section>
+              {adminToken && activeStation && (
+                <div className="px-4 pt-1">
+                  <AdminEditPanel
+                    key={activeStation.id}
+                    station={activeStation}
+                    token={adminToken}
+                    onSaved={stationsQ.reload}
+                    onAuthFail={logoutAdmin}
+                  />
+                </div>
               )}
-              <SiteFooter className="px-0" />
+              <SiteFooter className="mt-1" />
             </div>
           )}
         </div>

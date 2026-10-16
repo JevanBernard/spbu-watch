@@ -1,7 +1,6 @@
 "use client";
 
 import type { OfficialUpdateDTO } from "@/lib/api-types";
-import { ChevronRightIcon, MegaphoneIcon } from "./ui";
 
 const dateFmt = new Intl.DateTimeFormat("id-ID", {
   day: "numeric",
@@ -10,33 +9,6 @@ const dateFmt = new Intl.DateTimeFormat("id-ID", {
   minute: "2-digit",
   timeZone: "Asia/Makassar",
 });
-
-/** One-line strip on the map: latest official announcement. Tapping it opens the Info tab. */
-export default function OfficialPanel({
-  updates,
-  onOpen,
-}: {
-  updates: OfficialUpdateDTO[];
-  onOpen: () => void;
-}) {
-  const latest = updates[0];
-  return (
-    <button type="button" onClick={onOpen} className="flex min-h-11 w-full items-center gap-2 px-3 text-left">
-      <span className="text-primary">
-        <MegaphoneIcon />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-xs font-bold text-slate-900">Info resmi</span>
-        <span className="block truncate text-xs text-slate-700">
-          {latest ? latest.title : "Belum ada pengumuman. Untuk kepastian hubungi Call Center 135."}
-        </span>
-      </span>
-      <span className="text-slate-500">
-        <ChevronRightIcon />
-      </span>
-    </button>
-  );
-}
 
 /** Full list of official updates (Info tab). */
 export function OfficialList({ updates }: { updates: OfficialUpdateDTO[] }) {

@@ -24,6 +24,7 @@ export default function StationChat({
   geoMsg,
   onLocate,
   adminToken,
+  onDraftChange,
 }: {
   station: StationDTO;
   distance: number | null;
@@ -31,6 +32,8 @@ export default function StationChat({
   geoMsg: string | null;
   onLocate: () => void;
   adminToken: string | null;
+  /** Tells the parent whether there is text that has not been sent yet. */
+  onDraftChange?: (dirty: boolean) => void;
 }) {
   const [messages, setMessages] = useState<PublicChatMessage[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -43,6 +46,15 @@ export default function StationChat({
   const onCaptcha = useCallback((t: string | null) => setCaptcha(t), []);
   const list = useRef<HTMLDivElement>(null);
   const stickToBottom = useRef(true);
+  const hasDraft = text.trim().length > 0;
+  const draftCb = useRef(onDraftChange);
+  useEffect(() => {
+    draftCb.current = onDraftChange;
+  });
+  useEffect(() => {
+    draftCb.current?.(hasDraft);
+  }, [hasDraft]);
+  useEffect(() => () => draftCb.current?.(false), []);
 
   // Poll while this tab is open and the page is visible. No-store: the answer is personalised and must be current.
   useEffect(() => {

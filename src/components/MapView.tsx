@@ -103,18 +103,30 @@ interface Props {
   /** Bump to fly to the user's position (the "pusatkan lokasi" button). */
   recenterKey: number;
   onSelect: (id: string) => void;
+  /** The map itself was tapped, not a station or a cluster: lets the parent clear the selection. */
+  onBackgroundClick?: () => void;
 }
 
-export default function MapView({ stations, fitKey, selectedId, userLocation, recenterKey, onSelect }: Props) {
+export default function MapView({
+  stations,
+  fitKey,
+  selectedId,
+  userLocation,
+  recenterKey,
+  onSelect,
+  onBackgroundClick,
+}: Props) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const onSelectRef = useRef(onSelect);
+  const onBackgroundRef = useRef(onBackgroundClick);
   const stationsRef = useRef(stations);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
+    onBackgroundRef.current = onBackgroundClick;
     stationsRef.current = stations;
   });
 
@@ -279,6 +291,11 @@ export default function MapView({ stations, fitKey, selectedId, userLocation, re
       map.on("click", "stations", (e) => {
         const id = e.features?.[0]?.properties?.id as string | undefined;
         if (id) onSelectRef.current(id);
+      });
+      // A tap on empty map clears the selection. Taps on a station, its "habis" marker or a cluster do not.
+      map.on("click", (e) => {
+        const hit = map.queryRenderedFeatures(e.point, { layers: ["clusters", "stations", "stock-out"] });
+        if (hit.length === 0) onBackgroundRef.current?.();
       });
       for (const layer of ["clusters", "stations"]) {
         map.on("mouseenter", layer, () => (map.getCanvas().style.cursor = "pointer"));

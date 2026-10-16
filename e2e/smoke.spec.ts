@@ -25,7 +25,7 @@ test("home page: disclaimer, map loads under the CSP, station list, no console e
   await page.goto("/");
 
   await expect(page.getByText(/Bukan informasi resmi Pertamina/).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: /Info resmi/ })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" })).toBeVisible();
   await expect(page.locator("canvas.maplibregl-canvas")).toBeVisible({ timeout: 20_000 });
   await page.waitForTimeout(6000); // let tiles, glyphs and the worker load (CSP violations log here)
   if (seen.style !== null) expect(seen.style, "map style request").toBe(200);
@@ -154,17 +154,41 @@ test("bottom navigation: Lapor tab asks for location, Info tab shows how to read
   await expect(page.getByTestId("map")).toBeVisible();
 });
 
-test("main card shows the nearest station with travel estimate and alternatives within 5 km", async ({ page }) => {
+test("nearby row: cards within 5 km by distance, swipe or tap to pick, map stays big", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Gunakan lokasi saya" }).first().click();
-  await expect(page.getByRole("heading", { name: "SPBU terdekat dari Anda" })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("heading", { name: /SPBU terdekat dalam radius 5 km/ })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/bukan ketersediaan BBM/)).toBeVisible();
+  const row = page.getByRole("region", { name: "SPBU terdekat" });
+  const cards = row.getByRole("button");
+  await expect.poll(() => cards.count()).toBeGreaterThan(1);
   await expect(page.getByText(/± \d+ mnt/).first()).toBeVisible();
-  await expect(page.getByText("Ketersediaan produk BBM")).toBeVisible();
-  const alt = page.getByRole("region", { name: "Pilihan alternatif" });
-  await expect(alt.getByText(/Bukan peringkat ketersediaan BBM/)).toBeVisible();
-  // tapping an alternative makes it the main card instead of opening the full detail
-  await alt.getByRole("button").nth(1).click();
-  await expect(page.getByRole("heading", { name: "SPBU terpilih" })).toBeVisible();
+
+  // the sheet is compact: the map keeps most of the screen (phone: 375 x 760)
+  const sheet = await page.getByRole("button", { name: "Perbesar daftar" }).evaluate((el) => {
+    const r = el.parentElement!.getBoundingClientRect();
+    return { top: r.top, height: r.height };
+  });
+  expect(sheet.height).toBeLessThan(760 * 0.4);
+
+  // tapping a card opens that station's details
+  const name = (await cards.first().locator("span.line-clamp-2").textContent())!.trim();
+  await cards.first().click();
+  await expect(page.getByRole("heading", { name })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Obrolan" })).toBeVisible();
+});
+
+test("top of the map is compact: small disclaimer, small filter chips, no official-info banner", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText(/Bukan informasi resmi Pertamina/).first()).toBeVisible();
+  await expect(page.getByText("Info resmi", { exact: true })).toHaveCount(0); // the banner is gone, Info is in the menu
+  const chip = await page.getByRole("button", { name: "Pertashop", exact: true }).boundingBox();
+  expect(chip!.height).toBeLessThanOrEqual(34);
+  const disclaimer = await page.getByRole("button", { name: "Detail disclaimer" }).evaluate((el) => {
+    const r = el.parentElement!.getBoundingClientRect();
+    return r.height;
+  });
+  expect(disclaimer).toBeLessThanOrEqual(44);
 });
 
 test("station page: summary tiles, fuel chips and the 24-hour chart (history mocked, nothing written)", async ({ page }, info) => {
@@ -397,3 +421,74 @@ for (const size of [
     expect(hydration, hydration.join("\n")).toEqual([]);
   });
 }
+
+test("admin mode: the edit block follows the card in the nearby row (nothing is saved)", async ({ page }) => {
+  test.skip(!process.env.ADMIN_TOKEN, "ADMIN_TOKEN is not set");
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Menu utama" }).getByRole("button", { name: "Info" }).click();
+  await page.getByRole("button", { name: "Masuk mode admin" }).click();
+  await page.getByLabel("Token admin").fill(process.env.ADMIN_TOKEN!);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.getByRole("button", { name: "Gunakan lokasi saya" }).first().click();
+  const edit = page.getByRole("region", { name: "Edit kondisi (admin)" });
+  await expect(edit).toBeVisible({ timeout: 15_000 });
+  await expect(edit.getByRole("button", { name: /Sedang/ })).toBeVisible();
+});
+
+test("tapping empty map clears the selected station, tapping a card selects it again", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Gunakan lokasi saya" }).first().click();
+  const row = page.getByRole("region", { name: "SPBU terdekat" });
+  const selected = row.locator('[aria-current="true"]');
+  await expect(row.getByRole("button").nth(1)).toBeVisible({ timeout: 15_000 });
+  await expect(selected).toHaveCount(0); // nothing is selected until the reader picks something
+
+  // swiping the second card into the middle selects it (and the map moves to it)
+  await row.locator("ul").evaluate((ul) => ul.scrollTo({ left: 300, behavior: "instant" as ScrollBehavior }));
+  await expect(selected).toHaveCount(1);
+  await page.waitForTimeout(1500); // the map is flying to the station
+
+  // tap places on the map where no station is until the selection clears
+  const canvas = page.locator("canvas.maplibregl-canvas");
+  let cleared = false;
+  for (const [x, y] of [[60, 220], [315, 220], [60, 300], [315, 300], [187, 150]]) {
+    await canvas.click({ position: { x, y } });
+    await page.waitForTimeout(500);
+    if ((await selected.count()) === 0) {
+      cleared = true;
+      break;
+    }
+    await row.locator("ul").evaluate((ul) => ul.scrollTo({ left: 300, behavior: "instant" as ScrollBehavior })); // select again
+    await page.waitForTimeout(800);
+  }
+  expect(cleared, "no empty spot on the map cleared the selection").toBe(true);
+  expect(new URL(page.url()).searchParams.get("spbu")).toBeNull();
+
+  // From the detail view, a tap on empty map closes it and clears the selection as well
+  const tapEmptyMap = async (closed: () => Promise<boolean>) => {
+    for (const [x, y] of [[60, 220], [315, 220], [60, 300], [315, 300], [187, 150]]) {
+      await canvas.click({ position: { x, y } });
+      await page.waitForTimeout(500);
+      if (await closed()) return true;
+    }
+    return false;
+  };
+  const detailTab = page.getByRole("tab", { name: "Obrolan" });
+  await row.getByRole("button").first().click();
+  await expect(detailTab).toBeVisible();
+  await page.getByRole("button", { name: "Perkecil daftar" }).click(); // shrink the sheet so the map is reachable
+  expect(await tapEmptyMap(async () => (await detailTab.count()) === 0), "detail stayed open").toBe(true);
+  await expect(row).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("spbu")).toBeNull();
+
+  // but a report that is half filled in is not thrown away without asking
+  await row.getByRole("button").first().click();
+  await page.getByRole("button", { name: "Lapor kondisi" }).click();
+  await page.getByRole("button", { name: "Laporkan antrean" }).click();
+  await page.getByRole("button", { name: "Perkecil daftar" }).click();
+  page.once("dialog", (d) => d.dismiss()); // "no, keep it"
+  await tapEmptyMap(async () => (await detailTab.count()) === 0);
+  await expect(detailTab).toBeVisible();
+  page.on("dialog", (d) => d.accept()); // "yes, close it"
+  expect(await tapEmptyMap(async () => (await detailTab.count()) === 0), "detail did not close after confirming").toBe(true);
+});

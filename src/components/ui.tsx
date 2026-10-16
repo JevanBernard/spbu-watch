@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { travelMinutes } from "@/lib/format";
 
 /** Toggle chip for the horizontally scrolling filter row. 44 px tall for touch. */
 export function Chip({
@@ -15,7 +16,7 @@ export function Chip({
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors ${
+      className={`inline-flex min-h-8 shrink-0 items-center gap-1 rounded-full border px-3 text-[13px] font-semibold whitespace-nowrap transition-colors [&_svg]:size-4 ${
         active
           ? "border-ink bg-ink text-white"
           : "border-line bg-white text-slate-800 shadow-sm active:bg-slate-100"
@@ -175,17 +176,20 @@ export function IconButton({
   label,
   onClick,
   children,
+  compact = false,
 }: {
   label: string;
   onClick: () => void;
   children: ReactNode;
+  /** 40 px instead of 44 px, for controls that float on the map. */
+  compact?: boolean;
 }) {
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-primary shadow-md active:bg-slate-100"
+      className={`flex ${compact ? "size-10" : "size-11"} shrink-0 items-center justify-center rounded-full border border-line bg-white text-primary shadow-md active:bg-slate-100`}
     >
       {children}
     </button>
@@ -194,4 +198,16 @@ export function IconButton({
 
 export function routeUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+}
+
+/** "± 2 mnt": a rough motorbike estimate from the straight-line distance. Not navigation. */
+export function TravelEstimate({ distance, className = "" }: { distance: number; className?: string }) {
+  return (
+    <span
+      className={`tnum ${className}`}
+      title="Perkiraan kasar dengan sepeda motor dari jarak lurus. Bukan navigasi."
+    >
+      ± {travelMinutes(distance)} mnt
+    </span>
+  );
 }
